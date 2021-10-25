@@ -1,7 +1,6 @@
 package omegaVPLinc.automaton;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class VPA {
 
@@ -25,6 +24,34 @@ public class VPA {
         this.stackAlphabet = stackAlphabet;
         this.states = states;
         this.initialState = initialState;
+    }
+
+    public Map<State, Set<State>> context(String symbol) throws IllegalArgumentException {
+        Map<State, Set<State>> ctx = new HashMap<>();
+        for (State from : states) {
+            Set<State> ctxOfSymbol = new HashSet<>();
+            if (callAlphabet.contains(symbol)) {
+                for (String stackSymbol : stackAlphabet) {
+                    Set<State> ctxOfStackSymbol = from.getCallSuccessors()
+                            .getOrDefault(symbol, new HashMap<>())
+                            .getOrDefault(stackSymbol, new HashSet<>());
+                    ctxOfSymbol.addAll(ctxOfStackSymbol);
+                }
+            } else if (internalAlphabet.contains(symbol)) {
+                ctxOfSymbol.addAll(from.getInternalSuccessors().getOrDefault(symbol, new HashSet<>()));
+            } else if (returnAlphabet.contains(symbol)) {
+                for (String stackSymbol : stackAlphabet) {
+                    Set<State> ctxOfStackSymbol = from.getReturnSuccessors()
+                            .getOrDefault(symbol, new HashMap<>())
+                            .getOrDefault(stackSymbol, new HashSet<>());
+                    ctxOfSymbol.addAll(ctxOfStackSymbol);
+                }
+            } else {
+                throw new IllegalArgumentException("Symbol not in alphabet.");
+            }
+            if (!ctxOfSymbol.isEmpty()) ctx.put(from, ctxOfSymbol);
+        }
+        return ctx;
     }
 
     public Set<String> getCallAlphabet() {

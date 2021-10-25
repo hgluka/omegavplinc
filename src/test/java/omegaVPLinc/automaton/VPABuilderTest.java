@@ -3,6 +3,7 @@ package omegaVPLinc.automaton;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,5 +57,10 @@ class VPABuilderTest {
                 vpa.getInitialState().getCallSuccessors());
         assertEquals(q1.getCallPredecessors(),
                 vpa.getState("q1").get().getCallPredecessors());
+
+        Map<State, Set<State>> contextOfC = vpa.context("r");
+        Map<State, Set<State>> expectedContextOfC = Map.of(q0, Set.of(q1), q1, Set.of(q0));
+
+        assertEquals(expectedContextOfC, contextOfC);
     }
 }
