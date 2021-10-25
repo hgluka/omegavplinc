@@ -2,21 +2,31 @@ package omegaVPLinc.automaton;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public class State {
     private String name;
     private boolean isFinal;
-    private Map<String, Set<State>> successors;
-    private Map<String, Set<State>> predecessors;
 
-    public State(String name, boolean isFinal) {
+    private Map<String, Set<State>> internalSuccessors;
+    private Map<String, Set<State>> internalPredecessors;
+
+    private HashMap<String, HashMap<String, Set<State>>> callSuccessors;
+    private HashMap<String, HashMap<String, Set<State>>> callPredecessors;
+
+    private HashMap<String, HashMap<String, Set<State>>> returnSuccessors;
+    private HashMap<String, HashMap<String, Set<State>>> returnPredecessors;
+
+    public State(String name) {
         this.name = name;
-        this.isFinal = isFinal;
-        this.successors = new HashMap<>();
-        this.predecessors = new HashMap<>();
+        this.internalSuccessors = new HashMap<>();
+        this.internalPredecessors = new HashMap<>();
 
+        this.callSuccessors = new HashMap<String, HashMap<String, Set<State>>>();
+        this.callPredecessors = new HashMap<String, HashMap<String, Set<State>>>();
+
+        this.returnSuccessors = new HashMap<String, HashMap<String, Set<State>>>();
+        this.returnPredecessors = new HashMap<String, HashMap<String, Set<State>>>();
     }
 
     public String getName() {
@@ -35,32 +45,66 @@ public class State {
         isFinal = aFinal;
     }
 
-    public Map<String, Set<State>> getSuccessors() {
-        return successors;
+    public Map<String, Set<State>> getInternalSuccessors() {
+        return internalSuccessors;
     }
 
-    public void setSuccessors(Map<String, Set<State>> successors) {
-        this.successors = successors;
+    public void addInternalSuccessor(String symbol, State succ) {
+        Set<State> intSucc = internalSuccessors.putIfAbsent(symbol, Set.of(succ));
+        if (intSucc != null) intSucc.add(succ);
     }
 
-    public Map<String, Set<State>> getPredecessors() {
-        return predecessors;
+    public Map<String, Set<State>> getInternalPredecessors() {
+        return internalPredecessors;
     }
 
-    public void setPredecessors(Map<String, Set<State>> predecessors) {
-        this.predecessors = predecessors;
+    public void addInternalPredecessor(String symbol, State pred) {
+        Set<State> intPred = internalPredecessors.putIfAbsent(symbol, Set.of(pred));
+        if (intPred != null) intPred.add(pred);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        State state = (State) o;
-        return isFinal == state.isFinal && name.equals(state.name) && Objects.equals(successors, state.successors) && Objects.equals(predecessors, state.predecessors);
+    public HashMap<String, HashMap<String, Set<State>>> getCallSuccessors() {
+        return callSuccessors;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, isFinal, successors, predecessors);
+    public void addCallSuccessor(String symbol, String stackSymbol, State succ) {
+        addTransition(symbol, stackSymbol, succ, callSuccessors);
+    }
+
+    public HashMap<String, HashMap<String, Set<State>>> getCallPredecessors() {
+        return callPredecessors;
+    }
+
+    public void addCallPredecessor(String symbol, String stackSymbol, State pred) {
+        addTransition(symbol, stackSymbol, pred, callPredecessors);
+    }
+
+    public HashMap<String, HashMap<String, Set<State>>> getReturnSuccessors() {
+        return returnSuccessors;
+    }
+
+    public void addReturnSuccessor(String symbol, String stackSymbol, State succ) {
+        addTransition(symbol, stackSymbol, succ, returnSuccessors);
+    }
+
+    public HashMap<String, HashMap<String, Set<State>>> getReturnPredecessors() {
+        return returnPredecessors;
+    }
+
+    public void addReturnPredecessor(String symbol, String stackSymbol, State pred) {
+        addTransition(symbol, stackSymbol, pred, returnPredecessors);
+    }
+
+    private void addTransition(String symbol, String stackSymbol, State state, HashMap<String, HashMap<String, Set<State>>> transitionMap) {
+        if (transitionMap.containsKey(symbol)) {
+            if (transitionMap.get(symbol).containsKey(stackSymbol)) {
+                transitionMap.get(symbol).get(stackSymbol).add(state);
+            } else {
+                transitionMap.get(symbol).put(stackSymbol, Set.of(state));
+            }
+        } else {
+            transitionMap.put(symbol,
+                    new HashMap<String, Set<State>>(Map.of(stackSymbol, Set.of(state))));
+        }
     }
 }

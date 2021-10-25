@@ -17,14 +17,27 @@ class VPABuilderTest {
 
     @Test
     void build() {
-        Set<String> ca = Set.of("c0", "c1");
-        Set<String> ia = Set.of("a0");
-        Set<String> ra = Set.of("r0", "r1", "r2");
+        Set<String> ca = Set.of("c");
+        Set<String> ia = Set.of("a");
+        Set<String> ra = Set.of("r");
         Set<String> sa = Set.of("q0", "q1");
 
-        State q0 = new State("q0", false);
-        State q1 = new State("q1", true);
+        State q0 = new State("q0");
+        State q1 = new State("q1");
         Set<State> states = Set.of(q0, q1);
+
+        q1.setFinal(true);
+        q0.addCallSuccessor("c", "q0", q0);
+        q0.addCallPredecessor("c", "q0", q0);
+
+        q0.addInternalSuccessor("a", q0);
+        q0.addInternalPredecessor("a", q0);
+
+        q0.addReturnSuccessor("r", "q0", q1);
+        q1.addReturnPredecessor("r", "q0", q0);
+
+        q1.addReturnSuccessor("r", "q0", q0);
+        q0.addReturnPredecessor("r", "q0", q1);
 
         VPA vpa = vpaBuilder.callAlphabet(ca)
                 .internalAlphabet(ia)
