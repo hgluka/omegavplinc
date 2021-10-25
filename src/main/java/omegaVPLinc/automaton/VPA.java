@@ -1,5 +1,6 @@
 package omegaVPLinc.automaton;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class VPA {
@@ -44,6 +45,14 @@ public class VPA {
 
     public Set<State> getStates() {
         return states;
+    }
+
+    public Optional<State> getState(String name) {
+        for (State q : states) {
+            if (q.getName().equals(name))
+                return Optional.of(q);
+        }
+        return Optional.empty();
     }
 
     public State getInitialState() {

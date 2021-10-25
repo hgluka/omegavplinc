@@ -52,5 +52,9 @@ class VPABuilderTest {
         assertEquals(sa, vpa.getStackAlphabet());
         assertEquals(states, vpa.getStates());
         assertEquals(q0, vpa.getInitialState());
+        assertEquals(q0.getCallSuccessors(),
+                vpa.getInitialState().getCallSuccessors());
+        assertEquals(q1.getCallPredecessors(),
+                vpa.getState("q1").get().getCallPredecessors());
     }
 }
