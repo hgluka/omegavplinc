@@ -45,15 +45,21 @@ public class VPABuilder {
         if (Collections.disjoint(this.callAlphabet, this.internalAlphabet)
                 && Collections.disjoint(this.internalAlphabet, this.returnAlphabet)
                 && Collections.disjoint(this.callAlphabet, this.returnAlphabet)) {
-            if (this.states.contains(initialState)) {
-                return new VPA(this.callAlphabet,
-                        this.internalAlphabet,
-                        this.returnAlphabet,
-                        this.stackAlphabet,
-                        this.states,
-                        this.initialState);
+            if (this.callAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.CALL)
+            && this.internalAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.INTERNAL)
+            && this.returnAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.RETURN)) {
+                if (this.states.contains(initialState)) {
+                    return new VPA(this.callAlphabet,
+                            this.internalAlphabet,
+                            this.returnAlphabet,
+                            this.stackAlphabet,
+                            this.states,
+                            this.initialState);
+                } else {
+                    throw new IllegalArgumentException("Initial state must be part of the state set.");
+                }
             } else {
-                throw new IllegalArgumentException("Initial state must be part of the state set.");
+                throw new IllegalArgumentException("Wrong symbol type in alphabet partition.");
             }
         } else {
             throw new IllegalArgumentException("VPA must have disjoint call, internal and return alphabets.");

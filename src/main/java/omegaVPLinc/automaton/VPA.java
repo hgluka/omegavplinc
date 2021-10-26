@@ -1,6 +1,7 @@
 package omegaVPLinc.automaton;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class VPA {
 
@@ -55,6 +56,48 @@ public class VPA {
                         Set<State> ctxOfStackSymbol = from.getReturnSuccessors()
                                 .getOrDefault(symbol, new HashMap<>())
                                 .getOrDefault(stackSymbol, new HashSet<>());
+                        ctxFromState.addAll(ctxOfStackSymbol);
+                    }
+                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
+                }
+            }
+            default -> throw new IllegalArgumentException("Symbol type doesn't exist: " + symbol.getType());
+        }
+        return ctx;
+    }
+
+    public Map<State, Set<State>> finalContext(Symbol symbol) {
+        Map<State, Set<State>> ctx = new HashMap<>();
+        switch (symbol.getType()) {
+            case CALL -> {
+                for (State from : states) {
+                    Set<State> ctxFromState = new HashSet<>();
+                    for (String stackSymbol : stackAlphabet) {
+                        Set<State> ctxOfStackSymbol = from.getCallSuccessors()
+                                .getOrDefault(symbol, new HashMap<>())
+                                .getOrDefault(stackSymbol, new HashSet<>())
+                                .stream().filter(s -> from.isFinal() || s.isFinal()).collect(Collectors.toSet());
+                        ctxFromState.addAll(ctxOfStackSymbol);
+                    }
+                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
+                }
+            }
+            case INTERNAL -> {
+                for (State from : states) {
+                    Set<State> ctxFromState = from.getInternalSuccessors()
+                            .getOrDefault(symbol, new HashSet<>())
+                            .stream().filter(s -> from.isFinal() || s.isFinal()).collect(Collectors.toSet());
+                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
+                }
+            }
+            case RETURN -> {
+                for (State from : states) {
+                    Set<State> ctxFromState = new HashSet<>();
+                    for (String stackSymbol : stackAlphabet) {
+                        Set<State> ctxOfStackSymbol = from.getReturnSuccessors()
+                                .getOrDefault(symbol, new HashMap<>())
+                                .getOrDefault(stackSymbol, new HashSet<>())
+                                .stream().filter(s -> from.isFinal() || s.isFinal()).collect(Collectors.toSet());
                         ctxFromState.addAll(ctxOfStackSymbol);
                     }
                     if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
