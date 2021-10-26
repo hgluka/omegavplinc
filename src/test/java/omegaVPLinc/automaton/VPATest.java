@@ -8,21 +8,18 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class VPABuilderTest {
-    private VPABuilder vpaBuilder;
+public class VPATest {
+    private VPA vpa;
     private Map<String, Symbol> alphabet;
 
     @BeforeEach
     void setUp() {
-        vpaBuilder = new VPABuilder();
+        VPABuilder vpaBuilder = new VPABuilder();
         Symbol c = new Symbol("CALL", "c");
         Symbol a = new Symbol("INTERNAL", "a");
         Symbol r = new Symbol("RETURN", "r");
         alphabet = Map.of("c", c, "a", a, "r", r);
-    }
 
-    @Test
-    void testBuild() {
         Set<Symbol> ca = Set.of(alphabet.get("c"));
         Set<Symbol> ia = Set.of(alphabet.get("a"));
         Set<Symbol> ra = Set.of(alphabet.get("r"));
@@ -45,24 +42,24 @@ class VPABuilderTest {
         q1.addReturnSuccessor(alphabet.get("r"), "q0", q0);
         q0.addReturnPredecessor(alphabet.get("r"), "q0", q1);
 
-        VPA vpa = vpaBuilder.callAlphabet(ca)
+        this.vpa = vpaBuilder.callAlphabet(ca)
                 .internalAlphabet(ia)
                 .returnAlphabet(ra)
                 .stackAlphabet(sa)
                 .states(states)
                 .initialState(q0)
                 .build();
-        assertEquals(ca, vpa.getCallAlphabet());
-        assertEquals(ia, vpa.getInternalAlphabet());
-        assertEquals(ra, vpa.getReturnAlphabet());
-        assertEquals(sa, vpa.getStackAlphabet());
-        assertEquals(states, vpa.getStates());
-        assertEquals(q0, vpa.getInitialState());
-        assertEquals(q0.getCallSuccessors(),
-                vpa.getInitialState().getCallSuccessors());
-        assertEquals(q1.getCallPredecessors(),
-                vpa.getState("q1").get().getCallPredecessors());
+    }
 
+    @Test
+    void testContexts() {
+        Map<State, Set<State>> contextOfR = vpa.context(new Symbol("RETURN", "r"));
+        Map<State, Set<State>> expectedContextOfR = Map.of(
+                vpa.getState("q0").get(),
+                Set.of(vpa.getState("q1").get()),
+                vpa.getState("q1").get(),
+                Set.of(vpa.getState("q0").get()));
+        assertEquals(expectedContextOfR, contextOfR);
 
     }
 }
