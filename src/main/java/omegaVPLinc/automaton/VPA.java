@@ -9,6 +9,7 @@ public class VPA {
     private Set<Symbol> internalAlphabet;
     private Set<Symbol> returnAlphabet;
     private Set<String> stackAlphabet;
+    private Set<Symbol> fullAlphabet;
 
     private Set<State> states;
     private State initialState;
@@ -22,9 +23,21 @@ public class VPA {
         this.callAlphabet = callAlphabet;
         this.internalAlphabet = internalAlphabet;
         this.returnAlphabet = returnAlphabet;
+        this.fullAlphabet = new HashSet<>(this.callAlphabet);
+        this.fullAlphabet.addAll(this.internalAlphabet);
+        this.fullAlphabet.addAll(this.returnAlphabet);
         this.stackAlphabet = stackAlphabet;
         this.states = states;
         this.initialState = initialState;
+    }
+
+    public Map<Symbol, Map<State, Set<State>>> context() throws IllegalArgumentException {
+        Map<Symbol, Map<State, Set<State>>> ctx = new HashMap<>();
+        for (Symbol symbol : fullAlphabet) {
+            Map<State, Set<State>> ctxOfSymbol = context(symbol);
+            if (!ctxOfSymbol.isEmpty()) ctx.put(symbol, ctxOfSymbol);
+        }
+        return ctx;
     }
 
     public Map<State, Set<State>> context(Symbol symbol) throws IllegalArgumentException {
@@ -104,6 +117,15 @@ public class VPA {
                 }
             }
             default -> throw new IllegalArgumentException("Symbol type doesn't exist: " + symbol.getType());
+        }
+        return ctx;
+    }
+
+    public Map<Symbol, Map<State, Set<State>>> finalContext() throws IllegalArgumentException {
+        Map<Symbol, Map<State, Set<State>>> ctx = new HashMap<>();
+        for (Symbol symbol : fullAlphabet) {
+            Map<State, Set<State>> ctxOfSymbol = finalContext(symbol);
+            if (!ctxOfSymbol.isEmpty()) ctx.put(symbol, ctxOfSymbol);
         }
         return ctx;
     }
