@@ -1,0 +1,24 @@
+// Testfile dumped by Ultimate at 2021/10/10 12:27:36
+//
+// RefinementSetting [mInterpolantAutomaton=Deterministic, mBouncerStem=true, mBouncerLoop=false, mScroogeNondeterminismStem=false, mScroogeNondeterminismLoop=false, mCannibalizeLoop=false]
+
+NestedWordAutomaton nwa = (
+	callAlphabet = {c0 c1 },
+	internalAlphabet = {a0 a1 a2 a3 a4 a5 a6 },
+	returnAlphabet = {r0 r1 },
+	states = {s0 s1 s2 },
+	initialStates = {s1 },
+	finalStates = {s1 },
+	callTransitions = {
+		(s2 c1 s1)
+	},
+	internalTransitions = {
+		(s0 a2 s0)
+		(s0 a4 s0)
+		(s0 a5 s0)
+		(s1 a6 s0)
+		(s1 a3 s2)
+	},
+	returnTransitions = {
+	}
+);
