@@ -4,24 +4,24 @@ import java.util.Collections;
 import java.util.Set;
 
 public class VPABuilder {
-    private Set<String> callAlphabet;
-    private Set<String> internalAlphabet;
-    private Set<String> returnAlphabet;
+    private Set<Symbol> callAlphabet;
+    private Set<Symbol> internalAlphabet;
+    private Set<Symbol> returnAlphabet;
     private Set<String> stackAlphabet;
 
     private Set<State> states;
     private State initialState;
 
-    public VPABuilder callAlphabet(Set<String> callAlphabet) {
+    public VPABuilder callAlphabet(Set<Symbol> callAlphabet) {
         this.callAlphabet = callAlphabet;
         return this;
     }
-    public VPABuilder internalAlphabet(Set<String> internalAlphabet) {
+    public VPABuilder internalAlphabet(Set<Symbol> internalAlphabet) {
         this.internalAlphabet = internalAlphabet;
         return this;
     }
 
-    public VPABuilder returnAlphabet(Set<String> returnAlphabet) {
+    public VPABuilder returnAlphabet(Set<Symbol> returnAlphabet) {
         this.returnAlphabet = returnAlphabet;
         return this;
     }

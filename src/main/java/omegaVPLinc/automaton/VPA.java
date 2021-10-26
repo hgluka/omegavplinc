@@ -4,17 +4,17 @@ import java.util.*;
 
 public class VPA {
 
-    private Set<String> callAlphabet;
-    private Set<String> internalAlphabet;
-    private Set<String> returnAlphabet;
+    private Set<Symbol> callAlphabet;
+    private Set<Symbol> internalAlphabet;
+    private Set<Symbol> returnAlphabet;
     private Set<String> stackAlphabet;
 
     private Set<State> states;
     private State initialState;
 
-    public VPA(Set<String> callAlphabet,
-               Set<String> internalAlphabet,
-               Set<String> returnAlphabet,
+    public VPA(Set<Symbol> callAlphabet,
+               Set<Symbol> internalAlphabet,
+               Set<Symbol> returnAlphabet,
                Set<String> stackAlphabet,
                Set<State> states,
                State initialState) {
@@ -26,43 +26,54 @@ public class VPA {
         this.initialState = initialState;
     }
 
-    public Map<State, Set<State>> context(String symbol) throws IllegalArgumentException {
+    public Map<State, Set<State>> context(Symbol symbol) throws IllegalArgumentException {
         Map<State, Set<State>> ctx = new HashMap<>();
-        for (State from : states) {
-            Set<State> ctxOfSymbol = new HashSet<>();
-            if (callAlphabet.contains(symbol)) {
-                for (String stackSymbol : stackAlphabet) {
-                    Set<State> ctxOfStackSymbol = from.getCallSuccessors()
-                            .getOrDefault(symbol, new HashMap<>())
-                            .getOrDefault(stackSymbol, new HashSet<>());
-                    ctxOfSymbol.addAll(ctxOfStackSymbol);
+        switch (symbol.getType()) {
+            case CALL -> {
+                for (State from : states) {
+                    Set<State> ctxFromState = new HashSet<>();
+                    for (String stackSymbol : stackAlphabet) {
+                        Set<State> ctxOfStackSymbol = from.getCallSuccessors()
+                                .getOrDefault(symbol, new HashMap<>())
+                                .getOrDefault(stackSymbol, new HashSet<>());
+                        ctxFromState.addAll(ctxOfStackSymbol);
+                    }
+                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
                 }
-            } else if (internalAlphabet.contains(symbol)) {
-                ctxOfSymbol.addAll(from.getInternalSuccessors().getOrDefault(symbol, new HashSet<>()));
-            } else if (returnAlphabet.contains(symbol)) {
-                for (String stackSymbol : stackAlphabet) {
-                    Set<State> ctxOfStackSymbol = from.getReturnSuccessors()
-                            .getOrDefault(symbol, new HashMap<>())
-                            .getOrDefault(stackSymbol, new HashSet<>());
-                    ctxOfSymbol.addAll(ctxOfStackSymbol);
-                }
-            } else {
-                throw new IllegalArgumentException("Symbol not in alphabet.");
             }
-            if (!ctxOfSymbol.isEmpty()) ctx.put(from, ctxOfSymbol);
+            case INTERNAL -> {
+                for (State from : states) {
+                    Set<State> ctxFromState = from.getInternalSuccessors()
+                            .getOrDefault(symbol, new HashSet<>());
+                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
+                }
+            }
+            case RETURN -> {
+                for (State from : states) {
+                    Set<State> ctxFromState = new HashSet<>();
+                    for (String stackSymbol : stackAlphabet) {
+                        Set<State> ctxOfStackSymbol = from.getReturnSuccessors()
+                                .getOrDefault(symbol, new HashMap<>())
+                                .getOrDefault(stackSymbol, new HashSet<>());
+                        ctxFromState.addAll(ctxOfStackSymbol);
+                    }
+                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
+                }
+            }
+            default -> throw new IllegalArgumentException("Symbol type doesn't exist: " + symbol.getType());
         }
         return ctx;
     }
 
-    public Set<String> getCallAlphabet() {
+    public Set<Symbol> getCallAlphabet() {
         return callAlphabet;
     }
 
-    public Set<String> getInternalAlphabet() {
+    public Set<Symbol> getInternalAlphabet() {
         return internalAlphabet;
     }
 
-    public Set<String> getReturnAlphabet() {
+    public Set<Symbol> getReturnAlphabet() {
         return returnAlphabet;
     }
 

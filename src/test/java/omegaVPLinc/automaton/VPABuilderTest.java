@@ -10,17 +10,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class VPABuilderTest {
     private VPABuilder vpaBuilder;
+    private Map<String, Symbol> alphabet;
 
     @BeforeEach
     void setUp() {
         vpaBuilder = new VPABuilder();
+        Symbol c = new Symbol("CALL", "c");
+        Symbol a = new Symbol("INTERNAL", "a");
+        Symbol r = new Symbol("RETURN", "r");
+        alphabet = Map.of("c", c, "a", a, "r", r);
     }
 
     @Test
     void build() {
-        Set<String> ca = Set.of("c");
-        Set<String> ia = Set.of("a");
-        Set<String> ra = Set.of("r");
+        Set<Symbol> ca = Set.of(alphabet.get("c"));
+        Set<Symbol> ia = Set.of(alphabet.get("a"));
+        Set<Symbol> ra = Set.of(alphabet.get("r"));
         Set<String> sa = Set.of("q0", "q1");
 
         State q0 = new State("q0");
@@ -28,17 +33,17 @@ class VPABuilderTest {
         Set<State> states = Set.of(q0, q1);
 
         q1.setFinal(true);
-        q0.addCallSuccessor("c", "q0", q0);
-        q0.addCallPredecessor("c", "q0", q0);
+        q0.addCallSuccessor(alphabet.get("c"), "q0", q0);
+        q0.addCallPredecessor(alphabet.get("c"), "q0", q0);
 
-        q0.addInternalSuccessor("a", q0);
-        q0.addInternalPredecessor("a", q0);
+        q0.addInternalSuccessor(alphabet.get("a"), q0);
+        q0.addInternalPredecessor(alphabet.get("a"), q0);
 
-        q0.addReturnSuccessor("r", "q0", q1);
-        q1.addReturnPredecessor("r", "q0", q0);
+        q0.addReturnSuccessor(alphabet.get("r"), "q0", q1);
+        q1.addReturnPredecessor(alphabet.get("r"), "q0", q0);
 
-        q1.addReturnSuccessor("r", "q0", q0);
-        q0.addReturnPredecessor("r", "q0", q1);
+        q1.addReturnSuccessor(alphabet.get("r"), "q0", q0);
+        q0.addReturnPredecessor(alphabet.get("r"), "q0", q1);
 
         VPA vpa = vpaBuilder.callAlphabet(ca)
                 .internalAlphabet(ia)
@@ -58,7 +63,7 @@ class VPABuilderTest {
         assertEquals(q1.getCallPredecessors(),
                 vpa.getState("q1").get().getCallPredecessors());
 
-        Map<State, Set<State>> contextOfC = vpa.context("r");
+        Map<State, Set<State>> contextOfC = vpa.context(new Symbol("RETURN", "r"));
         Map<State, Set<State>> expectedContextOfC = Map.of(q0, Set.of(q1), q1, Set.of(q0));
 
         assertEquals(expectedContextOfC, contextOfC);
