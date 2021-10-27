@@ -40,6 +40,14 @@ public class VPA {
         return ctx;
     }
 
+    public Map<State, Set<State>> epsilonContext() {
+        Map<State, Set<State>> ctx = new HashMap<>();
+        for (State p : states) {
+            ctx.put(p, new HashSet<>(Set.of(p)));
+        }
+        return ctx;
+    }
+
     public Map<State, Set<State>> context(Symbol symbol) throws IllegalArgumentException {
         Map<State, Set<State>> ctx = new HashMap<>();
         switch (symbol.getType()) {

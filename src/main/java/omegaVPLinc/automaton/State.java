@@ -1,8 +1,7 @@
 package omegaVPLinc.automaton;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class State {
     private String name;
@@ -49,9 +48,38 @@ public class State {
         return internalSuccessors;
     }
 
+    public static Set<Map<State, Set<State>>> compose(
+            Set<Map<State, Set<State>>> E,
+            Set<Map<State, Set<State>>> D) {
+        Set<Map<State, Set<State>>> ED = new HashSet<>();
+        for (Map<State, Set<State>> e : E) {
+            for (Map<State, Set<State>> d : D) {
+                ED.add(compose(e, d));
+            }
+        }
+        return ED;
+    }
+
+    public static Map<State, Set<State>> compose(
+            Map<State, Set<State>> e,
+            Map<State, Set<State>> d) {
+        Map<State, Set<State>> ed = new HashMap<>();
+        for (State p : e.keySet()) {
+            for (State q : e.get(p)) {
+                if (d.containsKey(q)) {
+                    Set<State> ed_p = ed.putIfAbsent(p, d.get(q));
+                    if (ed_p != null) ed_p.addAll(d.get(q));
+                }
+            }
+        }
+        return ed;
+    }
+
     public void addInternalSuccessor(Symbol symbol, State succ) {
-        Set<State> intSucc = internalSuccessors.putIfAbsent(symbol, Set.of(succ));
-        if (intSucc != null) intSucc.add(succ);
+        Set<State> intSucc = internalSuccessors.putIfAbsent(symbol, new HashSet<>(Set.of(succ)));
+        if (intSucc != null) {
+            intSucc.add(succ);
+        }
     }
 
     public Map<Symbol, Set<State>> getInternalPredecessors() {
@@ -59,7 +87,7 @@ public class State {
     }
 
     public void addInternalPredecessor(Symbol symbol, State pred) {
-        Set<State> intPred = internalPredecessors.putIfAbsent(symbol, Set.of(pred));
+        Set<State> intPred = internalPredecessors.putIfAbsent(symbol, new HashSet<>(Set.of(pred)));
         if (intPred != null) intPred.add(pred);
     }
 
@@ -106,5 +134,18 @@ public class State {
             transitionMap.put(symbol,
                     new HashMap<String, Set<State>>(Map.of(stackSymbol, Set.of(state))));
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        State state = (State) o;
+        return isFinal == state.isFinal && name.equals(state.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, isFinal);
     }
 }
