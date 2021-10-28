@@ -4,9 +4,12 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.automaton.VPABuilder;
+import omegaVPLinc.utility.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,7 +60,26 @@ class WVectorTest {
 
     @Test
     void testIterateOnce() {
-        WVector w = new WVector(vpa, vpa);
-        w.iterateOnce();
+        WVector w1 = new WVector(vpa, vpa);
+        WVector w2 = new WVector(vpa, vpa);
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerW1copy = w1.deepCopy();
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerW2copy = w2.deepCopy();
+        Set<Pair<State, State>> frontier = new HashSet<>();
+        for (State p : vpa.getStates()) {
+            for (State q : vpa.getStates()) {
+                frontier.add(Pair.of(p, q));
+            }
+        }
+        Set<Pair<State, State>> changed1 = w1.iterateOnce(innerW1copy, frontier);
+        assertEquals(2, changed1.size());
+        Pair<State, State> pq = changed1.stream().findAny().get();
+        assertEquals(false, w1.getInnerW().get(pq).equals(innerW1copy.get(pq)));
+
+        Set<Pair<State, State>> changed2 = w2.iterateOnce(innerW2copy, frontier);
+
+        Set<Pair<State, State>> changed12 = w1.iterateOnce(innerW1copy, frontier);
+        Set<Pair<State, State>> changed22 = w2.iterateOnce(innerW2copy, changed2);
+
+        assertEquals(changed12, changed22);
     }
 }

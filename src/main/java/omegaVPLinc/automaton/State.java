@@ -50,7 +50,8 @@ public class State {
 
     public static Set<Map<State, Set<State>>> compose(
             Set<Map<State, Set<State>>> E,
-            Set<Map<State, Set<State>>> D) {
+            Set<Map<State, Set<State>>> D
+    ) {
         Set<Map<State, Set<State>>> ED = new HashSet<>();
         for (Map<State, Set<State>> e : E) {
             for (Map<State, Set<State>> d : D) {
@@ -62,13 +63,14 @@ public class State {
 
     public static Map<State, Set<State>> compose(
             Map<State, Set<State>> e,
-            Map<State, Set<State>> d) {
+            Map<State, Set<State>> d
+    ) {
         Map<State, Set<State>> ed = new HashMap<>();
         for (State p : e.keySet()) {
             for (State q : e.get(p)) {
                 if (d.containsKey(q)) {
-                    Set<State> ed_p = ed.putIfAbsent(p, d.get(q));
-                    if (ed_p != null) ed_p.addAll(d.get(q));
+                    Set<State> existingOrNull = ed.putIfAbsent(p, d.get(q));
+                    if (existingOrNull != null) existingOrNull.addAll(d.get(q));
                 }
             }
         }
@@ -147,5 +149,10 @@ public class State {
     @Override
     public int hashCode() {
         return Objects.hash(name, isFinal);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

@@ -14,6 +14,8 @@ public class VPA {
     private Set<State> states;
     private State initialState;
 
+    private Map<State, Set<State>> epsilonContext;
+
     public VPA(Set<Symbol> callAlphabet,
                Set<Symbol> internalAlphabet,
                Set<Symbol> returnAlphabet,
@@ -29,6 +31,15 @@ public class VPA {
         this.stackAlphabet = stackAlphabet;
         this.states = states;
         this.initialState = initialState;
+
+        this.epsilonContext = new HashMap<>();
+        for (State p : states) {
+            this.epsilonContext.put(p, new HashSet<>(Set.of(p)));
+        }
+    }
+
+    public Map<State, Set<State>> getEpsilonContext() {
+        return epsilonContext;
     }
 
     public Map<Symbol, Map<State, Set<State>>> context() throws IllegalArgumentException {
@@ -36,14 +47,6 @@ public class VPA {
         for (Symbol symbol : fullAlphabet) {
             Map<State, Set<State>> ctxOfSymbol = context(symbol);
             if (!ctxOfSymbol.isEmpty()) ctx.put(symbol, ctxOfSymbol);
-        }
-        return ctx;
-    }
-
-    public Map<State, Set<State>> epsilonContext() {
-        Map<State, Set<State>> ctx = new HashMap<>();
-        for (State p : states) {
-            ctx.put(p, new HashSet<>(Set.of(p)));
         }
         return ctx;
     }
@@ -88,43 +91,11 @@ public class VPA {
     }
 
     public Map<State, Set<State>> finalContext(Symbol symbol) {
-        Map<State, Set<State>> ctx = new HashMap<>();
-        switch (symbol.getType()) {
-            case CALL -> {
-                for (State from : states) {
-                    Set<State> ctxFromState = new HashSet<>();
-                    for (String stackSymbol : stackAlphabet) {
-                        Set<State> ctxOfStackSymbol = from.getCallSuccessors()
-                                .getOrDefault(symbol, new HashMap<>())
-                                .getOrDefault(stackSymbol, new HashSet<>())
-                                .stream().filter(s -> from.isFinal() || s.isFinal()).collect(Collectors.toSet());
-                        ctxFromState.addAll(ctxOfStackSymbol);
-                    }
-                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
-                }
+        Map<State, Set<State>> ctx = context(symbol);
+        for (State p : ctx.keySet()) {
+            if (!p.isFinal()) {
+                ctx.get(p).removeIf(q -> !q.isFinal());
             }
-            case INTERNAL -> {
-                for (State from : states) {
-                    Set<State> ctxFromState = from.getInternalSuccessors()
-                            .getOrDefault(symbol, new HashSet<>())
-                            .stream().filter(s -> from.isFinal() || s.isFinal()).collect(Collectors.toSet());
-                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
-                }
-            }
-            case RETURN -> {
-                for (State from : states) {
-                    Set<State> ctxFromState = new HashSet<>();
-                    for (String stackSymbol : stackAlphabet) {
-                        Set<State> ctxOfStackSymbol = from.getReturnSuccessors()
-                                .getOrDefault(symbol, new HashMap<>())
-                                .getOrDefault(stackSymbol, new HashSet<>())
-                                .stream().filter(s -> from.isFinal() || s.isFinal()).collect(Collectors.toSet());
-                        ctxFromState.addAll(ctxOfStackSymbol);
-                    }
-                    if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
-                }
-            }
-            default -> throw new IllegalArgumentException("Symbol type doesn't exist: " + symbol.getType());
         }
         return ctx;
     }
