@@ -1,6 +1,8 @@
 package omegaVPLinc.automaton;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Symbol {
     public enum SymbolType {
@@ -38,6 +40,14 @@ public class Symbol {
         } else {
             return false;
         }
+    }
+
+    public static Set<Symbol> createAlphabet(String typeString, Set<String> symbols) {
+        Set<Symbol> alphabet = new HashSet<>();
+        for (String s : symbols) {
+            alphabet.add(new Symbol(typeString, s));
+        }
+        return alphabet;
     }
 
     @Override

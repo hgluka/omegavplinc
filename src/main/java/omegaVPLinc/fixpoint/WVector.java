@@ -36,6 +36,7 @@ public class WVector {
     public Set<Pair<State, State>> iterateOnce(
             Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerWcopy,
             Set<Pair<State, State>> frontier) {
+        innerWcopy = deepCopy();
         Set<Pair<State, State>> changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -43,7 +44,7 @@ public class WVector {
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
             for (Symbol s : p.getInternalSuccessors().keySet()) {
                 Map<State, Set<State>> bCtxOfS = b.context(s);
-                for (State pPrime : pq.fst().getInternalSuccessors().get(s)) {
+                for (State pPrime : p.getInternalSuccessors().getOrDefault(s, new HashSet<>())) {
                     Set<Map<State, Set<State>>> toAdd =
                             State.compose(Set.of(bCtxOfS), innerWcopy.get(Pair.of(pPrime, q)));
                     if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
@@ -59,12 +60,12 @@ public class WVector {
                 for (String stackSymbol : p.getCallSuccessors().get(callSymbol).keySet()) {
                     Set<State> successorsOfCallSymbol = p
                             .getCallPredecessors()
-                            .get(callSymbol)
-                            .get(stackSymbol);
+                            .getOrDefault(callSymbol, new HashMap<>())
+                            .getOrDefault(stackSymbol, new HashSet<>());
                     for (Symbol retSymbol : q.getReturnPredecessors().keySet()) {
                         HashMap<String, Set<State>> predecessorsOfRetSymbol =
                                 q.getReturnPredecessors()
-                                .get(retSymbol);
+                                .getOrDefault(retSymbol, new HashMap<>());
                         if (predecessorsOfRetSymbol.containsKey(stackSymbol)) {
                             for (State pPrime : successorsOfCallSymbol) {
                                 for (State qPrime : predecessorsOfRetSymbol.get(stackSymbol)) {
@@ -108,5 +109,20 @@ public class WVector {
             innerWcopy.put(pq, new HashSet<>(innerW.get(pq)));
         }
         return innerWcopy;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Pair<State, State> p_q : innerW.keySet()) {
+            if (!innerW.get(p_q).isEmpty()) {
+                sb.append(p_q + " {\n");
+                for (Map<State, Set<State>> mp : innerW.get(p_q)) {
+                    sb.append("\t" + mp + "\n");
+                }
+                sb.append("}\n");
+            }
+        }
+        return sb.toString();
     }
 }
