@@ -78,6 +78,9 @@ public class State {
     }
 
     public void addInternalSuccessor(Symbol symbol, State succ) {
+        if (symbol == null || succ == null) {
+            throw new IllegalArgumentException("Cannot add transition with null values.");
+        }
         Set<State> intSucc = internalSuccessors.putIfAbsent(symbol, new HashSet<>(Set.of(succ)));
         if (intSucc != null) {
             intSucc.add(succ);
@@ -89,6 +92,9 @@ public class State {
     }
 
     public void addInternalPredecessor(Symbol symbol, State pred) {
+        if (symbol == null || pred == null) {
+            throw new IllegalArgumentException("Cannot add transition with null values.");
+        }
         Set<State> intPred = internalPredecessors.putIfAbsent(symbol, new HashSet<>(Set.of(pred)));
         if (intPred != null) intPred.add(pred);
     }
@@ -125,7 +131,14 @@ public class State {
         addTransition(symbol, stackSymbol, pred, returnPredecessors);
     }
 
-    private void addTransition(Symbol symbol, String stackSymbol, State state, HashMap<Symbol, HashMap<String, Set<State>>> transitionMap) {
+    private void addTransition(
+            Symbol symbol,
+            String stackSymbol,
+            State state,
+            HashMap<Symbol, HashMap<String, Set<State>>> transitionMap) throws IllegalArgumentException {
+        if (symbol == null || stackSymbol == null || state == null) {
+            throw new IllegalArgumentException("Cannot add transition with null values.");
+        }
         if (transitionMap.containsKey(symbol)) {
             if (transitionMap.get(symbol).containsKey(stackSymbol)) {
                 transitionMap.get(symbol).get(stackSymbol).add(state);

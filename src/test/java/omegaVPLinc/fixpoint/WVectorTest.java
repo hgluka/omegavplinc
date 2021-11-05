@@ -21,7 +21,7 @@ class WVectorTest {
         VPABuilder vpaBuilder = new VPABuilder();
         Set<String> callStrings = Set.of("c0", "c1");
         Set<String> internalStrings = Set.of("a0", "a1", "a2", "a3", "a4", "a5", "a6");
-        Set<String> returnStrings = Set.of("r1", "r2");
+        Set<String> returnStrings = Set.of("r0", "r1");
         Set<Symbol> ca = Symbol.createAlphabet("CALL", callStrings);
         Set<Symbol> ia = Symbol.createAlphabet(
                 "INTERNAL",
@@ -110,14 +110,17 @@ class WVectorTest {
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> oldInnerW1 = w1.deepCopy();
         Set<Pair<State, State>> changed12 = w1.iterateOnce(innerW1copy, frontier);
 
-        // System.out.println("CHANGED SIZE: " + changed2.size());
-        // System.out.println("FRONTIER SIZE: " + w2.frontier(changed2).size());
+        System.out.println("CHANGED SIZE: " + changed2.size());
+        System.out.println("FRONTIER SIZE: " + w2.frontier(changed2).size());
 
         Set<Pair<State, State>> changed22 =
                 w2.iterateOnce(innerW2copy, w2.frontier(changed2));
 
         assertEquals(changed12, changed22);
         assertEquals(w1, w2);
+
+        System.out.println("CHANGED SIZE: " + changed22.size());
+        System.out.println("FRONTIER SIZE: " + w2.frontier(changed22).size());
 
         /*
         For each of the pairs pq of states changed in the last iteration, we add
@@ -126,5 +129,38 @@ class WVectorTest {
          */
         // System.out.print(w1);
         assertNotEquals(oldInnerW1, w1.getInnerW());
+    }
+
+    @Test
+    void testIterate() {
+        WVector W = new WVector(vpa, vpa);
+
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> Wcopy = W.deepCopy();
+
+        Set<Pair<State, State>> frontier = new HashSet<>();
+        for (State p : vpa.getStates()) {
+            for (State q : vpa.getStates()) {
+                frontier.add(Pair.of(p, q));
+            }
+        }
+        Set<Pair<State, State>> changed = W.iterateOnce(Wcopy, frontier);
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> Wcopy2 = new HashMap<>();
+
+        // TODO: Use a logging library
+        System.out.println("======================");
+        int i = 1;
+        while (!changed.isEmpty()) {
+            frontier = W.frontier(changed);
+            System.out.println("CHANGED SIZE: " + changed.size());
+            System.out.println("FRONTIER SIZE: " + frontier.size());
+            Wcopy2 = W.deepCopy();
+            changed = W.iterateOnce(Wcopy, frontier);
+            i++;
+        }
+
+        assertEquals(Wcopy2, Wcopy);
+
+        System.out.println("Number of iterations: " + i);
+
     }
 }

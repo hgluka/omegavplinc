@@ -59,13 +59,13 @@ public class WVector {
             for (Symbol callSymbol : p.getCallSuccessors().keySet()) {
                 for (String stackSymbol : p.getCallSuccessors().get(callSymbol).keySet()) {
                     Set<State> successorsOfCallSymbol = p
-                            .getCallPredecessors()
-                            .getOrDefault(callSymbol, new HashMap<>())
-                            .getOrDefault(stackSymbol, new HashSet<>());
+                            .getCallSuccessors()
+                            .get(callSymbol)
+                            .get(stackSymbol);
                     for (Symbol retSymbol : q.getReturnPredecessors().keySet()) {
                         HashMap<String, Set<State>> predecessorsOfRetSymbol =
                                 q.getReturnPredecessors()
-                                .getOrDefault(retSymbol, new HashMap<>());
+                                .get(retSymbol);
                         if (predecessorsOfRetSymbol.containsKey(stackSymbol)) {
                             for (State pPrime : successorsOfCallSymbol) {
                                 for (State qPrime : predecessorsOfRetSymbol.get(stackSymbol)) {
@@ -114,16 +114,6 @@ public class WVector {
             State p = pq.fst();
             State q = pq.snd();
 
-            Set<State> internalPredecessorsOfP = p.getInternalPredecessors()
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-
-            for (State pPrime : internalPredecessorsOfP) {
-                frontier.add(Pair.of(pPrime, q));
-            }
-
             for (Symbol c : p.getCallPredecessors().keySet()) {
                 for (String g : p.getCallPredecessors().get(c).keySet()) {
                     for (State pPrime : p.getCallPredecessors().get(c).get(g)) {
@@ -157,9 +147,9 @@ public class WVector {
         StringBuilder sb = new StringBuilder();
         for (Pair<State, State> p_q : innerW.keySet()) {
             if (!innerW.get(p_q).isEmpty()) {
-                sb.append(p_q + " {\n");
+                sb.append(p_q).append(" {\n");
                 for (Map<State, Set<State>> mp : innerW.get(p_q)) {
-                    sb.append("\t" + mp + "\n");
+                    sb.append("\t").append(mp).append("\n");
                 }
                 sb.append("}\n");
             }
