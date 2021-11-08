@@ -6,12 +6,12 @@ import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class WVector {
 
     private VPA a;
     private VPA b;
+    private PartialComparator comparator;
 
     private Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerW;
 
@@ -19,6 +19,7 @@ public class WVector {
         this.a = a;
         this.b = b;
         this.innerW = new HashMap<>();
+        this.comparator = new PartialComparator();
         for (State p : a.getStates()) {
             for (State q : a.getStates()) {
                 if (p.equals(q)) {
@@ -47,10 +48,10 @@ public class WVector {
                 for (State pPrime : p.getInternalSuccessors().getOrDefault(s, new HashSet<>())) {
                     Set<Map<State, Set<State>>> toAdd =
                             State.compose(Set.of(bCtxOfS), innerWcopy.get(Pair.of(pPrime, q)));
-                    if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
-                        innerW.get(pq).addAll(toAdd);
+                    // if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
+                    if (antichainInsert(pq, toAdd))
                         changed.add(pq);
-                    }
+                    // }
                 }
             }
             // Union of cX_{p', q'}r for
@@ -77,10 +78,10 @@ public class WVector {
                                                     ),
                                                     Set.of(b.context(retSymbol))
                                             );
-                                    if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
-                                        innerW.get(pq).addAll(toAdd);
+                                    // if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
+                                    if (antichainInsert(pq, toAdd))
                                         changed.add(pq);
-                                    }
+                                    // }
                                 }
                             }
                         }
@@ -94,10 +95,10 @@ public class WVector {
                                 innerWcopy.get(Pair.of(p, qPrime)),
                                 innerWcopy.get(Pair.of(qPrime, q))
                         );
-                if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
-                    innerW.get(pq).addAll(toAdd);
+                // if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
+                if (antichainInsert(pq, toAdd))
                     changed.add(pq);
-                }
+                // }
             }
         }
 
@@ -132,6 +133,24 @@ public class WVector {
             }
         }
         return frontier;
+    }
+
+    public boolean antichainInsert(Pair<State, State> statePair, Set<Map<State, Set<State>>> toAdd) {
+        boolean removed = false;
+        boolean added = false;
+        for (Map<State, Set<State>> mapToAdd : toAdd) {
+            removed = removed || innerW.get(statePair).removeIf(
+                    existingMap ->
+                            !existingMap.equals(mapToAdd)
+                                    && comparator.lesserOrEqual(mapToAdd, existingMap));
+            boolean existsLesser = innerW.get(statePair).stream()
+                            .anyMatch(existingMap -> comparator.lesserOrEqual(existingMap, mapToAdd));
+            if (!existsLesser) {
+                innerW.get(statePair).add(mapToAdd);
+                added = true;
+            }
+        }
+        return removed || added;
     }
 
     public Map<Pair<State, State>, Set<Map<State, Set<State>>>> deepCopy() {
