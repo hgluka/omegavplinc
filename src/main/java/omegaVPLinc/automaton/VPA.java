@@ -1,7 +1,6 @@
 package omegaVPLinc.automaton;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class VPA {
 
@@ -9,6 +8,7 @@ public class VPA {
     private final Set<Symbol> internalAlphabet;
     private final Set<Symbol> returnAlphabet;
     private final Set<String> stackAlphabet;
+    private final String emptyStackSymbol;
     private final Set<Symbol> fullAlphabet;
 
     private final Set<State> states;
@@ -36,6 +36,11 @@ public class VPA {
         for (State p : states) {
             this.epsilonContext.put(p, new HashSet<>(Set.of(p)));
         }
+        this.emptyStackSymbol = "empty";
+    }
+
+    public String getEmptyStackSymbol() {
+        return emptyStackSymbol;
     }
 
     public Map<State, Set<State>> getEpsilonContext() {

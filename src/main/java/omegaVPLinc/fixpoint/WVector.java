@@ -8,16 +8,12 @@ import omegaVPLinc.utility.Pair;
 import java.util.*;
 
 public class WVector extends FixpointVector<Map<State, Set<State>>> {
-    private final MapComparator comparator;
-
     public WVector(VPA a, VPA b) {
-        super(a, b);
-        this.comparator = new MapComparator();
+        super(a, b, new MapComparator());
     }
 
-    public Set<Pair<State, State>> iterateOnce(
-            Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerWcopy,
-            Set<Pair<State, State>> frontier) {
+    @Override
+    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
         Set<Pair<State, State>> changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -32,7 +28,7 @@ public class WVector extends FixpointVector<Map<State, Set<State>>> {
                 Map<State, Set<State>> bCtxOfS = b.context(s);
                 for (State pPrime : p.getInternalSuccessors().getOrDefault(s, new HashSet<>())) {
                     Set<Map<State, Set<State>>> toAdd =
-                            State.compose(Set.of(bCtxOfS), innerWcopy.get(Pair.of(pPrime, q)));
+                            State.compose(Set.of(bCtxOfS), innerVectorCopy.get(Pair.of(pPrime, q)));
                     if (antichainInsert(pq, toAdd))
                         changed.add(pq);
                 }
@@ -57,7 +53,7 @@ public class WVector extends FixpointVector<Map<State, Set<State>>> {
                                             State.compose(
                                                     State.compose(
                                                             Set.of(b.context(callSymbol)),
-                                                            innerWcopy.get(Pair.of(pPrime, qPrime))
+                                                            innerVectorCopy.get(Pair.of(pPrime, qPrime))
                                                     ),
                                                     Set.of(b.context(retSymbol))
                                             );
@@ -73,21 +69,20 @@ public class WVector extends FixpointVector<Map<State, Set<State>>> {
             for (State qPrime : a.getStates()) {
                 Set<Map<State, Set<State>>> toAdd =
                         State.compose(
-                                innerWcopy.get(Pair.of(p, qPrime)),
-                                innerWcopy.get(Pair.of(qPrime, q))
+                                innerVectorCopy.get(Pair.of(p, qPrime)),
+                                innerVectorCopy.get(Pair.of(qPrime, q))
                         );
                 if (antichainInsert(pq, toAdd))
                     changed.add(pq);
             }
         }
 
-        for (Pair<State, State> pq : changed) {
-            innerWcopy.put(pq, new HashSet<>(innerVector.get(pq)));
-        }
+
 
         return changed;
     }
 
+    @Override
     public Set<Pair<State, State>> frontier(Set<Pair<State, State>> changed) {
         Set<Pair<State, State>> frontier = new HashSet<>();
         for (Pair<State, State> pq : changed) {
@@ -114,24 +109,7 @@ public class WVector extends FixpointVector<Map<State, Set<State>>> {
         return frontier;
     }
 
-    public boolean antichainInsert(Pair<State, State> statePair, Set<Map<State, Set<State>>> toAdd) {
-        boolean removed = false;
-        boolean added = false;
-        for (Map<State, Set<State>> mapToAdd : toAdd) {
-            removed = removed || innerVector.get(statePair).removeIf(
-                    existingMap ->
-                            !existingMap.equals(mapToAdd)
-                                    && comparator.lesserOrEqual(mapToAdd, existingMap));
-            boolean existsLesser = innerVector.get(statePair).stream()
-                            .anyMatch(existingMap -> comparator.lesserOrEqual(existingMap, mapToAdd));
-            if (!existsLesser) {
-                innerVector.get(statePair).add(mapToAdd);
-                added = true;
-            }
-        }
-        return removed || added;
-    }
-
+    @Override
     public Map<Pair<State, State>, Set<Map<State, Set<State>>>> deepCopy() {
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerWcopy = new HashMap<>();
         for (Pair<State, State> pq : innerVector.keySet()) {
