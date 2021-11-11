@@ -5,16 +5,16 @@ import java.util.stream.Collectors;
 
 public class VPA {
 
-    private Set<Symbol> callAlphabet;
-    private Set<Symbol> internalAlphabet;
-    private Set<Symbol> returnAlphabet;
-    private Set<String> stackAlphabet;
-    private Set<Symbol> fullAlphabet;
+    private final Set<Symbol> callAlphabet;
+    private final Set<Symbol> internalAlphabet;
+    private final Set<Symbol> returnAlphabet;
+    private final Set<String> stackAlphabet;
+    private final Set<Symbol> fullAlphabet;
 
-    private Set<State> states;
-    private State initialState;
+    private final Set<State> states;
+    private final State initialState;
 
-    private Map<State, Set<State>> epsilonContext;
+    private final Map<State, Set<State>> epsilonContext;
 
     public VPA(Set<Symbol> callAlphabet,
                Set<Symbol> internalAlphabet,

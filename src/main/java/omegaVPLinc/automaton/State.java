@@ -7,14 +7,14 @@ public class State {
     private String name;
     private boolean isFinal;
 
-    private Map<Symbol, Set<State>> internalSuccessors;
-    private Map<Symbol, Set<State>> internalPredecessors;
+    private final Map<Symbol, Set<State>> internalSuccessors;
+    private final Map<Symbol, Set<State>> internalPredecessors;
 
-    private HashMap<Symbol, HashMap<String, Set<State>>> callSuccessors;
-    private HashMap<Symbol, HashMap<String, Set<State>>> callPredecessors;
+    private final HashMap<Symbol, HashMap<String, Set<State>>> callSuccessors;
+    private final HashMap<Symbol, HashMap<String, Set<State>>> callPredecessors;
 
-    private HashMap<Symbol, HashMap<String, Set<State>>> returnSuccessors;
-    private HashMap<Symbol, HashMap<String, Set<State>>> returnPredecessors;
+    private final HashMap<Symbol, HashMap<String, Set<State>>> returnSuccessors;
+    private final HashMap<Symbol, HashMap<String, Set<State>>> returnPredecessors;
 
     public State(String name) {
         this.name = name;

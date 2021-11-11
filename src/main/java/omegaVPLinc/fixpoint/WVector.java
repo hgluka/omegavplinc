@@ -7,32 +7,12 @@ import omegaVPLinc.utility.Pair;
 
 import java.util.*;
 
-public class WVector {
-
-    private VPA a;
-    private VPA b;
-    private PartialComparator comparator;
-
-    private Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerW;
+public class WVector extends FixpointVector<Map<State, Set<State>>> {
+    private final MapComparator comparator;
 
     public WVector(VPA a, VPA b) {
-        this.a = a;
-        this.b = b;
-        this.innerW = new HashMap<>();
-        this.comparator = new PartialComparator();
-        for (State p : a.getStates()) {
-            for (State q : a.getStates()) {
-                if (p.equals(q)) {
-                    innerW.put(Pair.of(p, q), new HashSet<>(Set.of(b.getEpsilonContext())));
-                } else {
-                    innerW.put(Pair.of(p, q), new HashSet<>());
-                }
-            }
-        }
-    }
-
-    public Map<Pair<State, State>, Set<Map<State, Set<State>>>> getInnerW() {
-        return innerW;
+        super(a, b);
+        this.comparator = new MapComparator();
     }
 
     public Set<Pair<State, State>> iterateOnce(
@@ -42,16 +22,19 @@ public class WVector {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
+            // Epsilon context if p == q
+            if (p.equals(q)) {
+                if (antichainInsert(pq, Set.of(b.getEpsilonContext())))
+                    changed.add(pq);
+            }
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
             for (Symbol s : p.getInternalSuccessors().keySet()) {
                 Map<State, Set<State>> bCtxOfS = b.context(s);
                 for (State pPrime : p.getInternalSuccessors().getOrDefault(s, new HashSet<>())) {
                     Set<Map<State, Set<State>>> toAdd =
                             State.compose(Set.of(bCtxOfS), innerWcopy.get(Pair.of(pPrime, q)));
-                    // if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
                     if (antichainInsert(pq, toAdd))
                         changed.add(pq);
-                    // }
                 }
             }
             // Union of cX_{p', q'}r for
@@ -78,10 +61,8 @@ public class WVector {
                                                     ),
                                                     Set.of(b.context(retSymbol))
                                             );
-                                    // if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
                                     if (antichainInsert(pq, toAdd))
                                         changed.add(pq);
-                                    // }
                                 }
                             }
                         }
@@ -95,15 +76,13 @@ public class WVector {
                                 innerWcopy.get(Pair.of(p, qPrime)),
                                 innerWcopy.get(Pair.of(qPrime, q))
                         );
-                // if (!toAdd.isEmpty() && !innerWcopy.get(pq).containsAll(toAdd)) {
                 if (antichainInsert(pq, toAdd))
                     changed.add(pq);
-                // }
             }
         }
 
         for (Pair<State, State> pq : changed) {
-            innerWcopy.put(pq, new HashSet<>(innerW.get(pq)));
+            innerWcopy.put(pq, new HashSet<>(innerVector.get(pq)));
         }
 
         return changed;
@@ -139,14 +118,14 @@ public class WVector {
         boolean removed = false;
         boolean added = false;
         for (Map<State, Set<State>> mapToAdd : toAdd) {
-            removed = removed || innerW.get(statePair).removeIf(
+            removed = removed || innerVector.get(statePair).removeIf(
                     existingMap ->
                             !existingMap.equals(mapToAdd)
                                     && comparator.lesserOrEqual(mapToAdd, existingMap));
-            boolean existsLesser = innerW.get(statePair).stream()
+            boolean existsLesser = innerVector.get(statePair).stream()
                             .anyMatch(existingMap -> comparator.lesserOrEqual(existingMap, mapToAdd));
             if (!existsLesser) {
-                innerW.get(statePair).add(mapToAdd);
+                innerVector.get(statePair).add(mapToAdd);
                 added = true;
             }
         }
@@ -155,8 +134,8 @@ public class WVector {
 
     public Map<Pair<State, State>, Set<Map<State, Set<State>>>> deepCopy() {
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerWcopy = new HashMap<>();
-        for (Pair<State, State> pq : innerW.keySet()) {
-            innerWcopy.put(pq, new HashSet<>(innerW.get(pq)));
+        for (Pair<State, State> pq : innerVector.keySet()) {
+            innerWcopy.put(pq, new HashSet<>(innerVector.get(pq)));
         }
         return innerWcopy;
     }
@@ -164,10 +143,10 @@ public class WVector {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Pair<State, State> p_q : innerW.keySet()) {
-            if (!innerW.get(p_q).isEmpty()) {
+        for (Pair<State, State> p_q : innerVector.keySet()) {
+            if (!innerVector.get(p_q).isEmpty()) {
                 sb.append(p_q).append(" {\n");
-                for (Map<State, Set<State>> mp : innerW.get(p_q)) {
+                for (Map<State, Set<State>> mp : innerVector.get(p_q)) {
                     sb.append("\t").append(mp).append("\n");
                 }
                 sb.append("}\n");
@@ -181,11 +160,11 @@ public class WVector {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WVector wVector = (WVector) o;
-        return a.equals(wVector.a) && b.equals(wVector.b) && innerW.equals(wVector.innerW);
+        return a.equals(wVector.a) && b.equals(wVector.b) && innerVector.equals(wVector.innerVector);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(a, b, innerW);
+        return Objects.hash(a, b, innerVector);
     }
 }

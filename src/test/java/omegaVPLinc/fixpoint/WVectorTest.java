@@ -128,7 +128,7 @@ class WVectorTest {
         pairs ending with q and starting with a predecessor of q.
          */
         // System.out.print(w1);
-        assertNotEquals(oldInnerW1, w1.getInnerW());
+        assertNotEquals(oldInnerW1, w1.getInnerVector());
     }
 
     @Test

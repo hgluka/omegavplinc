@@ -10,12 +10,8 @@ public class Symbol {
         INTERNAL,
         RETURN;
     }
-    private SymbolType type;
-    private String symbol;
-
-    public Symbol(String symbol) {
-        this.symbol = symbol;
-    }
+    private final SymbolType type;
+    private final String symbol;
 
     public Symbol(String type, String symbol) throws IllegalArgumentException {
         this.type = SymbolType.valueOf(type);
@@ -30,16 +26,8 @@ public class Symbol {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = SymbolType.valueOf(type);
-    }
-
     public boolean typeEquals(Symbol s) {
-        if (type == s.getType()) {
-            return true;
-        } else {
-            return false;
-        }
+        return type == s.getType();
     }
 
     public static Set<Symbol> createAlphabet(String typeString, Set<String> symbols) {
