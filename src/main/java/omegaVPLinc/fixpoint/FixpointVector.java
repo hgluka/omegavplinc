@@ -4,10 +4,7 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class FixpointVector<T> {
     protected VPA a;
@@ -15,6 +12,8 @@ public abstract class FixpointVector<T> {
 
     protected Map<Pair<State, State>, Set<T>> innerVector;
     protected Map<Pair<State, State>, Set<T>> innerVectorCopy;
+
+    protected Set<Pair<State, State>> changed;
 
     protected PartialComparator<T> comparator;
 
@@ -29,6 +28,7 @@ public abstract class FixpointVector<T> {
                 this.innerVectorCopy.put(Pair.of(p, q), new HashSet<>());
             }
         }
+        this.changed = new HashSet<>();
         this.comparator = comparator;
     }
 
@@ -36,7 +36,7 @@ public abstract class FixpointVector<T> {
             Set<Pair<State, State>> frontier
     );
 
-    public abstract Set<Pair<State, State>> frontier(Set<Pair<State, State>> changed);
+    public abstract Set<Pair<State, State>> frontier();
 
     public boolean antichainInsert(Pair<State, State> statePair, Set<T> toAdd) {
         boolean removed = false;
@@ -58,15 +58,30 @@ public abstract class FixpointVector<T> {
 
     public abstract Map<Pair<State, State>, Set<T>> deepCopy();
 
-    public void updateCopy(Set<Pair<State, State>> changed) {
+    public void updateCopy() {
         for (Pair<State, State> pq : changed) {
             innerVectorCopy.put(pq, new HashSet<>(innerVector.get(pq)));
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WVector wVector = (WVector) o;
+        return a.equals(wVector.a) && b.equals(wVector.b) && innerVector.equals(wVector.innerVector);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, b, innerVector);
+    }
 
     public Map<Pair<State, State>, Set<T>> getInnerVector() {
         return innerVector;
+    }
+
+    public Map<Pair<State, State>, Set<T>> getInnerVectorCopy() {
+        return innerVectorCopy;
     }
 }

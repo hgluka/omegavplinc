@@ -14,7 +14,7 @@ public class WVector extends FixpointVector<Map<State, Set<State>>> {
 
     @Override
     public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
-        Set<Pair<State, State>> changed = new HashSet<>();
+        changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
@@ -83,7 +83,7 @@ public class WVector extends FixpointVector<Map<State, Set<State>>> {
     }
 
     @Override
-    public Set<Pair<State, State>> frontier(Set<Pair<State, State>> changed) {
+    public Set<Pair<State, State>> frontier() {
         Set<Pair<State, State>> frontier = new HashSet<>();
         for (Pair<State, State> pq : changed) {
             State p = pq.fst();
@@ -131,18 +131,5 @@ public class WVector extends FixpointVector<Map<State, Set<State>>> {
             }
         }
         return sb.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WVector wVector = (WVector) o;
-        return a.equals(wVector.a) && b.equals(wVector.b) && innerVector.equals(wVector.innerVector);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(a, b, innerVector);
     }
 }

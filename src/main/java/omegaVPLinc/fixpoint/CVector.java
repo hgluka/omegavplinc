@@ -5,28 +5,30 @@ import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class CVector extends FixpointVector<Map<State, Set<State>>> {
-    private Map<Pair<State, State>, Set<Map<State, Set<State>>>> wVectorCopy;
+    private final WVector wVector;
 
-    public CVector(VPA a, VPA b, Map<Pair<State, State>, Set<Map<State, Set<State>>>> wVectorCopy) {
+    public CVector(VPA a, VPA b, WVector wVector) {
         super(a, b, new MapComparator());
-        this.wVectorCopy = wVectorCopy;
+        this.wVector = wVector;
     }
 
     @Override
     public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
-        Set<Pair<State, State>> changed = new HashSet<>();
+        changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
 
             // X_{p, q}
-            if (antichainInsert(pq, wVectorCopy.get(pq)))
+            if (antichainInsert(pq, wVector.innerVectorCopy.get(pq))) {
                 changed.add(pq);
+            }
             // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
             for (Symbol r : p.getReturnSuccessors().keySet()) {
                 if (p.getReturnSuccessors()
@@ -54,14 +56,14 @@ public class CVector extends FixpointVector<Map<State, Set<State>>> {
                     changed.add(pq);
             }
         }
-        return changed;
+        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> frontier(Set<Pair<State, State>> changed) {
+    public Set<Pair<State, State>> frontier() {
         // Whatever changed in the W vector in the last iteration
         // needs to be added to this frontier as well
-        Set<Pair<State, State>> frontier = new HashSet<>();
+        Set<Pair<State, State>> frontier = new HashSet<>(wVector.changed);
         for (Pair<State, State> pq : changed) {
             State p = pq.fst();
             State q = pq.snd();
@@ -76,6 +78,25 @@ public class CVector extends FixpointVector<Map<State, Set<State>>> {
 
     @Override
     public Map<Pair<State, State>, Set<Map<State, Set<State>>>> deepCopy() {
-        return null;
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> innerWcopy = new HashMap<>();
+        for (Pair<State, State> pq : innerVector.keySet()) {
+            innerWcopy.put(pq, new HashSet<>(innerVector.get(pq)));
+        }
+        return innerWcopy;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Pair<State, State> p_q : innerVector.keySet()) {
+            if (!innerVector.get(p_q).isEmpty()) {
+                sb.append(p_q).append(" {\n");
+                for (Map<State, Set<State>> mp : innerVector.get(p_q)) {
+                    sb.append("\t").append(mp).append("\n");
+                }
+                sb.append("}\n");
+            }
+        }
+        return sb.toString();
     }
 }
