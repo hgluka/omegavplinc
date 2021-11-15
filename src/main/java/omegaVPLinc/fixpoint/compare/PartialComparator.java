@@ -1,4 +1,4 @@
-package omegaVPLinc.fixpoint;
+package omegaVPLinc.fixpoint.compare;
 
 import omegaVPLinc.automaton.State;
 

@@ -2,6 +2,7 @@ package omegaVPLinc.fixpoint;
 
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.compare.PartialComparator;
 import omegaVPLinc.utility.Pair;
 
 import java.util.*;
@@ -56,7 +57,13 @@ public abstract class FixpointVector<T> {
         return removed || added;
     }
 
-    public abstract Map<Pair<State, State>, Set<T>> deepCopy();
+    public Map<Pair<State, State>, Set<T>> deepCopy() {
+        Map<Pair<State, State>, Set<T>> innerWcopy = new HashMap<>();
+        for (Pair<State, State> pq : innerVector.keySet()) {
+            innerWcopy.put(pq, new HashSet<>(innerVector.get(pq)));
+        }
+        return innerWcopy;
+    }
 
     public void updateCopy() {
         for (Pair<State, State> pq : changed) {
@@ -83,5 +90,19 @@ public abstract class FixpointVector<T> {
 
     public Map<Pair<State, State>, Set<T>> getInnerVectorCopy() {
         return innerVectorCopy;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Pair<State, State> p_q : innerVector.keySet()) {
+            if (!innerVector.get(p_q).isEmpty()) {
+                sb.append(p_q).append(" {\n");
+                for (T t : innerVector.get(p_q)) {
+                    sb.append("\t").append(t).append("\n");
+                }
+                sb.append("}\n");
+            }
+        }
+        return sb.toString();
     }
 }

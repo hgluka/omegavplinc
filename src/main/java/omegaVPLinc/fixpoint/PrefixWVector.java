@@ -3,17 +3,20 @@ package omegaVPLinc.fixpoint;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
-import omegaVPLinc.fixpoint.compare.PartialComparator;
+import omegaVPLinc.fixpoint.compare.MapComparator;
 import omegaVPLinc.utility.Pair;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-public abstract class WVector<T> extends FixpointVector<T> {
-    public WVector(VPA a, VPA b, PartialComparator<T> comparator) {
-        super(a, b, comparator);
+public class PrefixWVector extends WVector<Map<State, Set<State>>> {
+
+    public PrefixWVector(VPA a, VPA b) {
+        super(a, b, new MapComparator());
     }
 
-    /*
     @Override
     public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
         changed = new HashSet<>();
@@ -47,7 +50,7 @@ public abstract class WVector<T> extends FixpointVector<T> {
                     for (Symbol retSymbol : q.getReturnPredecessors().keySet()) {
                         HashMap<String, Set<State>> predecessorsOfRetSymbol =
                                 q.getReturnPredecessors()
-                                .get(retSymbol);
+                                        .get(retSymbol);
                         if (predecessorsOfRetSymbol.containsKey(stackSymbol)) {
                             for (State pPrime : successorsOfCallSymbol) {
                                 for (State qPrime : predecessorsOfRetSymbol.get(stackSymbol)) {
@@ -78,38 +81,6 @@ public abstract class WVector<T> extends FixpointVector<T> {
                     changed.add(pq);
             }
         }
-
-
-
-        return changed;
-    }
-
-     */
-
-    @Override
-    public Set<Pair<State, State>> frontier() {
-        Set<Pair<State, State>> frontier = new HashSet<>();
-        for (Pair<State, State> pq : changed) {
-            State p = pq.fst();
-            State q = pq.snd();
-
-            for (Symbol c : p.getCallPredecessors().keySet()) {
-                for (String g : p.getCallPredecessors().get(c).keySet()) {
-                    for (State pPrime : p.getCallPredecessors().get(c).get(g)) {
-                        for (Symbol r : q.getCallSuccessors().keySet()) {
-                            for (State qPrime : q.getCallSuccessors().get(r).getOrDefault(g, new HashSet<>())) {
-                                frontier.add(Pair.of(pPrime, qPrime));
-                            }
-                        }
-                    }
-                }
-            }
-
-            for (State pPrime : a.getStates()) {
-                frontier.add(Pair.of(p, pPrime));
-                frontier.add(Pair.of(pPrime, q));
-            }
-        }
-        return frontier;
+        return new HashSet<>(changed);
     }
 }
