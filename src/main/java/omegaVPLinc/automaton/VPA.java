@@ -1,5 +1,7 @@
 package omegaVPLinc.automaton;
 
+import omegaVPLinc.utility.Pair;
+
 import java.util.*;
 
 public class VPA {
@@ -140,6 +142,16 @@ public class VPA {
                 return Optional.of(q);
         }
         return Optional.empty();
+    }
+
+    public Set<Pair<State, State>> getAllStatePairs() {
+        Set<Pair<State, State>> statePairs = new HashSet<>();
+        for (State p : states) {
+            for (State q : states) {
+                statePairs.add(Pair.of(p, q));
+            }
+        }
+        return statePairs;
     }
 
     public State getInitialState() {

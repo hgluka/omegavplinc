@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FixpointVectorTest {
     private VPA vpa;
-    private Map<String, Symbol> alphabet;
 
     @BeforeEach
     void setUp() {
@@ -89,20 +88,18 @@ class FixpointVectorTest {
         WVector<Map<State, Set<State>>> w1 = new PrefixWVector(vpa, vpa);
         WVector<Map<State, Set<State>>> w2 = new PrefixWVector(vpa, vpa);
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> oldInnerW1copy = w1.deepCopy();
-        Set<Pair<State, State>> frontier = new HashSet<>();
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
+        /*
         for (State p : vpa.getStates()) {
             for (State q : vpa.getStates()) {
                 frontier.add(Pair.of(p, q));
             }
         }
+        */
         Set<Pair<State, State>> changed1 = w1.iterateOnce(frontier);
         w1.updateCopy();
         assertEquals(7, changed1.size());
-        Pair<State, State> pq = changed1.stream().findAny().get();
         assertNotEquals(oldInnerW1copy, w1.getInnerVector());
-
-        // System.out.println(w1);
-        // System.out.println("==========================");
 
         Set<Pair<State, State>> changed2 = w2.iterateOnce(frontier);
         w2.updateCopy();
@@ -138,12 +135,8 @@ class FixpointVectorTest {
     void testIterateW() {
         WVector<Map<State, Set<State>>> W = new PrefixWVector(vpa, vpa);
 
-        Set<Pair<State, State>> frontier = new HashSet<>();
-        for (State p : vpa.getStates()) {
-            for (State q : vpa.getStates()) {
-                frontier.add(Pair.of(p, q));
-            }
-        }
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
+
         Set<Pair<State, State>> changed = W.iterateOnce(frontier);
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> Wcopy2 = new HashMap<>();
         W.updateCopy();
@@ -173,12 +166,7 @@ class FixpointVectorTest {
     void testIterateOnceC() {
         WVector<Map<State, Set<State>>> W = new PrefixWVector(vpa, vpa);
         CVector<Map<State, Set<State>>> C = new PrefixCVector(vpa, vpa, W);
-        Set<Pair<State, State>> frontier = new HashSet<>();
-        for (State p : vpa.getStates()) {
-            for (State q : vpa.getStates()) {
-                frontier.add(Pair.of(p, q));
-            }
-        }
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
         Set<Pair<State, State>> changedC = C.iterateOnce(frontier);
@@ -201,12 +189,8 @@ class FixpointVectorTest {
         WVector<Map<State, Set<State>>> W = new PrefixWVector(vpa, vpa);
         CVector<Map<State, Set<State>>> C = new PrefixCVector(vpa, vpa, W);
 
-        Set<Pair<State, State>> frontier = new HashSet<>();
-        for (State p : vpa.getStates()) {
-            for (State q : vpa.getStates()) {
-                frontier.add(Pair.of(p, q));
-            }
-        }
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
+
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyW = new HashMap<>();
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyC = new HashMap<>();
@@ -247,12 +231,7 @@ class FixpointVectorTest {
     void testIterateOnceR() {
         WVector<Map<State, Set<State>>> W = new PrefixWVector(vpa, vpa);
         RVector<Map<State, Set<State>>> R = new PrefixRVector(vpa, vpa, W);
-        Set<Pair<State, State>> frontier = new HashSet<>();
-        for (State p : vpa.getStates()) {
-            for (State q : vpa.getStates()) {
-                frontier.add(Pair.of(p, q));
-            }
-        }
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
         Set<Pair<State, State>> changedR = R.iterateOnce(frontier);
@@ -275,12 +254,8 @@ class FixpointVectorTest {
         WVector<Map<State, Set<State>>> W = new PrefixWVector(vpa, vpa);
         RVector<Map<State, Set<State>>> R = new PrefixRVector(vpa, vpa, W);
 
-        Set<Pair<State, State>> frontier = new HashSet<>();
-        for (State p : vpa.getStates()) {
-            for (State q : vpa.getStates()) {
-                frontier.add(Pair.of(p, q));
-            }
-        }
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
+
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyW = new HashMap<>();
         Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyR = new HashMap<>();
@@ -315,5 +290,112 @@ class FixpointVectorTest {
 
         System.out.println("Number of iterations: " + i);
         assertEquals(6, i);
+    }
+
+    @Test
+    void testIterateOnceU() {
+        WVector<Map<State, Set<State>>> W = new PrefixWVector(vpa, vpa);
+        CVector<Map<State, Set<State>>> C = new PrefixCVector(vpa, vpa, W);
+        RVector<Map<State, Set<State>>> R = new PrefixRVector(vpa, vpa, W);
+        UVector U = new UVector(vpa, vpa, C, R);
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
+
+        Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
+        Set<Pair<State, State>> changedC = C.iterateOnce(frontier);
+        Set<Pair<State, State>> changedR = R.iterateOnce(frontier);
+        Set<Pair<State, State>> changedU = U.iterateOnce(frontier);
+        System.out.println(changedU);
+        assertNotEquals(0, changedU.size());
+        W.updateCopy();
+        C.updateCopy();
+        R.updateCopy();
+        U.updateCopy();
+
+        changedW = W.iterateOnce(W.frontier());
+        changedC = C.iterateOnce(frontier);
+        changedR = R.iterateOnce(frontier);
+        System.out.println(U.frontier());
+        changedU = U.iterateOnce(U.frontier());
+        System.out.println(changedU);
+        assertEquals(0, changedU.size());
+        W.updateCopy();
+        C.updateCopy();
+        R.updateCopy();
+        U.updateCopy();
+
+        System.out.println(U);
+        assertEquals(U.getInnerVector(), U.getInnerVectorCopy());
+    }
+
+    @Test
+    void testIterateU() {
+        WVector<Map<State, Set<State>>> W = new PrefixWVector(vpa, vpa);
+        CVector<Map<State, Set<State>>> C = new PrefixCVector(vpa, vpa, W);
+        RVector<Map<State, Set<State>>> R = new PrefixRVector(vpa, vpa, W);
+        UVector U = new UVector(vpa, vpa, C, R);
+
+        Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
+
+        Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
+        Set<Pair<State, State>> changedU = U.iterateOnce(frontier);
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyW = new HashMap<>();
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyC = new HashMap<>();
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyR = new HashMap<>();
+        Map<Pair<State, State>, Set<Map<State, Set<State>>>> copyU = new HashMap<>();
+
+        W.updateCopy();
+        U.updateCopy();
+
+        // TODO: Use a logging library
+        System.out.println("======================");
+        System.out.println("Iterate W, C, R and U");
+        System.out.println("======================");
+        Set<Pair<State, State>> frontierW = W.frontier();
+        Set<Pair<State, State>> frontierC = frontier;
+        Set<Pair<State, State>> frontierR = frontier;
+        Set<Pair<State, State>> frontierU = U.frontier();
+        Set<Pair<State, State>> changedC = new HashSet<>();
+        Set<Pair<State, State>> changedR = new HashSet<>();
+        int i = 0;
+        while (!changedW.isEmpty()
+                || !changedC.isEmpty()
+                || !changedR.isEmpty()
+                || !changedU.isEmpty()) {
+            System.out.println("-------------------");
+            System.out.println("W CHANGED SIZE: " + changedW.size());
+            System.out.println("W FRONTIER SIZE: " + frontierW.size());
+            System.out.println("C CHANGED SIZE: " + changedC.size());
+            System.out.println("C FRONTIER SIZE: " + frontierC.size());
+            System.out.println("R CHANGED SIZE: " + changedR.size());
+            System.out.println("R FRONTIER SIZE: " + frontierR.size());
+            System.out.println("U CHANGED SIZE: " + changedU.size());
+            System.out.println("U FRONTIER SIZE: " + frontierU.size());
+            changedW = W.iterateOnce(frontierW);
+            changedC = C.iterateOnce(frontierC);
+            changedR = R.iterateOnce(frontierR);
+            changedU = U.iterateOnce(frontierU);
+            W.updateCopy();
+            C.updateCopy();
+            R.updateCopy();
+            U.updateCopy();
+            frontierW = W.frontier();
+            frontierC = C.frontier();
+            frontierR = R.frontier();
+            frontierU = U.frontier();
+            copyW = W.deepCopy();
+            copyC = C.deepCopy();
+            copyR = R.deepCopy();
+            copyU = U.deepCopy();
+            i++;
+        }
+
+        assertEquals(copyW, W.getInnerVector());
+        assertEquals(copyC, C.getInnerVector());
+        assertEquals(copyR, R.getInnerVector());
+        assertEquals(copyU, U.getInnerVector());
+
+        System.out.println("Number of iterations: " + i);
+        System.out.println(U);
+        assertEquals(7, i);
     }
 }
