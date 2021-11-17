@@ -1,7 +1,10 @@
 package omegaVPLinc.automaton;
 
+import omegaVPLinc.utility.Pair;
+
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class State {
     private String name;
@@ -48,20 +51,20 @@ public class State {
         return internalSuccessors;
     }
 
-    public static Set<Map<State, Set<State>>> compose(
+    public static Set<Map<State, Set<State>>> composeS(
             Set<Map<State, Set<State>>> E,
             Set<Map<State, Set<State>>> D
     ) {
         Set<Map<State, Set<State>>> ED = new HashSet<>();
         for (Map<State, Set<State>> e : E) {
             for (Map<State, Set<State>> d : D) {
-                ED.add(compose(e, d));
+                ED.add(composeM(e, d));
             }
         }
         return ED;
     }
 
-    public static Map<State, Set<State>> compose(
+    public static Map<State, Set<State>> composeM(
             Map<State, Set<State>> e,
             Map<State, Set<State>> d
     ) {
@@ -75,6 +78,28 @@ public class State {
             }
         }
         return ed;
+    }
+
+    public static Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> composeP(
+            Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> E,
+            Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> D
+    ) {
+        Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> ED = new HashSet<>();
+        for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> e : E) {
+            for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> d : D) {
+                ED.add(Pair.of(
+                        composeM(e.fst(), d.fst()),
+                        Stream.concat(
+                                composeM(e.fst(), d.snd()).entrySet().stream(),
+                                composeM(e.snd(), d.fst()).entrySet().stream()
+                        ).collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (v1, v2) -> Stream.concat(v1.stream(), v2.stream()).collect(Collectors.toSet())))
+                ));
+            }
+        }
+        return ED;
     }
 
     public void addInternalSuccessor(Symbol symbol, State succ) {

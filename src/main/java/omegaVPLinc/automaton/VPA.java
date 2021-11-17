@@ -17,6 +17,7 @@ public class VPA {
     private final State initialState;
 
     private final Map<State, Set<State>> epsilonContext;
+    private final Map<State, Set<State>> finalEpsilonContext;
 
     public VPA(Set<Symbol> callAlphabet,
                Set<Symbol> internalAlphabet,
@@ -38,6 +39,12 @@ public class VPA {
         for (State p : states) {
             this.epsilonContext.put(p, new HashSet<>(Set.of(p)));
         }
+
+        this.finalEpsilonContext = new HashMap<>();
+        for (State p : states) {
+            if (p.isFinal())
+                this.finalEpsilonContext.put(p, new HashSet<>(Set.of(p)));
+        }
         this.emptyStackSymbol = "empty";
     }
 
@@ -47,6 +54,10 @@ public class VPA {
 
     public Map<State, Set<State>> getEpsilonContext() {
         return epsilonContext;
+    }
+
+    public Map<State, Set<State>> getFinalEpsilonContext() {
+        return finalEpsilonContext;
     }
 
     public Map<Symbol, Map<State, Set<State>>> context() throws IllegalArgumentException {

@@ -33,7 +33,7 @@ public class PrefixRVector extends RVector<Map<State, Set<State>>> {
                 for (String g : p.getCallSuccessors().get(c).keySet()) {
                     for (State pPrime : p.getCallSuccessors().get(c).get(g)) {
                         Set<Map<State, Set<State>>> toAdd =
-                                State.compose(
+                                State.composeS(
                                         Set.of(b.context(c)),
                                         innerVectorCopy.get(Pair.of(pPrime, q))
                                 );
@@ -44,7 +44,7 @@ public class PrefixRVector extends RVector<Map<State, Set<State>>> {
             }
             for (State qPrime : a.getStates()) {
                 Set<Map<State, Set<State>>> toAdd =
-                        State.compose(
+                        State.composeS(
                                 innerVectorCopy.get(Pair.of(p, qPrime)),
                                 innerVectorCopy.get(Pair.of(qPrime, q))
                         );

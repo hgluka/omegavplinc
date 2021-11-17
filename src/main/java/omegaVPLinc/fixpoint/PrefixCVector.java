@@ -36,7 +36,7 @@ public class PrefixCVector extends CVector<Map<State, Set<State>>> {
                 ) {
                     for (State pPrime : p.getReturnSuccessors().get(r).get(a.getEmptyStackSymbol())) {
                         Set<Map<State, Set<State>>> toAdd =
-                                State.compose(
+                                State.composeS(
                                         Set.of(b.context(r)),
                                         innerVectorCopy.get(Pair.of(pPrime, q))
                                 );
@@ -47,7 +47,7 @@ public class PrefixCVector extends CVector<Map<State, Set<State>>> {
             }
             for (State qPrime : a.getStates()) {
                 Set<Map<State, Set<State>>> toAdd =
-                        State.compose(
+                        State.composeS(
                                 innerVectorCopy.get(Pair.of(p, qPrime)),
                                 innerVectorCopy.get(Pair.of(qPrime, q))
                         );
