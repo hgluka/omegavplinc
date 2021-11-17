@@ -21,6 +21,7 @@ public class State {
 
     public State(String name) {
         this.name = name;
+        this.isFinal = false;
         this.internalSuccessors = new HashMap<>();
         this.internalPredecessors = new HashMap<>();
 

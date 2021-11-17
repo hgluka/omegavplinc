@@ -12,7 +12,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FixpointVectorTest {
+class PrefixVectorsTest {
     private VPA vpa;
 
     @BeforeEach
