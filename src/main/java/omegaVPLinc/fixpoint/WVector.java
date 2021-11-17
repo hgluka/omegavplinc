@@ -96,8 +96,8 @@ public abstract class WVector<T> extends FixpointVector<T> {
             for (Symbol c : p.getCallPredecessors().keySet()) {
                 for (String g : p.getCallPredecessors().get(c).keySet()) {
                     for (State pPrime : p.getCallPredecessors().get(c).get(g)) {
-                        for (Symbol r : q.getCallSuccessors().keySet()) {
-                            for (State qPrime : q.getCallSuccessors().get(r).getOrDefault(g, new HashSet<>())) {
+                        for (Symbol r : q.getReturnSuccessors().keySet()) {
+                            for (State qPrime : q.getReturnSuccessors().get(r).getOrDefault(g, new HashSet<>())) {
                                 frontier.add(Pair.of(pPrime, qPrime));
                             }
                         }

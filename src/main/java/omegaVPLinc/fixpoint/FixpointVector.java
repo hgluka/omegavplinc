@@ -42,15 +42,17 @@ public abstract class FixpointVector<T> {
     public boolean antichainInsert(Pair<State, State> statePair, Set<T> toAdd) {
         boolean removed = false;
         boolean added = false;
-        for (T mapToAdd : toAdd) {
+        //if (!toAdd.isEmpty())
+        //    System.out.println(toAdd);
+        for (T t : toAdd) {
             removed = removed || innerVector.get(statePair).removeIf(
-                    existingMap ->
-                            !existingMap.equals(mapToAdd)
-                                    && comparator.lesserOrEqual(mapToAdd, existingMap));
+                    e ->
+                            !e.equals(t)
+                                    && comparator.lesserOrEqual(t, e));
             boolean existsLesser = innerVector.get(statePair).stream()
-                    .anyMatch(existingMap -> comparator.lesserOrEqual(existingMap, mapToAdd));
+                    .anyMatch(e -> comparator.lesserOrEqual(e, t));
             if (!existsLesser) {
-                innerVector.get(statePair).add(mapToAdd);
+                innerVector.get(statePair).add(t);
                 added = true;
             }
         }
@@ -75,8 +77,8 @@ public abstract class FixpointVector<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        WVector wVector = (WVector) o;
-        return a.equals(wVector.a) && b.equals(wVector.b) && innerVector.equals(wVector.innerVector);
+        FixpointVector fVector = (FixpointVector) o;
+        return a.equals(fVector.a) && b.equals(fVector.b) && innerVector.equals(fVector.innerVector);
     }
 
     @Override

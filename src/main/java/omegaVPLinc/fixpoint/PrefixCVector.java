@@ -23,8 +23,10 @@ public class PrefixCVector extends CVector<Map<State, Set<State>>> {
             State q = pq.snd();
 
             // X_{p, q}
-            if (antichainInsert(pq, wVector.innerVectorCopy.get(pq))) {
-                changed.add(pq);
+            if (!wVector.innerVectorCopy.isEmpty()) {
+                if (antichainInsert(pq, wVector.innerVectorCopy.get(pq))) {
+                    changed.add(pq);
+                }
             }
             // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
             for (Symbol r : p.getReturnSuccessors().keySet()) {

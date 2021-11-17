@@ -148,6 +148,7 @@ class FixpointVectorTest {
         int i = 0;
         while (!changed.isEmpty()) {
             frontier = W.frontier();
+            //frontier = vpa.getAllStatePairs();
             System.out.println("CHANGED SIZE: " + changed.size());
             System.out.println("FRONTIER SIZE: " + frontier.size());
             Wcopy2 = W.deepCopy();
@@ -159,7 +160,7 @@ class FixpointVectorTest {
         assertEquals(Wcopy2, W.getInnerVector());
 
         System.out.println("Number of iterations: " + i);
-        assertEquals(6, i);
+        assertEquals(7, i);
     }
 
     @Test
@@ -224,7 +225,7 @@ class FixpointVectorTest {
         assertEquals(copyC, C.getInnerVector());
 
         System.out.println("Number of iterations: " + i);
-        assertEquals(7, i);
+        assertEquals(8, i);
     }
 
     @Test
@@ -245,7 +246,6 @@ class FixpointVectorTest {
         W.updateCopy();
         R.updateCopy();
 
-        System.out.println(R);
         assertEquals(R.getInnerVector(), R.getInnerVectorCopy());
     }
 
@@ -289,7 +289,7 @@ class FixpointVectorTest {
         assertEquals(copyR, R.getInnerVector());
 
         System.out.println("Number of iterations: " + i);
-        assertEquals(6, i);
+        assertEquals(7, i);
     }
 
     @Test
@@ -304,7 +304,6 @@ class FixpointVectorTest {
         Set<Pair<State, State>> changedC = C.iterateOnce(frontier);
         Set<Pair<State, State>> changedR = R.iterateOnce(frontier);
         Set<Pair<State, State>> changedU = U.iterateOnce(frontier);
-        System.out.println(changedU);
         assertNotEquals(0, changedU.size());
         W.updateCopy();
         C.updateCopy();
@@ -314,16 +313,13 @@ class FixpointVectorTest {
         changedW = W.iterateOnce(W.frontier());
         changedC = C.iterateOnce(frontier);
         changedR = R.iterateOnce(frontier);
-        System.out.println(U.frontier());
         changedU = U.iterateOnce(U.frontier());
-        System.out.println(changedU);
         assertEquals(0, changedU.size());
         W.updateCopy();
         C.updateCopy();
         R.updateCopy();
         U.updateCopy();
 
-        System.out.println(U);
         assertEquals(U.getInnerVector(), U.getInnerVectorCopy());
     }
 
@@ -395,7 +391,6 @@ class FixpointVectorTest {
         assertEquals(copyU, U.getInnerVector());
 
         System.out.println("Number of iterations: " + i);
-        System.out.println(U);
-        assertEquals(7, i);
+        assertEquals(9, i);
     }
 }

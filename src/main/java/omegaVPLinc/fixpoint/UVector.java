@@ -4,7 +4,6 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.fixpoint.compare.MapComparator;
-import omegaVPLinc.fixpoint.compare.PartialComparator;
 import omegaVPLinc.utility.Pair;
 
 import java.util.Collection;
