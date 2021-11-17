@@ -391,6 +391,6 @@ class FixpointVectorTest {
         assertEquals(copyU, U.getInnerVector());
 
         System.out.println("Number of iterations: " + i);
-        assertEquals(9, i);
+        assertEquals(8, i);
     }
 }

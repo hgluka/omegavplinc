@@ -13,8 +13,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UVector extends FixpointVector<Map<State, Set<State>>> {
-    private CVector<Map<State, Set<State>>> cVector;
-    private RVector<Map<State, Set<State>>> rVector;
+    private final CVector<Map<State, Set<State>>> cVector;
+    private final RVector<Map<State, Set<State>>> rVector;
 
     public UVector(VPA a,
                    VPA b,
@@ -44,17 +44,19 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                 }
             }
 
-            for (State qPrime : a.getStates()) {
-                Set<Map<State, Set<State>>> toAdd =
-                        State.composeS(
-                                cVector.innerVectorCopy.get(Pair.of(p, qPrime)),
-                                State.composeS(
-                                        innerVectorCopy.get(Pair.of(qPrime, q)),
-                                        rVector.innerVectorCopy.get(Pair.of(q, p))
-                                )
-                        );
-                if (antichainInsert(pq, toAdd))
-                    changed.add(pq);
+            for (State pPrime : a.getStates()) {
+                for (State qPrime : a.getStates()) {
+                    Set<Map<State, Set<State>>> toAdd =
+                            State.composeS(
+                                    cVector.innerVectorCopy.get(Pair.of(p, pPrime)),
+                                    State.composeS(
+                                            innerVectorCopy.get(Pair.of(pPrime, qPrime)),
+                                            rVector.innerVectorCopy.get(Pair.of(qPrime, q))
+                                    )
+                            );
+                    if (antichainInsert(pq, toAdd))
+                        changed.add(pq);
+                }
             }
         }
         return new HashSet<>(changed);
@@ -62,14 +64,17 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
 
     @Override
     public Set<Pair<State, State>> frontier() {
-        Set<Pair<State, State>> frontier = new HashSet<>(rVector.changed);
+        if (!changed.isEmpty()) {
+            return a.getAllStatePairs();
+        }
+        Set<Pair<State, State>> frontier = new HashSet<>();
         for (Pair<State, State> pq : cVector.changed) {
             State p = pq.fst();
             for (State qPrime : a.getStates()) {
                 frontier.add(Pair.of(p, qPrime));
             }
         }
-        for (Pair<State, State> pq : changed) {
+        for (Pair<State, State> pq : rVector.changed) {
             State q = pq.snd();
             for (State qPrime : a.getStates()) {
                 frontier.add(Pair.of(qPrime, q));
