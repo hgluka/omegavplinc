@@ -18,49 +18,6 @@ public abstract class CVector<T> extends FixpointVector<T> {
         this.wVector = wVector;
     }
 
-    /*
-    @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
-        changed = new HashSet<>();
-        for (Pair<State, State> pq : frontier) {
-            State p = pq.fst();
-            State q = pq.snd();
-
-            // X_{p, q}
-            if (antichainInsert(pq, wVector.innerVectorCopy.get(pq))) {
-                changed.add(pq);
-            }
-            // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
-            for (Symbol r : p.getReturnSuccessors().keySet()) {
-                if (p.getReturnSuccessors()
-                        .get(r)
-                        .containsKey(a.getEmptyStackSymbol())
-                ) {
-                    for (State pPrime : p.getReturnSuccessors().get(r).get(a.getEmptyStackSymbol())) {
-                        Set<Map<State, Set<State>>> toAdd =
-                                State.compose(
-                                        Set.of(b.context(r)),
-                                        innerVectorCopy.get(Pair.of(pPrime, q))
-                                );
-                        if (antichainInsert(pq, toAdd))
-                            changed.add(pq);
-                    }
-                }
-            }
-            for (State qPrime : a.getStates()) {
-                Set<Map<State, Set<State>>> toAdd =
-                        State.compose(
-                                innerVectorCopy.get(Pair.of(p, qPrime)),
-                                innerVectorCopy.get(Pair.of(qPrime, q))
-                        );
-                if (antichainInsert(pq, toAdd))
-                    changed.add(pq);
-            }
-        }
-        return new HashSet<>(changed);
-    }
-     */
-
     @Override
     public Set<Pair<State, State>> frontier() {
         // Whatever changed in the W vector in the last iteration
