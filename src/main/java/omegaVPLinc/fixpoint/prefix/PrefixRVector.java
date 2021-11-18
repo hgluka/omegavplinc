@@ -1,8 +1,10 @@
-package omegaVPLinc.fixpoint;
+package omegaVPLinc.fixpoint.prefix;
 
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.RVector;
+import omegaVPLinc.fixpoint.WVector;
 import omegaVPLinc.fixpoint.compare.MapComparator;
 import omegaVPLinc.utility.Pair;
 
@@ -23,10 +25,8 @@ public class PrefixRVector extends RVector<Map<State, Set<State>>> {
             State q = pq.snd();
 
             // X_{p, q}
-            if (!wVector.innerVectorCopy.isEmpty()) {
-                if (antichainInsert(pq, wVector.innerVectorCopy.get(pq))) {
-                    changed.add(pq);
-                }
+            if (antichainInsert(pq, wVector.getInnerVectorCopy().get(pq))) {
+                changed.add(pq);
             }
             // Union of cZ_{p', q} for (p, r, g, p') in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {

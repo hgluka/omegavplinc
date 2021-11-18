@@ -1,10 +1,11 @@
-package omegaVPLinc.fixpoint;
+package omegaVPLinc.fixpoint.period;
 
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.RVector;
+import omegaVPLinc.fixpoint.WVector;
 import omegaVPLinc.fixpoint.compare.PairComparator;
-import omegaVPLinc.fixpoint.compare.PartialComparator;
 import omegaVPLinc.utility.Pair;
 
 import java.util.HashSet;
@@ -24,10 +25,8 @@ public class PeriodRVector extends RVector<Pair<Map<State, Set<State>>, Map<Stat
             State q = pq.snd();
 
             // X_{p, q}
-            if (!wVector.innerVectorCopy.isEmpty()) {
-                if (antichainInsert(pq, wVector.innerVectorCopy.get(pq))) {
-                    changed.add(pq);
-                }
+            if (antichainInsert(pq, wVector.getInnerVectorCopy().get(pq))) {
+                changed.add(pq);
             }
             // Union of cZ_{p', q} for (p, r, g, p') in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {

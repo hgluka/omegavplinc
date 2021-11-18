@@ -1,9 +1,10 @@
-package omegaVPLinc.fixpoint;
+package omegaVPLinc.fixpoint.period;
 
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
-import omegaVPLinc.fixpoint.compare.MapComparator;
+import omegaVPLinc.fixpoint.WVector;
+import omegaVPLinc.fixpoint.compare.PairComparator;
 import omegaVPLinc.utility.Pair;
 
 import java.util.HashMap;
@@ -11,10 +12,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class PrefixWVector extends WVector<Map<State, Set<State>>> {
-
-    public PrefixWVector(VPA a, VPA b) {
-        super(a, b, new MapComparator());
+public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
+    public PeriodWVector(VPA a, VPA b) {
+        super(a, b, new PairComparator());
     }
 
     @Override
@@ -25,15 +25,16 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
             State q = pq.snd();
             // Epsilon context if p == q
             if (p.equals(q)) {
-                if (antichainInsert(pq, Set.of(b.getEpsilonContext())))
+                if (antichainInsert(pq, Set.of(Pair.of(b.getEpsilonContext(), b.getFinalEpsilonContext()))))
                     changed.add(pq);
             }
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
             for (Symbol s : p.getInternalSuccessors().keySet()) {
                 Map<State, Set<State>> bCtxOfS = b.context(s);
+                Map<State, Set<State>> finalBCtxOfS = b.finalContext(s);
                 for (State pPrime : p.getInternalSuccessors().getOrDefault(s, new HashSet<>())) {
-                    Set<Map<State, Set<State>>> toAdd =
-                            State.composeS(Set.of(bCtxOfS), innerVectorCopy.get(Pair.of(pPrime, q)));
+                    Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> toAdd =
+                            State.composeP(Set.of(Pair.of(bCtxOfS, finalBCtxOfS)), innerVectorCopy.get(Pair.of(pPrime, q)));
                     if (antichainInsert(pq, toAdd))
                         changed.add(pq);
                 }
@@ -54,13 +55,13 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                         if (predecessorsOfRetSymbol.containsKey(stackSymbol)) {
                             for (State pPrime : successorsOfCallSymbol) {
                                 for (State qPrime : predecessorsOfRetSymbol.get(stackSymbol)) {
-                                    Set<Map<State, Set<State>>> toAdd =
-                                            State.composeS(
-                                                    State.composeS(
-                                                            Set.of(b.context(callSymbol)),
+                                    Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> toAdd =
+                                            State.composeP(
+                                                    State.composeP(
+                                                            Set.of(Pair.of(b.context(callSymbol), b.finalContext(callSymbol))),
                                                             innerVectorCopy.get(Pair.of(pPrime, qPrime))
                                                     ),
-                                                    Set.of(b.context(retSymbol))
+                                                    Set.of(Pair.of(b.context(retSymbol), b.finalContext(retSymbol)))
                                             );
                                     if (antichainInsert(pq, toAdd))
                                         changed.add(pq);
@@ -72,8 +73,8 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
             }
             // Union of X_{p, q'}X_{q', q} for q' in states of A
             for (State qPrime : a.getStates()) {
-                Set<Map<State, Set<State>>> toAdd =
-                        State.composeS(
+                Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> toAdd =
+                        State.composeP(
                                 innerVectorCopy.get(Pair.of(p, qPrime)),
                                 innerVectorCopy.get(Pair.of(qPrime, q))
                         );

@@ -4,6 +4,7 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.automaton.VPABuilder;
+import omegaVPLinc.fixpoint.period.PeriodWVector;
 import omegaVPLinc.utility.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

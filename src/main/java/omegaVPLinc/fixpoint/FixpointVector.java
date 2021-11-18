@@ -11,7 +11,7 @@ public abstract class FixpointVector<T> {
     protected VPA a;
     protected VPA b;
 
-    protected Map<Pair<State, State>, Set<T>> innerVector;
+    private Map<Pair<State, State>, Set<T>> innerVector;
     protected Map<Pair<State, State>, Set<T>> innerVectorCopy;
 
     protected Set<Pair<State, State>> changed;
@@ -92,6 +92,10 @@ public abstract class FixpointVector<T> {
 
     public Map<Pair<State, State>, Set<T>> getInnerVectorCopy() {
         return innerVectorCopy;
+    }
+
+    public Set<Pair<State, State>> getChanged() {
+        return changed;
     }
 
     public String toString() {

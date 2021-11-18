@@ -1,8 +1,10 @@
-package omegaVPLinc.fixpoint;
+package omegaVPLinc.fixpoint.period;
 
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.FixpointVector;
+import omegaVPLinc.fixpoint.WVector;
 import omegaVPLinc.fixpoint.compare.PairComparator;
 import omegaVPLinc.utility.Pair;
 
@@ -12,10 +14,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class FinalWVector extends FixpointVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
-    private WVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> wVector;
+    private final PeriodWVector wVector;
 
-    public FinalWVector(VPA a, VPA b) {
+    public FinalWVector(VPA a, VPA b, PeriodWVector wVector) {
         super(a, b, new PairComparator());
+        this.wVector = wVector;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class FinalWVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
                     if (p.isFinal() || pPrime.isFinal()) {
                         toAdd = State.composeP(
                                 Set.of(Pair.of(b.context(a), b.finalContext(a))),
-                                wVector.innerVectorCopy.get(Pair.of(pPrime, q))
+                                wVector.getInnerVectorCopy().get(Pair.of(pPrime, q))
                         );
                         if (antichainInsert(pq, toAdd))
                             changed.add(pq);
@@ -67,7 +70,7 @@ public class FinalWVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
                                                 State.composeP(
                                                         State.composeP(
                                                                 Set.of(Pair.of(b.context(callSymbol), b.finalContext(callSymbol))),
-                                                                wVector.innerVectorCopy.get(Pair.of(pPrime, qPrime))
+                                                                wVector.getInnerVectorCopy().get(Pair.of(pPrime, qPrime))
                                                         ),
                                                         Set.of(Pair.of(b.context(retSymbol), b.finalContext(retSymbol)))
                                                 )
@@ -85,11 +88,11 @@ public class FinalWVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
             for (State qPrime : a.getStates()) {
                 toAdd = State.composeP(
                         innerVectorCopy.get(Pair.of(p, qPrime)),
-                        wVector.innerVectorCopy.get(Pair.of(qPrime, q))
+                        wVector.getInnerVectorCopy().get(Pair.of(qPrime, q))
                 );
                 toAdd.addAll(
                         State.composeP(
-                                wVector.innerVectorCopy.get(Pair.of(p, qPrime)),
+                                wVector.getInnerVectorCopy().get(Pair.of(p, qPrime)),
                                 innerVectorCopy.get(Pair.of(qPrime, q))
                         )
                 );
@@ -104,7 +107,7 @@ public class FinalWVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
     @Override
     public Set<Pair<State, State>> frontier() {
         Set<Pair<State, State>> frontier = new HashSet<>();
-        for (Pair<State, State> pq : wVector.changed) {
+        for (Pair<State, State> pq : wVector.getChanged()) {
             State p = pq.fst();
             State q = pq.snd();
             for (Symbol c : p.getCallPredecessors().keySet()) {

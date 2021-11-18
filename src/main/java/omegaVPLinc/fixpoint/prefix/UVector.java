@@ -1,8 +1,11 @@
-package omegaVPLinc.fixpoint;
+package omegaVPLinc.fixpoint.prefix;
 
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.CVector;
+import omegaVPLinc.fixpoint.FixpointVector;
+import omegaVPLinc.fixpoint.RVector;
 import omegaVPLinc.fixpoint.compare.MapComparator;
 import omegaVPLinc.utility.Pair;
 
@@ -48,10 +51,10 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                 for (State qPrime : a.getStates()) {
                     Set<Map<State, Set<State>>> toAdd =
                             State.composeS(
-                                    cVector.innerVectorCopy.get(Pair.of(p, pPrime)),
+                                    cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)),
                                     State.composeS(
                                             innerVectorCopy.get(Pair.of(pPrime, qPrime)),
-                                            rVector.innerVectorCopy.get(Pair.of(qPrime, q))
+                                            rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))
                                     )
                             );
                     if (antichainInsert(pq, toAdd))
@@ -68,13 +71,13 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
             return a.getAllStatePairs();
         }
         Set<Pair<State, State>> frontier = new HashSet<>();
-        for (Pair<State, State> pq : cVector.changed) {
+        for (Pair<State, State> pq : cVector.getChanged()) {
             State p = pq.fst();
             for (State qPrime : a.getStates()) {
                 frontier.add(Pair.of(p, qPrime));
             }
         }
-        for (Pair<State, State> pq : rVector.changed) {
+        for (Pair<State, State> pq : rVector.getChanged()) {
             State q = pq.snd();
             for (State qPrime : a.getStates()) {
                 frontier.add(Pair.of(qPrime, q));

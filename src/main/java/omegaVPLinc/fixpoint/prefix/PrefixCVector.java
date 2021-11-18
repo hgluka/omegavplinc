@@ -1,18 +1,20 @@
-package omegaVPLinc.fixpoint;
+package omegaVPLinc.fixpoint.prefix;
 
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
-import omegaVPLinc.fixpoint.compare.PairComparator;
+import omegaVPLinc.fixpoint.CVector;
+import omegaVPLinc.fixpoint.WVector;
+import omegaVPLinc.fixpoint.compare.MapComparator;
 import omegaVPLinc.utility.Pair;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class PeriodCVector extends CVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
-    public PeriodCVector(VPA a, VPA b, WVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> wVector) {
-        super(a, b, new PairComparator(), wVector);
+public class PrefixCVector extends CVector<Map<State, Set<State>>> {
+    public PrefixCVector(VPA a, VPA b, WVector<Map<State, Set<State>>> wVector) {
+        super(a, b, new MapComparator(), wVector);
     }
 
     @Override
@@ -23,10 +25,8 @@ public class PeriodCVector extends CVector<Pair<Map<State, Set<State>>, Map<Stat
             State q = pq.snd();
 
             // X_{p, q}
-            if (!wVector.innerVectorCopy.isEmpty()) {
-                if (antichainInsert(pq, wVector.innerVectorCopy.get(pq))) {
-                    changed.add(pq);
-                }
+            if (antichainInsert(pq, wVector.getInnerVectorCopy().get(pq))) {
+                changed.add(pq);
             }
             // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
             for (Symbol r : p.getReturnSuccessors().keySet()) {
@@ -35,9 +35,9 @@ public class PeriodCVector extends CVector<Pair<Map<State, Set<State>>, Map<Stat
                         .containsKey(a.getEmptyStackSymbol())
                 ) {
                     for (State pPrime : p.getReturnSuccessors().get(r).get(a.getEmptyStackSymbol())) {
-                        Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> toAdd =
-                                State.composeP(
-                                        Set.of(Pair.of(b.context(r), b.finalContext(r))),
+                        Set<Map<State, Set<State>>> toAdd =
+                                State.composeS(
+                                        Set.of(b.context(r)),
                                         innerVectorCopy.get(Pair.of(pPrime, q))
                                 );
                         if (antichainInsert(pq, toAdd))
@@ -46,8 +46,8 @@ public class PeriodCVector extends CVector<Pair<Map<State, Set<State>>, Map<Stat
                 }
             }
             for (State qPrime : a.getStates()) {
-                Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> toAdd =
-                        State.composeP(
+                Set<Map<State, Set<State>>> toAdd =
+                        State.composeS(
                                 innerVectorCopy.get(Pair.of(p, qPrime)),
                                 innerVectorCopy.get(Pair.of(qPrime, q))
                         );
