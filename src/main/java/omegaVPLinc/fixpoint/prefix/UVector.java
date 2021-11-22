@@ -67,7 +67,7 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
 
     @Override
     public Set<Pair<State, State>> frontier() {
-        if (!changed.isEmpty()) {
+        if (!changed.isEmpty() || (cVector.getChanged().isEmpty() && rVector.getChanged().isEmpty())) {
             return a.getAllStatePairs();
         }
         Set<Pair<State, State>> frontier = new HashSet<>();

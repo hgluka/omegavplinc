@@ -19,6 +19,9 @@ public abstract class RVector<T> extends FixpointVector<T> {
 
     @Override
     public Set<Pair<State, State>> frontier() {
+        if (changed.isEmpty() && wVector.changed.isEmpty()) {
+            return a.getAllStatePairs();
+        }
         Set<Pair<State, State>> frontier = new HashSet<>(wVector.changed);
         for (Pair<State, State> pq : changed) {
             State p = pq.fst();

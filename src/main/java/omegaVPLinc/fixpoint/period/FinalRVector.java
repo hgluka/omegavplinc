@@ -78,6 +78,9 @@ public class FinalRVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
 
     @Override
     public Set<Pair<State, State>> frontier() {
+        if (changed.isEmpty() && finalWVector.getChanged().isEmpty() && rVector.getChanged().isEmpty()) {
+            return a.getAllStatePairs();
+        }
         Set<Pair<State, State>> frontier = new HashSet<>(finalWVector.getChanged());
         for (Pair<State, State> pq : rVector.getChanged()) {
             State p = pq.fst();

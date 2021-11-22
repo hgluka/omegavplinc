@@ -351,8 +351,8 @@ class PrefixVectorsTest {
         System.out.println("Iterate W, C, R and U");
         System.out.println("======================");
         Set<Pair<State, State>> frontierW = W.frontier();
-        Set<Pair<State, State>> frontierC = frontier;
-        Set<Pair<State, State>> frontierR = frontier;
+        Set<Pair<State, State>> frontierC = C.frontier();
+        Set<Pair<State, State>> frontierR = C.frontier();
         Set<Pair<State, State>> frontierU = U.frontier();
         Set<Pair<State, State>> changedC = new HashSet<>();
         Set<Pair<State, State>> changedR = new HashSet<>();

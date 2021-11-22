@@ -20,6 +20,9 @@ public abstract class CVector<T> extends FixpointVector<T> {
 
     @Override
     public Set<Pair<State, State>> frontier() {
+        if (changed.isEmpty() && wVector.changed.isEmpty()) {
+            return a.getAllStatePairs();
+        }
         // Whatever changed in the W vector in the last iteration
         // needs to be added to this frontier as well
         Set<Pair<State, State>> frontier = new HashSet<>(wVector.changed);

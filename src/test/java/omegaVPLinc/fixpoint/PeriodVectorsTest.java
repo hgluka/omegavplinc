@@ -503,9 +503,9 @@ class PeriodVectorsTest {
         System.out.println("Iterate W, FW, R and FR");
         System.out.println("======================");
         Set<Pair<State, State>> frontierW = W.frontier();
-        Set<Pair<State, State>> frontierFW = frontier;
-        Set<Pair<State, State>> frontierR = frontier;
-        Set<Pair<State, State>> frontierFR = frontier;
+        Set<Pair<State, State>> frontierFW = FW.frontier();
+        Set<Pair<State, State>> frontierR = R.frontier();
+        Set<Pair<State, State>> frontierFR = FR.frontier();
         Set<Pair<State, State>> changedFW = new HashSet<>();
         Set<Pair<State, State>> changedR = new HashSet<>();
         Set<Pair<State, State>> changedFR = new HashSet<>();
