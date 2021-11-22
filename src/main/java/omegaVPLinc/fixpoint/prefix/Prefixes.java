@@ -4,6 +4,7 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
 
+import java.util.Map;
 import java.util.Set;
 
 public class Prefixes {
@@ -58,7 +59,14 @@ public class Prefixes {
             frontierU = U.frontier();
             i++;
         }
-
         return i;
+    }
+
+    public Set<Map<State, Set<State>>> getFromC(State p, State q) {
+        return C.getInnerVector().get(Pair.of(p, q));
+    }
+
+    public Set<Map<State, Set<State>>> getFromU(State p, State q) {
+        return U.getInnerVector().get(Pair.of(p, q));
     }
 }

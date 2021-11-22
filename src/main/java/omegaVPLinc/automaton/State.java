@@ -103,6 +103,34 @@ public class State {
         return ED;
     }
 
+    private static boolean addTransitive(Map<State, Set<State>> m) {
+        boolean added = false;
+        for (State p1 : m.keySet()) {
+            for (State q1 : m.get(p1)) {
+                for (State p2 : m.keySet()) {
+                    for (State q2 : m.get(p2)) {
+                        if (q1.equals(p2)) {
+                            if (!m.get(p1).contains(q2)) {
+                                m.get(p1).add(q2);
+                                added = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return added;
+    }
+
+    public static Map<State, Set<State>> transitiveClosure(Map<State, Set<State>> m) {
+        Map<State, Set<State>> transitiveClosure = new HashMap<>(m);
+        boolean added;
+        do {
+            added = addTransitive(transitiveClosure);
+        } while (added);
+        return transitiveClosure;
+    }
+
     public void addInternalSuccessor(Symbol symbol, State succ) {
         if (symbol == null || succ == null) {
             throw new IllegalArgumentException("Cannot add transition with null values.");

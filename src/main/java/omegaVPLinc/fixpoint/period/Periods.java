@@ -4,8 +4,6 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,5 +80,13 @@ public class Periods {
             i++;
         }
         return i;
+    }
+
+    public Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> getFromFC(State p, State q) {
+        return FC.getInnerVector().get(Pair.of(p, q));
+    }
+
+    public Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> getFromFR(State p, State q) {
+        return FR.getInnerVector().get(Pair.of(p, q));
     }
 }
