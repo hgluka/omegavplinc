@@ -41,6 +41,10 @@ public class VPABuilder {
         return this;
     }
 
+    public Set<State> getStates() {
+        return states;
+    }
+
     public VPA build() throws IllegalArgumentException {
         if (Collections.disjoint(this.callAlphabet, this.internalAlphabet)
                 && Collections.disjoint(this.internalAlphabet, this.returnAlphabet)

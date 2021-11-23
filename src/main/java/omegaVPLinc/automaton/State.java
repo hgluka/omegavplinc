@@ -210,12 +210,12 @@ public class State {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         State state = (State) o;
-        return isFinal == state.isFinal && name.equals(state.name);
+        return name.equals(state.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, isFinal);
+        return Objects.hash(name);
     }
 
     @Override
