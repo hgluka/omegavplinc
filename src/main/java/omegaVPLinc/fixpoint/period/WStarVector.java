@@ -13,10 +13,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class FinalWVector extends FixpointVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
+public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
     private final PeriodWVector wVector;
 
-    public FinalWVector(VPA a, VPA b, PeriodWVector wVector) {
+    public WStarVector(VPA a, VPA b, PeriodWVector wVector) {
         super(a, b, new PairComparator());
         this.wVector = wVector;
     }

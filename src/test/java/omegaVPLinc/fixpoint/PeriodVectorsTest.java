@@ -287,64 +287,64 @@ class PeriodVectorsTest {
     @Test
     void testIterateOnceFinalW() {
         PeriodWVector W = new PeriodWVector(vpa, vpa);
-        FinalWVector FW = new FinalWVector(vpa, vpa, W);
+        WStarVector WS = new WStarVector(vpa, vpa, W);
         Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
-        Set<Pair<State, State>> changedR = FW.iterateOnce(frontier);
+        Set<Pair<State, State>> changedR = WS.iterateOnce(frontier);
         assertEquals(0, changedR.size());
         W.updateCopy();
-        FW.updateCopy();
+        WS.updateCopy();
 
         changedW = W.iterateOnce(W.frontier());
-        changedR = FW.iterateOnce(frontier);
+        changedR = WS.iterateOnce(frontier);
         assertNotEquals(0, changedR.size());
         W.updateCopy();
-        FW.updateCopy();
+        WS.updateCopy();
 
-        assertEquals(FW.getInnerVector(), FW.getInnerVectorCopy());
+        assertEquals(WS.getInnerVector(), WS.getInnerVectorCopy());
     }
 
     @Test
     void testIterateFinalW() {
         PeriodWVector W = new PeriodWVector(vpa, vpa);
-        FinalWVector FW = new FinalWVector(vpa, vpa, W);
+        WStarVector WS = new WStarVector(vpa, vpa, W);
 
         Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
         Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyW = new HashMap<>();
-        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyFW = new HashMap<>();
+        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyWS = new HashMap<>();
         W.updateCopy();
 
         // TODO: Use a logging library
         System.out.println("======================");
-        System.out.println("Iterate Period W and FW");
+        System.out.println("Iterate Period W and WS");
         System.out.println("======================");
         Set<Pair<State, State>> frontierW = W.frontier();
-        Set<Pair<State, State>> frontierFW = frontier;
-        Set<Pair<State, State>> changedFW = new HashSet<>();
+        Set<Pair<State, State>> frontierWS = frontier;
+        Set<Pair<State, State>> changedWS = new HashSet<>();
         int i = 0;
-        while (!changedW.isEmpty() || !changedFW.isEmpty()) {
+        while (!changedW.isEmpty() || !changedWS.isEmpty()) {
             System.out.println("W CHANGED SIZE: " + changedW.size());
             System.out.println("W FRONTIER SIZE: " + frontierW.size());
-            System.out.println("FW CHANGED SIZE: " + changedFW.size());
-            System.out.println("FW FRONTIER SIZE: " + frontierFW.size());
+            System.out.println("WS CHANGED SIZE: " + changedWS.size());
+            System.out.println("WS FRONTIER SIZE: " + frontierWS.size());
             changedW = W.iterateOnce(frontierW);
-            changedFW = FW.iterateOnce(frontierFW);
+            changedWS = WS.iterateOnce(frontierWS);
             W.updateCopy();
-            FW.updateCopy();
+            WS.updateCopy();
             frontierW = W.frontier();
-            frontierFW = FW.frontier();
+            frontierWS = WS.frontier();
             copyW = W.deepCopy();
-            copyFW = FW.deepCopy();
+            copyWS = WS.deepCopy();
             i++;
         }
 
         assertEquals(copyW, W.getInnerVector());
-        assertEquals(copyFW, FW.getInnerVector());
+        assertEquals(copyWS, WS.getInnerVector());
 
-        assertNotEquals(FW, W);
+        assertNotEquals(WS, W);
         System.out.println("Number of iterations: " + i);
         assertEquals(7, i);
     }
@@ -352,99 +352,99 @@ class PeriodVectorsTest {
     @Test
     void testIterateOnceFinalC() {
         PeriodWVector W = new PeriodWVector(vpa, vpa);
-        FinalWVector FW = new FinalWVector(vpa, vpa, W);
+        WStarVector WS = new WStarVector(vpa, vpa, W);
         PeriodCVector C = new PeriodCVector(vpa, vpa, W);
-        FinalCVector FC = new FinalCVector(vpa, vpa, FW, C);
+        CStarVector CS = new CStarVector(vpa, vpa, WS, C);
         Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
-        Set<Pair<State, State>> changedFW = FW.iterateOnce(frontier);
+        Set<Pair<State, State>> changedWS = WS.iterateOnce(frontier);
         Set<Pair<State, State>> changedC = C.iterateOnce(frontier);
-        Set<Pair<State, State>> changedFC = FC.iterateOnce(frontier);
-        assertEquals(0, changedFC.size());
+        Set<Pair<State, State>> changedCS = CS.iterateOnce(frontier);
+        assertEquals(0, changedCS.size());
         W.updateCopy();
-        FW.updateCopy();
+        WS.updateCopy();
         C.updateCopy();
-        FC.updateCopy();
+        CS.updateCopy();
 
         changedW = W.iterateOnce(W.frontier());
-        changedFW = FW.iterateOnce(frontier);
+        changedWS = WS.iterateOnce(frontier);
         changedC = C.iterateOnce(frontier);
-        changedFC = FC.iterateOnce(FC.frontier());
-        assertEquals(0, changedFC.size());
+        changedCS = CS.iterateOnce(CS.frontier());
+        assertEquals(0, changedCS.size());
         W.updateCopy();
-        FW.updateCopy();
+        WS.updateCopy();
         C.updateCopy();
-        FC.updateCopy();
+        CS.updateCopy();
 
-        assertEquals(FC.getInnerVector(), FC.getInnerVectorCopy());
+        assertEquals(CS.getInnerVector(), CS.getInnerVectorCopy());
     }
 
     @Test
     void testIterateFinalC() {
         PeriodWVector W = new PeriodWVector(vpa, vpa);
-        FinalWVector FW = new FinalWVector(vpa, vpa, W);
+        WStarVector WS = new WStarVector(vpa, vpa, W);
         PeriodCVector C = new PeriodCVector(vpa, vpa, W);
-        FinalCVector FC = new FinalCVector(vpa, vpa, FW, C);
+        CStarVector CS = new CStarVector(vpa, vpa, WS, C);
 
         Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
         Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyW = new HashMap<>();
-        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyFW = new HashMap<>();
+        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyWS = new HashMap<>();
         Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyC = new HashMap<>();
-        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyFC = new HashMap<>();
+        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyCS = new HashMap<>();
 
         W.updateCopy();
 
         // TODO: Use a logging library
         System.out.println("======================");
-        System.out.println("Iterate W, FW, C and FC");
+        System.out.println("Iterate W, WS, C and CS");
         System.out.println("======================");
         Set<Pair<State, State>> frontierW = W.frontier();
-        Set<Pair<State, State>> frontierFW = frontier;
+        Set<Pair<State, State>> frontierWS = frontier;
         Set<Pair<State, State>> frontierC = frontier;
-        Set<Pair<State, State>> frontierFC = frontier;
-        Set<Pair<State, State>> changedFW = new HashSet<>();
+        Set<Pair<State, State>> frontierCS = frontier;
+        Set<Pair<State, State>> changedWS = new HashSet<>();
         Set<Pair<State, State>> changedC = new HashSet<>();
-        Set<Pair<State, State>> changedFC = new HashSet<>();
+        Set<Pair<State, State>> changedCS = new HashSet<>();
         int i = 0;
         while (!changedW.isEmpty()
-                || !changedFW.isEmpty()
+                || !changedWS.isEmpty()
                 || !changedC.isEmpty()
-                || !changedFC.isEmpty()) {
+                || !changedCS.isEmpty()) {
             System.out.println("-------------------");
             System.out.println("W CHANGED SIZE: " + changedW.size());
             System.out.println("W FRONTIER SIZE: " + frontierW.size());
-            System.out.println("FW CHANGED SIZE: " + changedFW.size());
-            System.out.println("FW FRONTIER SIZE: " + frontierFW.size());
+            System.out.println("WS CHANGED SIZE: " + changedWS.size());
+            System.out.println("WS FRONTIER SIZE: " + frontierWS.size());
             System.out.println("C CHANGED SIZE: " + changedC.size());
             System.out.println("C FRONTIER SIZE: " + frontierC.size());
-            System.out.println("FC CHANGED SIZE: " + changedFC.size());
-            System.out.println("FC FRONTIER SIZE: " + frontierFC.size());
+            System.out.println("CS CHANGED SIZE: " + changedCS.size());
+            System.out.println("CS FRONTIER SIZE: " + frontierCS.size());
             changedW = W.iterateOnce(frontierW);
-            changedFW = FW.iterateOnce(frontierFW);
+            changedWS = WS.iterateOnce(frontierWS);
             changedC = C.iterateOnce(frontierC);
-            changedFC = FC.iterateOnce(frontierFC);
+            changedCS = CS.iterateOnce(frontierCS);
             W.updateCopy();
-            FW.updateCopy();
+            WS.updateCopy();
             C.updateCopy();
-            FC.updateCopy();
+            CS.updateCopy();
             frontierW = W.frontier();
-            frontierFW = FW.frontier();
+            frontierWS = WS.frontier();
             frontierC = C.frontier();
-            frontierFC = FC.frontier();
+            frontierCS = CS.frontier();
             copyW = W.deepCopy();
-            copyFW = FW.deepCopy();
+            copyWS = WS.deepCopy();
             copyC = C.deepCopy();
-            copyFC = FC.deepCopy();
+            copyCS = CS.deepCopy();
             i++;
         }
 
         assertEquals(copyW, W.getInnerVector());
-        assertEquals(copyFW, FW.getInnerVector());
+        assertEquals(copyWS, WS.getInnerVector());
         assertEquals(copyC, C.getInnerVector());
-        assertEquals(copyFC, FC.getInnerVector());
+        assertEquals(copyCS, CS.getInnerVector());
 
         System.out.println("Number of iterations: " + i);
         assertEquals(8, i);
@@ -453,99 +453,99 @@ class PeriodVectorsTest {
     @Test
     void testIterateOnceFinalR() {
         PeriodWVector W = new PeriodWVector(vpa, vpa);
-        FinalWVector FW = new FinalWVector(vpa, vpa, W);
+        WStarVector WS = new WStarVector(vpa, vpa, W);
         PeriodRVector R = new PeriodRVector(vpa, vpa, W);
-        FinalRVector FR = new FinalRVector(vpa, vpa, FW, R);
+        RStarVector RS = new RStarVector(vpa, vpa, WS, R);
         Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
-        Set<Pair<State, State>> changedFW = FW.iterateOnce(frontier);
+        Set<Pair<State, State>> changedWS = WS.iterateOnce(frontier);
         Set<Pair<State, State>> changedC = R.iterateOnce(frontier);
-        Set<Pair<State, State>> changedFC = FR.iterateOnce(frontier);
-        assertEquals(0, changedFC.size());
+        Set<Pair<State, State>> changedRS = RS.iterateOnce(frontier);
+        assertEquals(0, changedRS.size());
         W.updateCopy();
-        FW.updateCopy();
+        WS.updateCopy();
         R.updateCopy();
-        FR.updateCopy();
+        RS.updateCopy();
 
         changedW = W.iterateOnce(W.frontier());
-        changedFW = FW.iterateOnce(frontier);
+        changedWS = WS.iterateOnce(frontier);
         changedC = R.iterateOnce(frontier);
-        changedFC = FR.iterateOnce(FR.frontier());
-        assertEquals(2, changedFC.size());
+        changedRS = RS.iterateOnce(RS.frontier());
+        assertEquals(2, changedRS.size());
         W.updateCopy();
-        FW.updateCopy();
+        WS.updateCopy();
         R.updateCopy();
-        FR.updateCopy();
+        RS.updateCopy();
 
-        assertEquals(FR.getInnerVector(), FR.getInnerVectorCopy());
+        assertEquals(RS.getInnerVector(), RS.getInnerVectorCopy());
     }
 
     @Test
     void testIterateFinalR() {
         PeriodWVector W = new PeriodWVector(vpa, vpa);
-        FinalWVector FW = new FinalWVector(vpa, vpa, W);
+        WStarVector WS = new WStarVector(vpa, vpa, W);
         PeriodRVector R = new PeriodRVector(vpa, vpa, W);
-        FinalRVector FR = new FinalRVector(vpa, vpa, FW, R);
+        RStarVector RS = new RStarVector(vpa, vpa, WS, R);
 
         Set<Pair<State, State>> frontier = vpa.getAllStatePairs();
 
         Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
         Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyW = new HashMap<>();
-        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyFW = new HashMap<>();
+        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyWS = new HashMap<>();
         Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyR = new HashMap<>();
-        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyFR = new HashMap<>();
+        Map<Pair<State, State>, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>>> copyRS = new HashMap<>();
 
         W.updateCopy();
 
         // TODO: Use a logging library
         System.out.println("======================");
-        System.out.println("Iterate W, FW, R and FR");
+        System.out.println("Iterate W, WS, R and RS");
         System.out.println("======================");
         Set<Pair<State, State>> frontierW = W.frontier();
-        Set<Pair<State, State>> frontierFW = FW.frontier();
+        Set<Pair<State, State>> frontierWS = WS.frontier();
         Set<Pair<State, State>> frontierR = R.frontier();
-        Set<Pair<State, State>> frontierFR = FR.frontier();
-        Set<Pair<State, State>> changedFW = new HashSet<>();
+        Set<Pair<State, State>> frontierRS = RS.frontier();
+        Set<Pair<State, State>> changedWS = new HashSet<>();
         Set<Pair<State, State>> changedR = new HashSet<>();
-        Set<Pair<State, State>> changedFR = new HashSet<>();
+        Set<Pair<State, State>> changedRS = new HashSet<>();
         int i = 0;
         while (!changedW.isEmpty()
-                || !changedFW.isEmpty()
+                || !changedWS.isEmpty()
                 || !changedR.isEmpty()
-                || !changedFR.isEmpty()) {
+                || !changedRS.isEmpty()) {
             System.out.println("-------------------");
             System.out.println("W CHANGED SIZE: " + changedW.size());
             System.out.println("W FRONTIER SIZE: " + frontierW.size());
-            System.out.println("FW CHANGED SIZE: " + changedFW.size());
-            System.out.println("FW FRONTIER SIZE: " + frontierFW.size());
+            System.out.println("WS CHANGED SIZE: " + changedWS.size());
+            System.out.println("WS FRONTIER SIZE: " + frontierWS.size());
             System.out.println("R CHANGED SIZE: " + changedR.size());
             System.out.println("R FRONTIER SIZE: " + frontierR.size());
-            System.out.println("FR CHANGED SIZE: " + changedFR.size());
-            System.out.println("FR FRONTIER SIZE: " + frontierFR.size());
+            System.out.println("RS CHANGED SIZE: " + changedRS.size());
+            System.out.println("RS FRONTIER SIZE: " + frontierRS.size());
             changedW = W.iterateOnce(frontierW);
-            changedFW = FW.iterateOnce(frontierFW);
+            changedWS = WS.iterateOnce(frontierWS);
             changedR = R.iterateOnce(frontierR);
-            changedFR = FR.iterateOnce(frontierFR);
+            changedRS = RS.iterateOnce(frontierRS);
             W.updateCopy();
-            FW.updateCopy();
+            WS.updateCopy();
             R.updateCopy();
-            FR.updateCopy();
+            RS.updateCopy();
             frontierW = W.frontier();
-            frontierFW = FW.frontier();
+            frontierWS = WS.frontier();
             frontierR = R.frontier();
-            frontierFR = FR.frontier();
+            frontierRS = RS.frontier();
             copyW = W.deepCopy();
-            copyFW = FW.deepCopy();
+            copyWS = WS.deepCopy();
             copyR = R.deepCopy();
-            copyFR = FR.deepCopy();
+            copyRS = RS.deepCopy();
             i++;
         }
 
         assertEquals(copyW, W.getInnerVector());
-        assertEquals(copyFW, FW.getInnerVector());
+        assertEquals(copyWS, WS.getInnerVector());
         assertEquals(copyR, R.getInnerVector());
-        assertEquals(copyFR, FR.getInnerVector());
+        assertEquals(copyRS, RS.getInnerVector());
 
         System.out.println("Number of iterations: " + i);
         assertEquals(7, i);

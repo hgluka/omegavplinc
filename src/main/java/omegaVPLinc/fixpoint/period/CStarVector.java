@@ -11,13 +11,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class FinalCVector extends FixpointVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
-    private final FinalWVector finalWVector;
+public class CStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
+    private final WStarVector wStarVector;
     private final PeriodCVector cVector;
 
-    public FinalCVector(VPA a, VPA b, FinalWVector finalWVector, PeriodCVector cVector) {
+    public CStarVector(VPA a, VPA b, WStarVector wStarVector, PeriodCVector cVector) {
         super(a, b, new PairComparator());
-        this.finalWVector = finalWVector;
+        this.wStarVector = wStarVector;
         this.cVector = cVector;
     }
 
@@ -29,8 +29,8 @@ public class FinalCVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
             State p = pq.fst();
             State q = pq.snd();
 
-            if (!finalWVector.getInnerVectorCopy().get(pq).isEmpty()) {
-                if (antichainInsert(pq, finalWVector.getInnerVectorCopy().get(pq)))
+            if (!wStarVector.getInnerVectorCopy().get(pq).isEmpty()) {
+                if (antichainInsert(pq, wStarVector.getInnerVectorCopy().get(pq)))
                     changed.add(pq);
             }
 
@@ -79,10 +79,10 @@ public class FinalCVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
 
     @Override
     public Set<Pair<State, State>> frontier() {
-        if (changed.isEmpty() && finalWVector.getChanged().isEmpty() && cVector.getChanged().isEmpty()) {
+        if (changed.isEmpty() && wStarVector.getChanged().isEmpty() && cVector.getChanged().isEmpty()) {
             return a.getAllStatePairs();
         }
-        Set<Pair<State, State>> frontier = new HashSet<>(finalWVector.getChanged());
+        Set<Pair<State, State>> frontier = new HashSet<>(wStarVector.getChanged());
         for (Pair<State, State> pq : cVector.getChanged()) {
             State p = pq.fst();
             State q = pq.snd();

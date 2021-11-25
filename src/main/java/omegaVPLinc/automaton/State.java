@@ -70,6 +70,8 @@ public class State {
             Map<State, Set<State>> d
     ) {
         Map<State, Set<State>> ed = new HashMap<>();
+        if (e.isEmpty() || d.isEmpty())
+            return ed;
         for (State p : e.keySet()) {
             for (State q : new HashSet<>(e.get(p))) {
                 if (d.containsKey(q)) {
@@ -198,6 +200,30 @@ public class State {
             transitionMap.put(symbol,
                     new HashMap<String, Set<State>>(Map.of(stackSymbol, new HashSet<>(Set.of(state)))));
         }
+    }
+
+    public boolean isReachable(State q) {
+        for (Symbol c : callSuccessors.keySet()) {
+            if (callSuccessors.get(c)
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet())
+                    .contains(q)) {
+                return true;
+            }
+        }
+        for (Symbol r : returnSuccessors.keySet()) {
+            if (returnSuccessors.get(r)
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet())
+                    .contains(q)) {
+                return true;
+            }
+        }
+        return internalSuccessors.containsValue(q);
     }
 
     @Override

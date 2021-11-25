@@ -11,13 +11,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class FinalRVector extends FixpointVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
-    private final FinalWVector finalWVector;
+public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
+    private final WStarVector wStarVector;
     private final PeriodRVector rVector;
 
-    public FinalRVector(VPA a, VPA b, FinalWVector finalWVector, PeriodRVector rVector) {
+    public RStarVector(VPA a, VPA b, WStarVector wStarVector, PeriodRVector rVector) {
         super(a, b, new PairComparator());
-        this.finalWVector = finalWVector;
+        this.wStarVector = wStarVector;
         this.rVector = rVector;
     }
 
@@ -30,8 +30,8 @@ public class FinalRVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
             State q = pq.snd();
 
             // X_{p, q}
-            if (!finalWVector.getInnerVectorCopy().isEmpty()) {
-                if (antichainInsert(pq, finalWVector.getInnerVectorCopy().get(pq))) {
+            if (!wStarVector.getInnerVectorCopy().get(pq).isEmpty()) {
+                if (antichainInsert(pq, wStarVector.getInnerVectorCopy().get(pq))) {
                     changed.add(pq);
                 }
             }
@@ -57,6 +57,7 @@ public class FinalRVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
                     }
                 }
             }
+
             // Phi(X, X')_{p, q}
             for (State qPrime : a.getStates()) {
                 toAdd = State.composeP(
@@ -78,10 +79,10 @@ public class FinalRVector extends FixpointVector<Pair<Map<State, Set<State>>, Ma
 
     @Override
     public Set<Pair<State, State>> frontier() {
-        if (changed.isEmpty() && finalWVector.getChanged().isEmpty() && rVector.getChanged().isEmpty()) {
+        if (changed.isEmpty() && wStarVector.getChanged().isEmpty() && rVector.getChanged().isEmpty()) {
             return a.getAllStatePairs();
         }
-        Set<Pair<State, State>> frontier = new HashSet<>(finalWVector.getChanged());
+        Set<Pair<State, State>> frontier = new HashSet<>(wStarVector.getChanged());
         for (Pair<State, State> pq : rVector.getChanged()) {
             State p = pq.fst();
             State q = pq.snd();

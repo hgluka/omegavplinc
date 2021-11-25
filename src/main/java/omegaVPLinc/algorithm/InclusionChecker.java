@@ -43,12 +43,12 @@ public class InclusionChecker {
         int periodIterations = periods.iterate();
         for (State p : a.getStates()) {
             for (Map<State, Set<State>> x : prefixes.getFromC(a.getInitialState(), p)) {
-                for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromFC(p, p)) {
+                for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromCS(p, p)) {
                     if (!inctx(x, y1y2.fst(), y1y2.snd())) return false;
                 }
             }
             for (Map<State, Set<State>> x : prefixes.getFromU(a.getInitialState(), p)) {
-                for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromFR(p, p)) {
+                for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromRS(p, p)) {
                     if (!inctx(x, y1y2.fst(), y1y2.snd())) return false;
                 }
             }

@@ -1,11 +1,17 @@
 package omegaVPLinc.fixpoint.prefix;
 
 import omegaVPLinc.automaton.State;
+import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Prefixes {
     private final VPA a;
@@ -28,18 +34,29 @@ public class Prefixes {
     public int iterate() {
         Set<Pair<State, State>> frontier = a.getAllStatePairs();
 
-        Set<Pair<State, State>> changedW = W.iterateOnce(frontier);
-        Set<Pair<State, State>> changedC = C.iterateOnce(frontier);
-        Set<Pair<State, State>> changedR = R.iterateOnce(frontier);
-        Set<Pair<State, State>> changedU = U.iterateOnce(frontier);
+        Set<Pair<State, State>> changedW = new HashSet<>(Set.of(Pair.of(null, null)));
+        Set<Pair<State, State>> changedC = new HashSet<>(Set.of(Pair.of(null, null)));
+        Set<Pair<State, State>> changedR = new HashSet<>(Set.of(Pair.of(null, null)));
+        Set<Pair<State, State>> changedU = new HashSet<>(Set.of(Pair.of(null, null)));
 
-        W.updateCopy();
-        U.updateCopy();
-
-        Set<Pair<State, State>> frontierW = W.frontier();
-        Set<Pair<State, State>> frontierC = C.frontier();
-        Set<Pair<State, State>> frontierR = R.frontier();
-        Set<Pair<State, State>> frontierU = U.frontier();
+        Set<Pair<State, State>> frontierW = new HashSet<>();
+        for (State p : a.getStates()) {
+            frontierW.add(Pair.of(p, p));
+        }
+        Set<Pair<State, State>> frontierC = new HashSet<>();
+        Set<Pair<State, State>> frontierR = new HashSet<>();
+        Set<Pair<State, State>> frontierU = new HashSet<>();
+        for (State p : a.getStates()) {
+            for (Symbol c : p.getCallSuccessors().keySet()) {
+                for (State q : p.getCallSuccessors().get(c)
+                        .values()
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toSet())) {
+                    frontierU.add(Pair.of(p, q));
+                }
+            }
+        }
         int i = 0;
         while (!changedW.isEmpty()
                 || !changedC.isEmpty()

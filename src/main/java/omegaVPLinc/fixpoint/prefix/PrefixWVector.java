@@ -73,13 +73,15 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
             }
             // Union of X_{p, q'}X_{q', q} for q' in states of A
             for (State qPrime : a.getStates()) {
-                Set<Map<State, Set<State>>> toAdd =
-                        State.composeS(
-                                innerVectorCopy.get(Pair.of(p, qPrime)),
-                                innerVectorCopy.get(Pair.of(qPrime, q))
-                        );
-                if (antichainInsert(pq, toAdd))
-                    changed.add(pq);
+                if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && !innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
+                    Set<Map<State, Set<State>>> toAdd =
+                            State.composeS(
+                                    innerVectorCopy.get(Pair.of(p, qPrime)),
+                                    innerVectorCopy.get(Pair.of(qPrime, q))
+                            );
+                    if (antichainInsert(pq, toAdd))
+                        changed.add(pq);
+                }
             }
         }
         return new HashSet<>(changed);

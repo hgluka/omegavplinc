@@ -43,13 +43,15 @@ public class PrefixRVector extends RVector<Map<State, Set<State>>> {
                 }
             }
             for (State qPrime : a.getStates()) {
-                Set<Map<State, Set<State>>> toAdd =
-                        State.composeS(
-                                innerVectorCopy.get(Pair.of(p, qPrime)),
-                                innerVectorCopy.get(Pair.of(qPrime, q))
-                        );
-                if (antichainInsert(pq, toAdd))
-                    changed.add(pq);
+                if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && !innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
+                    Set<Map<State, Set<State>>> toAdd =
+                            State.composeS(
+                                    innerVectorCopy.get(Pair.of(p, qPrime)),
+                                    innerVectorCopy.get(Pair.of(qPrime, q))
+                            );
+                    if (antichainInsert(pq, toAdd))
+                        changed.add(pq);
+                }
             }
         }
         return new HashSet<>(changed);
