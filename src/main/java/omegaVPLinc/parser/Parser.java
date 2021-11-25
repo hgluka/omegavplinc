@@ -19,10 +19,9 @@ public class Parser {
         }
     }
 
-    private List<Lexer.Word> stream;
+    private final List<Lexer.Word> stream;
     private Lexer.Word currentWord;
-    private VPABuilder vpaBuilder;
-    private boolean flag;
+    private final VPABuilder vpaBuilder;
 
     public Parser(String filePath) throws IOException {
         String stringInput = Files.readString(Path.of(filePath));
@@ -30,7 +29,6 @@ public class Parser {
         this.stream = lexer.lex(stringInput);
         this.currentWord = this.stream.get(0);
         this.vpaBuilder = new VPABuilder();
-        this.flag = false;
     }
 
     private void accept(Lexer.Token expected) throws ParseError {
@@ -38,7 +36,7 @@ public class Parser {
             stream.remove(0);
             currentWord = stream.get(0);
         } else {
-            throw new ParseError("Syntax error: " + currentWord + " was not expected.");
+            throw new ParseError("Syntax error: expected " + expected + ", but got " + currentWord + ".");
         }
     }
 
@@ -47,7 +45,7 @@ public class Parser {
             stream.remove(0);
             currentWord = stream.get(0);
         } else {
-            throw new ParseError("Syntax error: " + currentWord + " was not expected.");
+            throw new ParseError("Syntax error: expected " + expected + ", but got " + currentWord + ".");
         }
     }
 
@@ -76,7 +74,7 @@ public class Parser {
     private void parseDefinitions() throws ParseError {
         boolean innerFlag = true;
         while (innerFlag) {
-            if (peekWord("calAlphabet"))
+            if (peekWord("callAlphabet"))
                 parseCallAlphabet();
             else if (peekWord("internalAlphabet"))
                 parseInternalAlphabet();
@@ -99,16 +97,104 @@ public class Parser {
         }
     }
 
-    private void parseReturnTransitions() {
-
+    private void parseReturnTransitions() throws ParseError {
+        acceptWord("returnTransitions");
+        accept(Lexer.Token.EQ);
+        accept(Lexer.Token.LBR);
+        while (peek(Lexer.Token.LPR)) {
+            parseReturnTransition();
+        }
+        accept(Lexer.Token.RBR);
     }
 
-    private void parseInternalTransitions() {
-
+    private void parseReturnTransition() throws ParseError {
+        accept(Lexer.Token.LPR);
+        State from = null;
+        Symbol returnSymbol = null;
+        String stackSymbol = null;
+        State to = null;
+        if (peek(Lexer.Token.WORD))
+            from = vpaBuilder.getState(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (peek(Lexer.Token.WORD))
+            stackSymbol = currentWord.getLexeme();
+        accept(Lexer.Token.WORD);
+        if (peek(Lexer.Token.WORD))
+            returnSymbol = vpaBuilder.getReturnSymbol(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (peek(Lexer.Token.WORD))
+            to = vpaBuilder.getState(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (from == null || stackSymbol == null || returnSymbol == null || to == null) {
+            throw new ParseError("Syntax error: part of returnTransition doesn't exist. FROM: " + from + " returnSymbol: " + returnSymbol + " stackSymbol: " + stackSymbol + " TO: " + to + ".");
+        }
+        from.addReturnSuccessor(returnSymbol, stackSymbol, to);
+        to.addReturnPredecessor(returnSymbol, stackSymbol, from);
+        accept(Lexer.Token.RPR);
     }
 
-    private void parseCallTransitions() {
+    private void parseInternalTransitions() throws ParseError {
+        acceptWord("internalTransitions");
+        accept(Lexer.Token.EQ);
+        accept(Lexer.Token.LBR);
+        while (peek(Lexer.Token.LPR)) {
+            parseInternalTransition();
+        }
+        accept(Lexer.Token.RBR);
+    }
 
+    private void parseInternalTransition() throws ParseError {
+        accept(Lexer.Token.LPR);
+        State from = null;
+        Symbol internalSymbol = null;
+        State to = null;
+        if (peek(Lexer.Token.WORD))
+            from = vpaBuilder.getState(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (peek(Lexer.Token.WORD))
+            internalSymbol = vpaBuilder.getInternalSymbol(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (peek(Lexer.Token.WORD))
+            to = vpaBuilder.getState(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (from == null || internalSymbol == null || to == null) {
+            throw new ParseError("Syntax error: part of internalTransition doesn't exist. FROM: " + from + " internalSymbol: " + internalSymbol + " TO: " + to + ".");
+        }
+        from.addInternalSuccessor(internalSymbol, to);
+        to.addInternalPredecessor(internalSymbol, from);
+        accept(Lexer.Token.RPR);
+    }
+
+    private void parseCallTransitions() throws ParseError {
+        acceptWord("callTransitions");
+        accept(Lexer.Token.EQ);
+        accept(Lexer.Token.LBR);
+        while (peek(Lexer.Token.LPR)) {
+            parseCallTransition();
+        }
+        accept(Lexer.Token.RBR);
+    }
+
+    private void parseCallTransition() throws ParseError {
+        accept(Lexer.Token.LPR);
+        State from = null;
+        Symbol callSymbol = null;
+        State to = null;
+        if (peek(Lexer.Token.WORD))
+            from = vpaBuilder.getState(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (peek(Lexer.Token.WORD))
+            callSymbol = vpaBuilder.getCallSymbol(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (peek(Lexer.Token.WORD))
+            to = vpaBuilder.getState(currentWord.getLexeme());
+        accept(Lexer.Token.WORD);
+        if (from == null || callSymbol == null || to == null) {
+            throw new ParseError("Syntax error: part of callTransition doesn't exist. FROM: " + from + " callSymbol: " + callSymbol + " TO: " + to + ".");
+        }
+        from.addCallSuccessor(callSymbol, from.getName(), to);
+        to.addCallPredecessor(callSymbol, from.getName(), from);
+        accept(Lexer.Token.RPR);
     }
 
     private void parseFinalStates() throws ParseError {
@@ -151,41 +237,44 @@ public class Parser {
         accept(Lexer.Token.EQ);
         accept(Lexer.Token.LBR);
         Set<State> states = new HashSet<>();
+        Set<String> stackAlphabet = new HashSet<>();
         while (!peek(Lexer.Token.RBR)) {
-            if (peek(Lexer.Token.WORD))
+            if (peek(Lexer.Token.WORD)) {
                 states.add(new State(currentWord.getLexeme()));
+                stackAlphabet.add(currentWord.getLexeme());
+            }
             accept(Lexer.Token.WORD);
         }
         accept(Lexer.Token.RBR);
         vpaBuilder.states(states);
+        vpaBuilder.stackAlphabet(stackAlphabet);
     }
 
     private void parseReturnAlphabet() throws ParseError {
         acceptWord("returnAlphabet");
-        parseAlphabet();
-        Set<Symbol> returnAlphabet = parseAlphabet();
+        Set<Symbol> returnAlphabet = parseAlphabet("RETURN");
         vpaBuilder.returnAlphabet(returnAlphabet);
     }
 
     private void parseInternalAlphabet() throws ParseError {
         acceptWord("internalAlphabet");
-        Set<Symbol> internalAlphabet = parseAlphabet();
+        Set<Symbol> internalAlphabet = parseAlphabet("INTERNAL");
         vpaBuilder.internalAlphabet(internalAlphabet);
     }
 
     private void parseCallAlphabet() throws ParseError {
         acceptWord("callAlphabet");
-        Set<Symbol> callAlphabet = parseAlphabet();
+        Set<Symbol> callAlphabet = parseAlphabet("CALL");
         vpaBuilder.callAlphabet(callAlphabet);
     }
 
-    private Set<Symbol> parseAlphabet() throws ParseError {
+    private Set<Symbol> parseAlphabet(String alphabetType) throws ParseError {
         accept(Lexer.Token.EQ);
         accept(Lexer.Token.LBR);
         Set<Symbol> alphabet = new HashSet<>();
         while (!peek(Lexer.Token.RBR)) {
             if (peek(Lexer.Token.WORD))
-                alphabet.add(new Symbol("CALL", currentWord.getLexeme()));
+                alphabet.add(new Symbol(alphabetType, currentWord.getLexeme()));
             accept(Lexer.Token.WORD);
         }
         accept(Lexer.Token.RBR);

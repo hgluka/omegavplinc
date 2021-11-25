@@ -45,6 +45,7 @@ class VPABuilderTest {
 
         q1.addReturnSuccessor(alphabet.get("r"), "q0", q0);
         q0.addReturnPredecessor(alphabet.get("r"), "q0", q1);
+        q0.addReturnPredecessor(alphabet.get("r"), "q0", q0);
 
         VPA vpa = vpaBuilder.callAlphabet(ca)
                 .internalAlphabet(ia)

@@ -51,11 +51,10 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                 for (State qPrime : a.getStates()) {
                     Set<Map<State, Set<State>>> toAdd =
                             State.composeS(
-                                    cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)),
                                     State.composeS(
-                                            innerVectorCopy.get(Pair.of(pPrime, qPrime)),
-                                            rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))
-                                    )
+                                            cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)),
+                                            innerVectorCopy.get(Pair.of(pPrime, qPrime))),
+                                    rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))
                             );
                     if (antichainInsert(pq, toAdd))
                         changed.add(pq);

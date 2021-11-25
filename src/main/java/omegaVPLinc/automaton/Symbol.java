@@ -50,4 +50,9 @@ public class Symbol {
     public int hashCode() {
         return Objects.hash(type, symbol);
     }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
 }

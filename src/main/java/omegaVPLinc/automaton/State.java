@@ -71,10 +71,9 @@ public class State {
     ) {
         Map<State, Set<State>> ed = new HashMap<>();
         for (State p : e.keySet()) {
-            for (State q : e.get(p)) {
+            for (State q : new HashSet<>(e.get(p))) {
                 if (d.containsKey(q)) {
-                    Set<State> existingOrNull = ed.putIfAbsent(p, d.get(q));
-                    if (existingOrNull != null) existingOrNull.addAll(d.get(q));
+                    ed.computeIfAbsent(p, k -> new HashSet<>()).addAll(d.get(q));
                 }
             }
         }
@@ -106,15 +105,11 @@ public class State {
     private static boolean addTransitive(Map<State, Set<State>> m) {
         boolean added = false;
         for (State p1 : m.keySet()) {
-            for (State q1 : m.get(p1)) {
-                for (State p2 : m.keySet()) {
-                    for (State q2 : m.get(p2)) {
-                        if (q1.equals(p2)) {
-                            if (!m.get(p1).contains(q2)) {
-                                m.get(p1).add(q2);
-                                added = true;
-                            }
-                        }
+            for (State q1 : new HashSet<>(m.get(p1))) {
+                for (State q2 : new HashSet<>(m.getOrDefault(q1, new HashSet<>()))) {
+                    if (!m.get(p1).contains(q2)) {
+                        m.get(p1).add(q2);
+                        added = true;
                     }
                 }
             }
@@ -197,11 +192,11 @@ public class State {
             if (transitionMap.get(symbol).containsKey(stackSymbol)) {
                 transitionMap.get(symbol).get(stackSymbol).add(state);
             } else {
-                transitionMap.get(symbol).put(stackSymbol, Set.of(state));
+                transitionMap.get(symbol).put(stackSymbol, new HashSet<>(Set.of(state)));
             }
         } else {
             transitionMap.put(symbol,
-                    new HashMap<String, Set<State>>(Map.of(stackSymbol, Set.of(state))));
+                    new HashMap<String, Set<State>>(Map.of(stackSymbol, new HashSet<>(Set.of(state)))));
         }
     }
 
