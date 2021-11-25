@@ -30,49 +30,27 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
             State q = pq.snd();
 
             // X_{p, q}
-            if (!wStarVector.getInnerVectorCopy().get(pq).isEmpty()) {
-                if (antichainInsert(pq, wStarVector.getInnerVectorCopy().get(pq))) {
-                    changed.add(pq);
-                }
-            }
+            Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> potentialAdditions = new HashSet<>(wStarVector.getInnerVectorCopy().get(pq));
             // Union of cZ_{p', q} for (p, r, g, p') in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {
-                for (String g : p.getCallSuccessors().get(c).keySet()) {
-                    for (State pPrime : p.getCallSuccessors().get(c).get(g)) {
-                        toAdd =
-                                State.composeP(
-                                        Set.of(Pair.of(b.context(c), b.finalContext(c))),
-                                        innerVectorCopy.get(Pair.of(pPrime, q))
-                                );
-                        if (p.isFinal() || pPrime.isFinal()) {
-                            toAdd.addAll(
-                                    State.composeP(
-                                            Set.of(Pair.of(b.context(c), b.finalContext(c))),
-                                            rVector.getInnerVector().get(Pair.of(pPrime, q))
-                                    )
-                            );
-                        }
-                        if (antichainInsert(pq, toAdd))
-                            changed.add(pq);
+                for (State pPrime : p.getCallSuccessors(c)) {
+                    if (p.isFinal() || pPrime.isFinal()) {
+                        potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(c)), rVector.getInnerVectorCopy().get(Pair.of(pPrime, q))));
                     }
+                    potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(c)), innerVectorCopy.get(Pair.of(pPrime, q))));
                 }
             }
-
             // Phi(X, X')_{p, q}
             for (State qPrime : a.getStates()) {
-                toAdd = State.composeP(
-                        innerVectorCopy.get(Pair.of(p, qPrime)),
-                        rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))
-                );
-                toAdd.addAll(
-                        State.composeP(
-                                rVector.getInnerVectorCopy().get(Pair.of(p, qPrime)),
-                                innerVectorCopy.get(Pair.of(qPrime, q))
-                        )
-                );
-                if (antichainInsert(pq, toAdd))
-                    changed.add(pq);
+                if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && ! rVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
+                    potentialAdditions.addAll(State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))));
+                }
+                if (!rVector.getInnerVectorCopy().get(Pair.of(p, qPrime)).isEmpty() && ! innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
+                    potentialAdditions.addAll(State.composeP(rVector.getInnerVectorCopy().get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q))));
+                }
             }
+            if (antichainInsert(pq, potentialAdditions))
+                changed.add(pq);
         }
         return new HashSet<>(changed);
     }

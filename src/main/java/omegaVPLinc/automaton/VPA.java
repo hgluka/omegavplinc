@@ -60,15 +60,6 @@ public class VPA {
         return finalEpsilonContext;
     }
 
-    public Map<Symbol, Map<State, Set<State>>> context() throws IllegalArgumentException {
-        Map<Symbol, Map<State, Set<State>>> ctx = new HashMap<>();
-        for (Symbol symbol : fullAlphabet) {
-            Map<State, Set<State>> ctxOfSymbol = context(symbol);
-            if (!ctxOfSymbol.isEmpty()) ctx.put(symbol, ctxOfSymbol);
-        }
-        return ctx;
-    }
-
     public Map<State, Set<State>> context(Symbol symbol) throws IllegalArgumentException {
         Map<State, Set<State>> ctx = new HashMap<>();
         switch (symbol.getType()) {
@@ -118,13 +109,8 @@ public class VPA {
         return ctx;
     }
 
-    public Map<Symbol, Map<State, Set<State>>> finalContext() throws IllegalArgumentException {
-        Map<Symbol, Map<State, Set<State>>> ctx = new HashMap<>();
-        for (Symbol symbol : fullAlphabet) {
-            Map<State, Set<State>> ctxOfSymbol = finalContext(symbol);
-            if (!ctxOfSymbol.isEmpty()) ctx.put(symbol, ctxOfSymbol);
-        }
-        return ctx;
+    public Pair<Map<State, Set<State>>, Map<State, Set<State>>> contextPair(Symbol symbol) {
+        return Pair.of(context(symbol), finalContext(symbol));
     }
 
     public Set<Symbol> getCallAlphabet() {

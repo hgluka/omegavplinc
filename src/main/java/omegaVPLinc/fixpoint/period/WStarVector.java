@@ -24,20 +24,14 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
     @Override
     public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
         changed = new HashSet<>();
-        Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> toAdd;
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
-
+            Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> potentialAdditions = new HashSet<>();
             for (Symbol a : p.getInternalSuccessors().keySet()) {
-                for (State pPrime : p.getInternalSuccessors().get(a)) {
+                for (State pPrime : p.getInternalSuccessors(a)) {
                     if (p.isFinal() || pPrime.isFinal()) {
-                        toAdd = State.composeP(
-                                Set.of(Pair.of(b.context(a), b.finalContext(a))),
-                                wVector.getInnerVectorCopy().get(Pair.of(pPrime, q))
-                        );
-                        if (antichainInsert(pq, toAdd))
-                            changed.add(pq);
+                        potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(a)), wVector.getInnerVectorCopy().get(Pair.of(pPrime, q))));
                     }
                 }
             }
@@ -45,61 +39,29 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
             // (p, c, p', g) in callTransitions and
             // (q', r, g, q) in returnTransitions
             // and cX_{p', q'}r if p or q are final
-            for (Symbol callSymbol : p.getCallSuccessors().keySet()) {
-                for (String stackSymbol : p.getCallSuccessors().get(callSymbol).keySet()) {
-                    Set<State> successorsOfCallSymbol = p
-                            .getCallSuccessors()
-                            .get(callSymbol)
-                            .get(stackSymbol);
-                    for (Symbol retSymbol : q.getReturnPredecessors().keySet()) {
-                        HashMap<String, Set<State>> predecessorsOfRetSymbol =
-                                q.getReturnPredecessors()
-                                        .get(retSymbol);
-                        if (predecessorsOfRetSymbol.containsKey(stackSymbol)) {
-                            for (State pPrime : successorsOfCallSymbol) {
-                                for (State qPrime : predecessorsOfRetSymbol.get(stackSymbol)) {
-                                    toAdd = State.composeP(
-                                            State.composeP(
-                                                    Set.of(Pair.of(b.context(callSymbol), b.finalContext(callSymbol))),
-                                                    innerVectorCopy.get(Pair.of(pPrime, qPrime))
-                                            ),
-                                            Set.of(Pair.of(b.context(retSymbol), b.finalContext(retSymbol)))
-                                    );
-                                    if (p.isFinal() || q.isFinal()) {
-                                        toAdd.addAll(
-                                                State.composeP(
-                                                        State.composeP(
-                                                                Set.of(Pair.of(b.context(callSymbol), b.finalContext(callSymbol))),
-                                                                wVector.getInnerVectorCopy().get(Pair.of(pPrime, qPrime))
-                                                        ),
-                                                        Set.of(Pair.of(b.context(retSymbol), b.finalContext(retSymbol)))
-                                                )
-                                        );
-                                    }
-                                    if (antichainInsert(pq, toAdd))
-                                        changed.add(pq);
-                                }
+            for (Symbol c : p.getCallSuccessors().keySet()) {
+                for (State pPrime : p.getCallSuccessors(c)) {
+                    for (Symbol r : q.getReturnPredecessors().keySet()) {
+                        for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
+                            if (p.isFinal() || q.isFinal()) {
+                                potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(c)), State.composeP(wVector.getInnerVectorCopy().get(Pair.of(pPrime, qPrime)), Set.of(b.contextPair(r)))));
                             }
+                            potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(c)), State.composeP(innerVectorCopy.get(Pair.of(pPrime, qPrime)), Set.of(b.contextPair(r)))));
                         }
                     }
                 }
             }
             // Phi(X, X')_{p, q}
             for (State qPrime : a.getStates()) {
-                toAdd = State.composeP(
-                        innerVectorCopy.get(Pair.of(p, qPrime)),
-                        wVector.getInnerVectorCopy().get(Pair.of(qPrime, q))
-                );
-                toAdd.addAll(
-                        State.composeP(
-                                wVector.getInnerVectorCopy().get(Pair.of(p, qPrime)),
-                                innerVectorCopy.get(Pair.of(qPrime, q))
-                        )
-                );
-                if (antichainInsert(pq, toAdd))
-                    changed.add(pq);
+                if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && ! wVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
+                    potentialAdditions.addAll(State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), wVector.getInnerVectorCopy().get(Pair.of(qPrime, q))));
+                }
+                if (!wVector.getInnerVectorCopy().get(Pair.of(p, qPrime)).isEmpty() && ! innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
+                    potentialAdditions.addAll(State.composeP(wVector.getInnerVectorCopy().get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q))));
+                }
             }
-
+            if (antichainInsert(pq, potentialAdditions))
+                changed.add(pq);
         }
         return new HashSet<>(changed);
     }

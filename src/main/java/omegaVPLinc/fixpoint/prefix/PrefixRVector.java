@@ -23,36 +23,22 @@ public class PrefixRVector extends RVector<Map<State, Set<State>>> {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
-
             // X_{p, q}
-            if (antichainInsert(pq, wVector.getInnerVectorCopy().get(pq))) {
-                changed.add(pq);
-            }
+            Set<Map<State, Set<State>>> potentialAdditions = new HashSet<>(wVector.getInnerVectorCopy().get(pq));
             // Union of cZ_{p', q} for (p, r, g, p') in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {
-                for (String g : p.getCallSuccessors().get(c).keySet()) {
-                    for (State pPrime : p.getCallSuccessors().get(c).get(g)) {
-                        Set<Map<State, Set<State>>> toAdd =
-                                State.composeS(
-                                        Set.of(b.context(c)),
-                                        innerVectorCopy.get(Pair.of(pPrime, q))
-                                );
-                        if (antichainInsert(pq, toAdd))
-                            changed.add(pq);
-                    }
+                for (State pPrime : p.getCallSuccessors(c)) {
+                    potentialAdditions.addAll(State.composeS(Set.of(b.context(c)), innerVectorCopy.get(Pair.of(pPrime, q))));
                 }
             }
+            // Union of Z_{p, q'}Z_{q', q}
             for (State qPrime : a.getStates()) {
                 if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && !innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
-                    Set<Map<State, Set<State>>> toAdd =
-                            State.composeS(
-                                    innerVectorCopy.get(Pair.of(p, qPrime)),
-                                    innerVectorCopy.get(Pair.of(qPrime, q))
-                            );
-                    if (antichainInsert(pq, toAdd))
-                        changed.add(pq);
+                    potentialAdditions.addAll(State.composeS(innerVectorCopy.get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q))));
                 }
             }
+            if (antichainInsert(pq, potentialAdditions))
+                changed.add(pq);
         }
         return new HashSet<>(changed);
     }

@@ -472,7 +472,7 @@ class PeriodVectorsTest {
         changedWS = WS.iterateOnce(frontier);
         changedC = R.iterateOnce(frontier);
         changedRS = RS.iterateOnce(RS.frontier());
-        assertEquals(2, changedRS.size());
+        assertEquals(0, changedRS.size());
         W.updateCopy();
         WS.updateCopy();
         R.updateCopy();

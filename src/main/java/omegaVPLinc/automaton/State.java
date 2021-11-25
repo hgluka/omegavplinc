@@ -48,9 +48,7 @@ public class State {
         isFinal = aFinal;
     }
 
-    public Map<Symbol, Set<State>> getInternalSuccessors() {
-        return internalSuccessors;
-    }
+
 
     public static Set<Map<State, Set<State>>> composeS(
             Set<Map<State, Set<State>>> E,
@@ -128,6 +126,14 @@ public class State {
         return transitiveClosure;
     }
 
+    public Map<Symbol, Set<State>> getInternalSuccessors() {
+        return internalSuccessors;
+    }
+
+    public Set<State> getInternalSuccessors(Symbol c) {
+        return internalSuccessors.getOrDefault(c, new HashSet<>());
+    }
+
     public void addInternalSuccessor(Symbol symbol, State succ) {
         if (symbol == null || succ == null) {
             throw new IllegalArgumentException("Cannot add transition with null values.");
@@ -142,6 +148,10 @@ public class State {
         return internalPredecessors;
     }
 
+    public Set<State> getInternalPredecessors(Symbol c) {
+        return internalPredecessors.getOrDefault(c, new HashSet<>());
+    }
+
     public void addInternalPredecessor(Symbol symbol, State pred) {
         if (symbol == null || pred == null) {
             throw new IllegalArgumentException("Cannot add transition with null values.");
@@ -154,12 +164,38 @@ public class State {
         return callSuccessors;
     }
 
+    public Set<State> getCallSuccessors(Symbol c) {
+        return callSuccessors
+                .getOrDefault(c, new HashMap<>())
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<State> getCallSuccessors(Symbol c, String s) {
+        return callSuccessors.getOrDefault(c, new HashMap<>()).getOrDefault(s, new HashSet<>());
+    }
+
     public void addCallSuccessor(Symbol symbol, String stackSymbol, State succ) {
         addTransition(symbol, stackSymbol, succ, callSuccessors);
     }
 
     public HashMap<Symbol, HashMap<String, Set<State>>> getCallPredecessors() {
         return callPredecessors;
+    }
+
+    public Set<State> getCallPredecessors(Symbol c) {
+        return callPredecessors
+                .getOrDefault(c, new HashMap<>())
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<State> getCallPredecessors(Symbol c, String s) {
+        return callPredecessors.getOrDefault(c, new HashMap<>()).getOrDefault(s, new HashSet<>());
     }
 
     public void addCallPredecessor(Symbol symbol, String stackSymbol, State pred) {
@@ -170,12 +206,38 @@ public class State {
         return returnSuccessors;
     }
 
+    public Set<State> getReturnSuccessors(Symbol c) {
+        return returnSuccessors
+                .getOrDefault(c, new HashMap<>())
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<State> getReturnSuccessors(Symbol c, String s) {
+        return returnSuccessors.getOrDefault(c, new HashMap<>()).getOrDefault(s, new HashSet<>());
+    }
+
     public void addReturnSuccessor(Symbol symbol, String stackSymbol, State succ) {
         addTransition(symbol, stackSymbol, succ, returnSuccessors);
     }
 
     public HashMap<Symbol, HashMap<String, Set<State>>> getReturnPredecessors() {
         return returnPredecessors;
+    }
+
+    public Set<State> getReturnPredecessors(Symbol c) {
+        return returnPredecessors
+                .getOrDefault(c, new HashMap<>())
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<State> getReturnPredecessors(Symbol c, String s) {
+        return returnPredecessors.getOrDefault(c, new HashMap<>()).getOrDefault(s, new HashSet<>());
     }
 
     public void addReturnPredecessor(Symbol symbol, String stackSymbol, State pred) {
@@ -200,30 +262,6 @@ public class State {
             transitionMap.put(symbol,
                     new HashMap<String, Set<State>>(Map.of(stackSymbol, new HashSet<>(Set.of(state)))));
         }
-    }
-
-    public boolean isReachable(State q) {
-        for (Symbol c : callSuccessors.keySet()) {
-            if (callSuccessors.get(c)
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet())
-                    .contains(q)) {
-                return true;
-            }
-        }
-        for (Symbol r : returnSuccessors.keySet()) {
-            if (returnSuccessors.get(r)
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet())
-                    .contains(q)) {
-                return true;
-            }
-        }
-        return internalSuccessors.containsValue(q);
     }
 
     @Override
