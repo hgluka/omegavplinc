@@ -22,16 +22,18 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
     public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
-            Set<Map<State, Set<State>>> potentialAdditions = new HashSet<>();
             State p = pq.fst();
             State q = pq.snd();
             // Epsilon context if p == q
-            if (p.equals(q))
-                potentialAdditions.add(b.getEpsilonContext());
+            if (p.equals(q)) {
+                if (antichainInsert(pq, Set.of(b.getEpsilonContext())))
+                    changed.add(pq);
+            }
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
             for (Symbol a : p.getInternalSuccessors().keySet()) {
                 for (State pPrime : p.getInternalSuccessors(a)) {
-                    potentialAdditions.addAll(State.composeS(Set.of(b.context(a)), innerVectorCopy.get(Pair.of(pPrime, q))));
+                    if (antichainInsert(pq, State.composeS(Set.of(b.context(a)), innerVectorCopy.get(Pair.of(pPrime, q)))))
+                        changed.add(pq);
                 }
             }
             // Union of cX_{p', q'}r for
@@ -41,7 +43,8 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                 for (State pPrime : p.getCallSuccessors(c)) {
                     for (Symbol r : q.getReturnPredecessors().keySet()) {
                         for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
-                            potentialAdditions.addAll(State.composeS(Set.of(b.context(c)), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), Set.of(b.context(r)))));
+                            if (antichainInsert(pq, State.composeS(Set.of(b.context(c)), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), Set.of(b.context(r))))))
+                                changed.add(pq);
                         }
                     }
                 }
@@ -49,11 +52,10 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
             // Union of X_{p, q'}X_{q', q} for q' in states of A
             for (State qPrime : a.getStates()) {
                 if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && !innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
-                    potentialAdditions.addAll(State.composeS(innerVectorCopy.get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q))));
+                    if (antichainInsert(pq, State.composeS(innerVectorCopy.get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                        changed.add(pq);
                 }
             }
-            if (antichainInsert(pq, potentialAdditions))
-                changed.add(pq);
         }
         return new HashSet<>(changed);
     }

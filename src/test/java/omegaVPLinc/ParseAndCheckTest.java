@@ -38,7 +38,7 @@ public class ParseAndCheckTest {
         Instant start = Instant.now();
         boolean isIncluded = checker.checkInclusion();
         Instant end = Instant.now();
-        System.out.println(Duration.between(start, end).toSeconds());
+        System.out.println("The check took " + Duration.between(start, end).toSeconds() + " seconds.");
         assertTrue(isIncluded);
     }
 }

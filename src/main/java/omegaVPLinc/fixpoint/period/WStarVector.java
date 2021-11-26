@@ -27,11 +27,11 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
-            Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> potentialAdditions = new HashSet<>();
             for (Symbol a : p.getInternalSuccessors().keySet()) {
                 for (State pPrime : p.getInternalSuccessors(a)) {
                     if (p.isFinal() || pPrime.isFinal()) {
-                        potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(a)), wVector.getInnerVectorCopy().get(Pair.of(pPrime, q))));
+                        if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(a)), wVector.getInnerVectorCopy().get(Pair.of(pPrime, q)))))
+                            changed.add(pq);
                     }
                 }
             }
@@ -44,9 +44,11 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
                     for (Symbol r : q.getReturnPredecessors().keySet()) {
                         for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
                             if (p.isFinal() || q.isFinal()) {
-                                potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(c)), State.composeP(wVector.getInnerVectorCopy().get(Pair.of(pPrime, qPrime)), Set.of(b.contextPair(r)))));
+                                if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(c)), State.composeP(wVector.getInnerVectorCopy().get(Pair.of(pPrime, qPrime)), Set.of(b.contextPair(r))))))
+                                    changed.add(pq);
                             }
-                            potentialAdditions.addAll(State.composeP(Set.of(b.contextPair(c)), State.composeP(innerVectorCopy.get(Pair.of(pPrime, qPrime)), Set.of(b.contextPair(r)))));
+                            if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(c)), State.composeP(innerVectorCopy.get(Pair.of(pPrime, qPrime)), Set.of(b.contextPair(r))))))
+                                changed.add(pq);
                         }
                     }
                 }
@@ -54,14 +56,14 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
             // Phi(X, X')_{p, q}
             for (State qPrime : a.getStates()) {
                 if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && ! wVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
-                    potentialAdditions.addAll(State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), wVector.getInnerVectorCopy().get(Pair.of(qPrime, q))));
+                    if (antichainInsert(pq, State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), wVector.getInnerVectorCopy().get(Pair.of(qPrime, q)))))
+                        changed.add(pq);
                 }
                 if (!wVector.getInnerVectorCopy().get(Pair.of(p, qPrime)).isEmpty() && ! innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
-                    potentialAdditions.addAll(State.composeP(wVector.getInnerVectorCopy().get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q))));
+                    if (antichainInsert(pq, State.composeP(wVector.getInnerVectorCopy().get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                        changed.add(pq);
                 }
             }
-            if (antichainInsert(pq, potentialAdditions))
-                changed.add(pq);
         }
         return new HashSet<>(changed);
     }

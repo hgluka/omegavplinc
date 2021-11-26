@@ -165,16 +165,15 @@ public class State {
     }
 
     public Set<State> getCallSuccessors(Symbol c) {
-        return callSuccessors
-                .getOrDefault(c, new HashMap<>())
-                .values()
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        Set<State> callSuccessorsOfC = new HashSet<>();
+        for (String s : callSuccessors.getOrDefault(c, new HashMap<>()).keySet()) {
+            callSuccessorsOfC.addAll(callSuccessors.get(c).get(s));
+        }
+        return callSuccessorsOfC;
     }
 
     public Set<State> getCallSuccessors(Symbol c, String s) {
-        return callSuccessors.getOrDefault(c, new HashMap<>()).getOrDefault(s, new HashSet<>());
+        return callPredecessors.getOrDefault(c, new HashMap<>()).getOrDefault(s, new HashSet<>());
     }
 
     public void addCallSuccessor(Symbol symbol, String stackSymbol, State succ) {
@@ -186,12 +185,11 @@ public class State {
     }
 
     public Set<State> getCallPredecessors(Symbol c) {
-        return callPredecessors
-                .getOrDefault(c, new HashMap<>())
-                .values()
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        Set<State> callPredecessorsOfC = new HashSet<>();
+        for (String s : callPredecessors.getOrDefault(c, new HashMap<>()).keySet()) {
+            callPredecessorsOfC.addAll(callPredecessors.get(c).get(s));
+        }
+        return callPredecessorsOfC;
     }
 
     public Set<State> getCallPredecessors(Symbol c, String s) {
@@ -207,12 +205,11 @@ public class State {
     }
 
     public Set<State> getReturnSuccessors(Symbol c) {
-        return returnSuccessors
-                .getOrDefault(c, new HashMap<>())
-                .values()
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        Set<State> returnSuccessorsOfC = new HashSet<>();
+        for (String s : returnSuccessors.getOrDefault(c, new HashMap<>()).keySet()) {
+            returnSuccessorsOfC.addAll(returnSuccessors.get(c).get(s));
+        }
+        return returnSuccessorsOfC;
     }
 
     public Set<State> getReturnSuccessors(Symbol c, String s) {
@@ -228,12 +225,11 @@ public class State {
     }
 
     public Set<State> getReturnPredecessors(Symbol c) {
-        return returnPredecessors
-                .getOrDefault(c, new HashMap<>())
-                .values()
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        Set<State> returnPredecessorsOfC = new HashSet<>();
+        for (String s : returnPredecessors.getOrDefault(c, new HashMap<>()).keySet()) {
+            returnPredecessorsOfC.addAll(returnPredecessors.get(c).get(s));
+        }
+        return returnPredecessorsOfC;
     }
 
     public Set<State> getReturnPredecessors(Symbol c, String s) {
