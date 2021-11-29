@@ -42,13 +42,9 @@ public abstract class FixpointVector<T> {
     public boolean antichainInsert(Pair<State, State> statePair, Set<T> toAdd) {
         boolean removed = false;
         boolean added = false;
-        //if (!toAdd.isEmpty())
-        //    System.out.println(toAdd);
         for (T t : toAdd) {
-            removed = removed || innerVector.get(statePair).removeIf(
-                    e -> !e.equals(t) && comparator.lesserOrEqual(t, e));
-            boolean existsLesser = innerVector.get(statePair).stream()
-                    .anyMatch(e -> comparator.lesserOrEqual(e, t));
+            removed = removed || innerVector.get(statePair).removeIf(e -> !e.equals(t) && comparator.lesserOrEqual(t, e));
+            boolean existsLesser = innerVector.get(statePair).stream().anyMatch(e -> comparator.lesserOrEqual(e, t));
             if (!existsLesser) {
                 innerVector.get(statePair).add(t);
                 added = true;

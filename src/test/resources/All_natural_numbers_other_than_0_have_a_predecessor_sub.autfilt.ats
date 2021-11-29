@@ -1,0 +1,55 @@
+NestedWordAutomaton nwa = (
+	callAlphabet = {},
+	internalAlphabet = {f p l k o},
+	returnAlphabet = {},
+	states = {q0 q1 q2 q3 q4 q5 q6 q7 q8 q9 q10},
+	initialStates = {q0},
+	finalStates = {q10},
+	callTransitions = {
+	},
+	internalTransitions = {
+		(q0 f q1)
+		(q1 p q1)
+		(q1 l q2)
+		(q1 k q3)
+		(q1 o q3)
+		(q2 l q2)
+		(q2 p q2)
+		(q2 o q3)
+		(q2 k q4)
+		(q2 f q5)
+		(q3 k q3)
+		(q3 o q3)
+		(q3 p q3)
+		(q3 l q4)
+		(q4 o q3)
+		(q4 k q4)
+		(q4 l q4)
+		(q4 p q4)
+		(q4 f q6)
+		(q5 l q2)
+		(q5 o q3)
+		(q5 k q4)
+		(q5 p q7)
+		(q5 l q8)
+		(q5 p q9)
+		(q6 p q1)
+		(q6 l q2)
+		(q6 k q3)
+		(q6 o q3)
+		(q6 l q8)
+		(q7 p q7)
+		(q7 l q8)
+		(q8 l q8)
+		(q8 p q8)
+		(q8 f q10)
+		(q9 l q2)
+		(q9 o q3)
+		(q9 k q4)
+		(q9 p q9)
+		(q10 p q7)
+		(q10 l q8)
+	},
+	returnTransitions = {
+	},
+);

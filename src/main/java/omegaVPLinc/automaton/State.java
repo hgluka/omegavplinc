@@ -61,8 +61,7 @@ public class State {
         for (Map<State, Set<State>> e : E) {
             for (Map<State, Set<State>> d : D) {
                 Map<State, Set<State>> ed = composeM(e, d);
-                if (!ed.isEmpty())
-                    ED.add(ed);
+                ED.add(ed);
             }
         }
         return ED;
@@ -102,9 +101,7 @@ public class State {
             for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> d : D) {
                 Map<State, Set<State>> ed1 = composeM(e.fst(), d.fst());
                 Map<State, Set<State>> ed2 = union(composeM(e.fst(), d.snd()), composeM(e.snd(), d.fst()));
-                if (!ed1.isEmpty() || !ed2.isEmpty()) {
-                    ED.add(Pair.of(ed1, ed2));
-                }
+                ED.add(Pair.of(ed1, ed2));
             }
         }
         return ED;

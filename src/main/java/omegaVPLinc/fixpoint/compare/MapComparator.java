@@ -10,5 +10,10 @@ public class MapComparator extends PartialComparator<Map<State, Set<State>>> {
         return isSubset(x1, x2);
     }
 
+    @Override
+    public boolean isEmpty(Map<State, Set<State>> t) {
+        return t.isEmpty();
+    }
+
 
 }

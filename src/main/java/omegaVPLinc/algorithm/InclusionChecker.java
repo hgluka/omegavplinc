@@ -37,6 +37,8 @@ public class InclusionChecker {
                 if (yComposition.containsKey(p) && yComposition.get(p).contains(p))
                     return true;
             }
+            if (yComposition.isEmpty() || y1closure.isEmpty())
+                return true;
         }
         return false;
     }

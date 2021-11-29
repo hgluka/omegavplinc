@@ -4,11 +4,9 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.fixpoint.FixpointVector;
-import omegaVPLinc.fixpoint.WVector;
 import omegaVPLinc.fixpoint.compare.PairComparator;
 import omegaVPLinc.utility.Pair;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +25,8 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
+            // Union of aX_{p', q} for (p, a, p') in internalTransitions
+            // if p or p' are final
             for (Symbol a : p.getInternalSuccessors().keySet()) {
                 for (State pPrime : p.getInternalSuccessors(a)) {
                     if (p.isFinal() || pPrime.isFinal()) {

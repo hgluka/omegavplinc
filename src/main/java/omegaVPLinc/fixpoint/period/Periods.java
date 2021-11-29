@@ -59,17 +59,11 @@ public class Periods {
                 || !changedR.isEmpty()
                 || !changedRS.isEmpty()) {
             changedW = W.iterateOnce(frontierW);
-            logger.info("W is done.");
             changedWS = WS.iterateOnce(frontierWS);
-            logger.info("WS is done.");
             changedC = C.iterateOnce(frontierC);
-            logger.info("C is done.");
             changedCS = CS.iterateOnce(frontierCS);
-            logger.info("CS is done.");
             changedR = R.iterateOnce(frontierR);
-            logger.info("R is done.");
             changedRS = RS.iterateOnce(frontierRS);
-            logger.info("RS is done.");
             logger.info("Iteration number {} complete.", i);
             W.updateCopy();
             WS.updateCopy();

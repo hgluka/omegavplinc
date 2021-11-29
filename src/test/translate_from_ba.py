@@ -1,36 +1,40 @@
 if __name__ == '__main__':
     import sys
     if len(sys.argv) < 3:
-        exit()
+        sys.exit()
     states = []
     alphabet = []
     transitions = []
     initial_state = ""
     final_states = []
-    with open(sys.argv[1]) as file:
-        lines = file.readlines()
-        initial_state = "q" + str(lines[0][1:-2])
-        for line in lines[1::]:
-            if line[0] == '[':
-                if line[-1] == '\n':
-                    q = "q" + str(line[1:-2])
+    try:
+        with open(sys.argv[1]) as file:
+            lines = file.readlines()
+            initial_state = "q" + str(lines[0][1:-2])
+            for line in lines[1::]:
+                if line[0] == '[':
+                    if line[-1] == '\n':
+                        q = "q" + str(line[1:-2])
+                    else:
+                        q = "q" + str(line[1:-1])
+                    if q not in states:
+                        states.append(q)
+                    if q not in final_states:
+                        final_states.append(q)
                 else:
-                    q = "q" + str(line[1:-1])
-                if q not in states:
-                    states.append(q)
-                if q not in final_states:
-                    final_states.append(q)
-            else:
-                a = line.split(",")[0]
-                if a not in alphabet:
-                    alphabet.append(a)
-                q1 = "q" + line.split(",")[1].split("->")[0][1:-1]
-                q2 = "q" + line.split(",")[1].split("->")[1][1:-2]
-                if q1 not in states:
-                    states.append(q1)
-                if q2 not in states:
-                    states.append(q2)
-                transitions.append((q1, a, q2))
+                    a = line.split(",")[0]
+                    if a not in alphabet:
+                        alphabet.append(a)
+                    q1 = "q" + line.split(",")[1].split("->")[0][1:-1]
+                    q2 = "q" + line.split(",")[1].split("->")[1][1:-2]
+                    if q1 not in states:
+                        states.append(q1)
+                    if q2 not in states:
+                        states.append(q2)
+                    transitions.append((q1, a, q2))
+    except:
+        print(sys.argv[1])
+        sys.exit()
     print("=====================================")
     print(states)
     print(alphabet)
