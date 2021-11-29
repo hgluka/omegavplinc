@@ -1,12 +1,15 @@
 package omegaVPLinc.automaton;
 
 import omegaVPLinc.utility.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class State {
+    private static final Logger logger = LoggerFactory.getLogger(State.class);
     private String name;
     private boolean isFinal;
 
@@ -57,7 +60,9 @@ public class State {
         Set<Map<State, Set<State>>> ED = new HashSet<>();
         for (Map<State, Set<State>> e : E) {
             for (Map<State, Set<State>> d : D) {
-                ED.add(composeM(e, d));
+                Map<State, Set<State>> ed = composeM(e, d);
+                if (!ed.isEmpty())
+                    ED.add(ed);
             }
         }
         return ED;
@@ -80,6 +85,14 @@ public class State {
         return ed;
     }
 
+    public static Map<State, Set<State>> union(Map<State, Set<State>> e, Map<State, Set<State>> d) {
+        Map<State, Set<State>> union = new HashMap<>(e);
+        for (Map.Entry<State, Set<State>> entry : d.entrySet()) {
+            union.computeIfAbsent(entry.getKey(), k -> new HashSet<>()).addAll(entry.getValue());
+        }
+        return union;
+    }
+
     public static Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> composeP(
             Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> E,
             Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> D
@@ -87,16 +100,11 @@ public class State {
         Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> ED = new HashSet<>();
         for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> e : E) {
             for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> d : D) {
-                ED.add(Pair.of(
-                        composeM(e.fst(), d.fst()),
-                        Stream.concat(
-                                composeM(e.fst(), d.snd()).entrySet().stream(),
-                                composeM(e.snd(), d.fst()).entrySet().stream()
-                        ).collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (v1, v2) -> Stream.concat(v1.stream(), v2.stream()).collect(Collectors.toSet())))
-                ));
+                Map<State, Set<State>> ed1 = composeM(e.fst(), d.fst());
+                Map<State, Set<State>> ed2 = union(composeM(e.fst(), d.snd()), composeM(e.snd(), d.fst()));
+                if (!ed1.isEmpty() || !ed2.isEmpty()) {
+                    ED.add(Pair.of(ed1, ed2));
+                }
             }
         }
         return ED;

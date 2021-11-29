@@ -58,9 +58,6 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
 
     @Override
     public Set<Pair<State, State>> frontier() {
-        if (changed.isEmpty() && wStarVector.getChanged().isEmpty() && rVector.getChanged().isEmpty()) {
-            return a.getAllStatePairs();
-        }
         Set<Pair<State, State>> frontier = new HashSet<>(wStarVector.getChanged());
         for (Pair<State, State> pq : rVector.getChanged()) {
             State p = pq.fst();

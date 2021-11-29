@@ -70,9 +70,6 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
 
     @Override
     public Set<Pair<State, State>> frontier() {
-        if (changed.isEmpty() && wVector.getChanged().isEmpty()) {
-            return a.getAllStatePairs();
-        }
         Set<Pair<State, State>> frontier = new HashSet<>();
         for (Pair<State, State> pq : wVector.getChanged()) {
             State p = pq.fst();

@@ -5,12 +5,15 @@ import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.fixpoint.period.Periods;
 import omegaVPLinc.fixpoint.prefix.Prefixes;
 import omegaVPLinc.utility.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class InclusionChecker {
+    private static final Logger logger = LoggerFactory.getLogger(InclusionChecker.class);
     private final VPA a;
     private final VPA b;
 
@@ -44,12 +47,24 @@ public class InclusionChecker {
         for (State p : a.getStates()) {
             for (Map<State, Set<State>> x : prefixes.getFromC(a.getInitialState(), p)) {
                 for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromCS(p, p)) {
-                    if (!inctx(x, y1y2.fst(), y1y2.snd())) return false;
+                    if (!inctx(x, y1y2.fst(), y1y2.snd())) {
+                        logger.debug("1");
+                        logger.debug("{} -> {}: {}", a.getInitialState(), p, x);
+                        logger.debug("{} -> {}: {}", p, p, y1y2.fst());
+                        logger.debug("{} ->* {}: {}", p, p, y1y2.snd());
+                        return false;
+                    }
                 }
             }
             for (Map<State, Set<State>> x : prefixes.getFromU(a.getInitialState(), p)) {
                 for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromRS(p, p)) {
-                    if (!inctx(x, y1y2.fst(), y1y2.snd())) return false;
+                    if (!inctx(x, y1y2.fst(), y1y2.snd())) {
+                        logger.debug("2");
+                        logger.debug("{} -> {}: {}", a.getInitialState(), p, x);
+                        logger.debug("{} -> {}: {}", p, p, y1y2.fst());
+                        logger.debug("{} ->* {}: {}", p, p, y1y2.snd());
+                        return false;
+                    }
                 }
             }
         }

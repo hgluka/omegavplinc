@@ -58,9 +58,6 @@ public class CStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
 
     @Override
     public Set<Pair<State, State>> frontier() {
-        if (changed.isEmpty() && wStarVector.getChanged().isEmpty() && cVector.getChanged().isEmpty()) {
-            return a.getAllStatePairs();
-        }
         Set<Pair<State, State>> frontier = new HashSet<>(wStarVector.getChanged());
         for (Pair<State, State> pq : cVector.getChanged()) {
             State p = pq.fst();

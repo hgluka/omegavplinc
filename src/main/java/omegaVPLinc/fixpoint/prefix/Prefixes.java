@@ -4,16 +4,16 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Prefixes {
+    private static final Logger logger = LoggerFactory.getLogger(Prefixes.class);
+
     private final VPA a;
     private final VPA b;
 
@@ -32,8 +32,7 @@ public class Prefixes {
     }
 
     public int iterate() {
-        Set<Pair<State, State>> frontier = a.getAllStatePairs();
-
+        logger.info("Starting Prefix iteration.");
         Set<Pair<State, State>> changedW = new HashSet<>(Set.of(Pair.of(null, null)));
         Set<Pair<State, State>> changedC = new HashSet<>(Set.of(Pair.of(null, null)));
         Set<Pair<State, State>> changedR = new HashSet<>(Set.of(Pair.of(null, null)));
@@ -48,11 +47,7 @@ public class Prefixes {
         Set<Pair<State, State>> frontierU = new HashSet<>();
         for (State p : a.getStates()) {
             for (Symbol c : p.getCallSuccessors().keySet()) {
-                for (State q : p.getCallSuccessors().get(c)
-                        .values()
-                        .stream()
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toSet())) {
+                for (State q : p.getCallSuccessors(c)) {
                     frontierU.add(Pair.of(p, q));
                 }
             }
@@ -63,9 +58,14 @@ public class Prefixes {
                 || !changedR.isEmpty()
                 || !changedU.isEmpty()) {
             changedW = W.iterateOnce(frontierW);
+            logger.info("W is done.");
             changedC = C.iterateOnce(frontierC);
+            logger.info("C is done.");
             changedR = R.iterateOnce(frontierR);
+            logger.info("R is done.");
             changedU = U.iterateOnce(frontierU);
+            logger.info("U is done.");
+            logger.info("Iteration number {} complete", i);
             W.updateCopy();
             C.updateCopy();
             R.updateCopy();
@@ -85,5 +85,13 @@ public class Prefixes {
 
     public Set<Map<State, Set<State>>> getFromU(State p, State q) {
         return U.getInnerVector().get(Pair.of(p, q));
+    }
+
+    public PrefixCVector getC() {
+        return C;
+    }
+
+    public UVector getU() {
+        return U;
     }
 }
