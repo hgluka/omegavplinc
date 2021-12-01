@@ -28,9 +28,9 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
                 if (antichainInsert(pq, Set.of(Pair.of(b.getEpsilonContext(), b.getFinalEpsilonContext()))))
                     changed.add(pq);
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
-            for (Symbol a : p.getInternalSuccessors().keySet()) {
-                for (State pPrime : p.getInternalSuccessors(a)) {
-                    if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(a)), innerVectorCopy.get(Pair.of(pPrime, q)))))
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                for (State pPrime : p.getInternalSuccessors(s)) {
+                    if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(s)), innerVectorCopy.get(Pair.of(pPrime, q)))))
                         changed.add(pq);
                 }
             }

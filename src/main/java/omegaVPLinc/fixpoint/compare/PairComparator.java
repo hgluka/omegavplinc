@@ -11,9 +11,4 @@ public class PairComparator extends PartialComparator<Pair<Map<State, Set<State>
                                  Pair<Map<State, Set<State>>, Map<State, Set<State>>> x2) {
         return isSubset(x1.fst(), x2.fst()) && isSubset(x1.snd(), x2.snd());
     }
-
-    @Override
-    public boolean isEmpty(Pair<Map<State, Set<State>>, Map<State, Set<State>>> t) {
-        return t.fst().isEmpty() && t.snd().isEmpty();
-    }
 }

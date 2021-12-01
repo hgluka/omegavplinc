@@ -58,13 +58,9 @@ public class Prefixes {
                 || !changedR.isEmpty()
                 || !changedU.isEmpty()) {
             changedW = W.iterateOnce(frontierW);
-            logger.info("W is done.");
             changedC = C.iterateOnce(frontierC);
-            logger.info("C is done.");
             changedR = R.iterateOnce(frontierR);
-            logger.info("R is done.");
             changedU = U.iterateOnce(frontierU);
-            logger.info("U is done.");
             logger.info("Iteration number {} complete", i);
             W.updateCopy();
             C.updateCopy();

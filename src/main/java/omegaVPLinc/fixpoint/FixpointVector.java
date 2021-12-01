@@ -43,11 +43,10 @@ public abstract class FixpointVector<T> {
         boolean removed = false;
         boolean added = false;
         for (T t : toAdd) {
-            removed = removed || innerVector.get(statePair).removeIf(e -> !e.equals(t) && comparator.lesserOrEqual(t, e));
+            removed = innerVector.get(statePair).removeIf(e -> !e.equals(t) && comparator.lesserOrEqual(t, e)) || removed;
             boolean existsLesser = innerVector.get(statePair).stream().anyMatch(e -> comparator.lesserOrEqual(e, t));
             if (!existsLesser) {
-                innerVector.get(statePair).add(t);
-                added = true;
+                added = innerVector.get(statePair).add(t) || added;
             }
         }
         return removed || added;

@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class State {
     private static final Logger logger = LoggerFactory.getLogger(State.class);
@@ -53,10 +51,7 @@ public class State {
 
 
 
-    public static Set<Map<State, Set<State>>> composeS(
-            Set<Map<State, Set<State>>> E,
-            Set<Map<State, Set<State>>> D
-    ) {
+    public static Set<Map<State, Set<State>>> composeS(Set<Map<State, Set<State>>> E, Set<Map<State, Set<State>>> D) {
         Set<Map<State, Set<State>>> ED = new HashSet<>();
         for (Map<State, Set<State>> e : E) {
             for (Map<State, Set<State>> d : D) {
@@ -67,15 +62,12 @@ public class State {
         return ED;
     }
 
-    public static Map<State, Set<State>> composeM(
-            Map<State, Set<State>> e,
-            Map<State, Set<State>> d
-    ) {
+    public static Map<State, Set<State>> composeM(Map<State, Set<State>> e, Map<State, Set<State>> d) {
         Map<State, Set<State>> ed = new HashMap<>();
         if (e.isEmpty() || d.isEmpty())
             return ed;
         for (State p : e.keySet()) {
-            for (State q : new HashSet<>(e.get(p))) {
+            for (State q : e.get(p)) {
                 if (d.containsKey(q)) {
                     ed.computeIfAbsent(p, k -> new HashSet<>()).addAll(d.get(q));
                 }

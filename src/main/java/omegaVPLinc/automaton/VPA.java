@@ -101,12 +101,19 @@ public class VPA {
 
     public Map<State, Set<State>> finalContext(Symbol symbol) {
         Map<State, Set<State>> ctx = context(symbol);
+        Map<State, Set<State>> finalCtx = new HashMap<>();
         for (State p : ctx.keySet()) {
-            if (!p.isFinal()) {
-                ctx.get(p).removeIf(q -> !q.isFinal());
+            if (p.isFinal()) {
+                finalCtx.put(p, ctx.get(p));
+            } else {
+                for (State q : ctx.get(p)) {
+                    if (q.isFinal()) {
+                        finalCtx.computeIfAbsent(p, k -> new HashSet<>()).add(q);
+                    }
+                }
             }
         }
-        return ctx;
+        return finalCtx;
     }
 
     public Pair<Map<State, Set<State>>, Map<State, Set<State>>> contextPair(Symbol symbol) {
