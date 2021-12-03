@@ -21,20 +21,30 @@ public abstract class WVector<T> extends FixpointVector<T> {
             State q = pq.snd();
 
             for (Symbol c : p.getCallPredecessors().keySet()) {
-                for (String g : p.getCallPredecessors().get(c).keySet()) {
-                    for (State pPrime : p.getCallPredecessors().get(c).get(g)) {
-                        for (Symbol r : q.getReturnSuccessors().keySet()) {
-                            for (State qPrime : q.getReturnSuccessors().get(r).getOrDefault(g, new HashSet<>())) {
-                                frontier.add(Pair.of(pPrime, qPrime));
-                            }
+                for (State pPrime : p.getCallPredecessors(c)) {
+                    for (Symbol r : q.getReturnSuccessors().keySet()) {
+                        for (State qPrime : q.getReturnSuccessors(r, pPrime.getName())) {
+                            frontier.add(Pair.of(pPrime, qPrime));
                         }
                     }
                 }
             }
 
             for (State pPrime : a.getStates()) {
-                frontier.add(Pair.of(p, pPrime));
-                frontier.add(Pair.of(pPrime, q));
+                /*
+                for (Symbol s : pPrime.getInternalSuccessors().keySet()) {
+                    for (State qPrime : a.getFromContext(s, pPrime)) {
+                        frontier.add(Pair.of(pPrime, qPrime));
+                    }
+                }
+
+                 */
+                if (!getInnerVector().get(Pair.of(q, pPrime)).isEmpty()) {
+                    frontier.add(Pair.of(p, pPrime));
+                }
+                if (!getInnerVector().get(Pair.of(pPrime, p)).isEmpty()) {
+                    frontier.add(Pair.of(pPrime, q));
+                }
             }
         }
         return frontier;

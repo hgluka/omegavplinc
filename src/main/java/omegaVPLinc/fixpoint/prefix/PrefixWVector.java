@@ -7,7 +7,6 @@ import omegaVPLinc.fixpoint.WVector;
 import omegaVPLinc.fixpoint.compare.MapComparator;
 import omegaVPLinc.utility.Pair;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +18,7 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -30,12 +29,22 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                     changed.add(pq);
             }
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
-            for (Symbol a : p.getInternalSuccessors().keySet()) {
-                for (State pPrime : p.getInternalSuccessors(a)) {
-                    if (antichainInsert(pq, State.composeS(Set.of(b.context(a)), innerVectorCopy.get(Pair.of(pPrime, q)))))
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                if (p.getInternalSuccessors(s).contains(q)) {
+                    if (antichainInsert(pq, Set.of(b.context(s))))
                         changed.add(pq);
                 }
             }
+        }
+        return new HashSet<>(changed);
+    }
+
+    @Override
+    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+        changed = new HashSet<>();
+        for (Pair<State, State> pq : frontier) {
+            State p = pq.fst();
+            State q = pq.snd();
             // Union of cX_{p', q'}r for
             // (p, c, p', g) in callTransitions and
             // (q', r, g, q) in returnTransitions
@@ -43,7 +52,7 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                 for (State pPrime : p.getCallSuccessors(c)) {
                     for (Symbol r : q.getReturnPredecessors().keySet()) {
                         for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
-                            if (antichainInsert(pq, State.composeS(Set.of(b.context(c)), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), Set.of(b.context(r))))))
+                            if (antichainInsert(pq, State.composeS(Set.of(b.context(c)), State.composeS(getOldInnerFrontier(pPrime, qPrime), Set.of(b.context(r))))))
                                 changed.add(pq);
                         }
                     }
@@ -51,7 +60,7 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
             }
             // Union of X_{p, q'}X_{q', q} for q' in states of A
             for (State qPrime : a.getStates()) {
-                if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && !innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
+                if (!getOldInnerFrontier(p, qPrime).isEmpty() || !getOldInnerFrontier(qPrime, q).isEmpty()) {
                     if (antichainInsert(pq, State.composeS(innerVectorCopy.get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q)))))
                         changed.add(pq);
                 }

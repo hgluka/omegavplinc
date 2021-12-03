@@ -1,6 +1,7 @@
 package omegaVPLinc.fixpoint.period;
 
 import omegaVPLinc.automaton.State;
+import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.utility.Pair;
 import org.slf4j.Logger;
@@ -43,15 +44,63 @@ public class Periods {
         Set<Pair<State, State>> changedRS = new HashSet<>(Set.of(Pair.of(null, null)));
 
         Set<Pair<State, State>> frontierW = new HashSet<>();
-        for (State p : a.getStates()) {
-            frontierW.add(Pair.of(p, p));
-        }
+
         Set<Pair<State, State>> frontierWS = new HashSet<>();
         Set<Pair<State, State>> frontierC = new HashSet<>();
         Set<Pair<State, State>> frontierCS = new HashSet<>();
         Set<Pair<State, State>> frontierR = new HashSet<>();
         Set<Pair<State, State>> frontierRS = new HashSet<>();
-        int i = 0;
+        for (State p : a.getStates()) {
+            frontierW.add(Pair.of(p, p));
+            for (Symbol c : p.getCallSuccessors().keySet()) {
+                for (State q : p.getCallSuccessors(c)) {
+                    if (p.isFinal() || q.isFinal())
+                        frontierRS.add(Pair.of(p, q));
+                    frontierR.add(Pair.of(p, q));
+                }
+            }
+            for (Symbol r : p.getReturnSuccessors().keySet()) {
+                for (State q : p.getReturnSuccessors(r, a.getEmptyStackSymbol())) {
+                    if (p.isFinal() || q.isFinal())
+                        frontierCS.add(Pair.of(p, q));
+                    frontierC.add(Pair.of(p, q));
+                }
+            }
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                for (State q : p.getInternalSuccessors(s)) {
+                    if (p.isFinal() || q.isFinal()) {
+                        frontierWS.add(Pair.of(p, q));
+                    }
+                    frontierW.add(Pair.of(p, q));
+                }
+            }
+        }
+        changedW = W.initial(frontierW);
+        changedWS = WS.initial(frontierWS);
+        changedC = C.initial(frontierC);
+        changedCS = CS.initial(frontierCS);
+        changedR = R.initial(frontierR);
+        changedRS = RS.initial(frontierRS);
+        logger.info("Iteration number 0 complete");
+        W.updateCopy();
+        WS.updateCopy();
+        C.updateCopy();
+        CS.updateCopy();
+        R.updateCopy();
+        RS.updateCopy();
+        W.updateInnerFrontier();
+        WS.updateInnerFrontier();
+        C.updateInnerFrontier();
+        CS.updateInnerFrontier();
+        R.updateInnerFrontier();
+        RS.updateInnerFrontier();
+        frontierW = W.frontier();
+        frontierWS = WS.frontier();
+        frontierC = C.frontier();
+        frontierCS = CS.frontier();
+        frontierR = R.frontier();
+        frontierRS = RS.frontier();
+        int i = 1;
         while (!changedW.isEmpty()
                 || !changedWS.isEmpty()
                 || !changedC.isEmpty()
@@ -66,11 +115,17 @@ public class Periods {
             changedRS = RS.iterateOnce(frontierRS);
             logger.info("Iteration number {} complete.", i);
             W.updateCopy();
+            W.updateInnerFrontier();
             WS.updateCopy();
+            WS.updateInnerFrontier();
             C.updateCopy();
+            C.updateInnerFrontier();
             CS.updateCopy();
+            CS.updateInnerFrontier();
             R.updateCopy();
+            R.updateInnerFrontier();
             RS.updateCopy();
+            RS.updateInnerFrontier();
             frontierW = W.frontier();
             frontierWS = WS.frontier();
             frontierC = C.frontier();

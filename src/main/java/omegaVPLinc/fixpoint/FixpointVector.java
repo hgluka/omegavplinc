@@ -13,6 +13,8 @@ public abstract class FixpointVector<T> {
 
     private Map<Pair<State, State>, Set<T>> innerVector;
     protected Map<Pair<State, State>, Set<T>> innerVectorCopy;
+    protected Map<Pair<State, State>, Set<T>> innerFrontier;
+    protected Map<Pair<State, State>, Set<T>> oldInnerFrontier;
 
     protected Set<Pair<State, State>> changed;
 
@@ -23,15 +25,21 @@ public abstract class FixpointVector<T> {
         this.b = b;
         this.innerVector = new HashMap<>();
         this.innerVectorCopy = new HashMap<>();
+        this.innerFrontier = new HashMap<>();
+        this.oldInnerFrontier = new HashMap<>();
         for (State p : a.getStates()) {
             for (State q : a.getStates()) {
                 this.innerVector.put(Pair.of(p, q), new HashSet<>());
                 this.innerVectorCopy.put(Pair.of(p, q), new HashSet<>());
+                this.innerFrontier.put(Pair.of(p, q), new HashSet<>());
+                this.oldInnerFrontier.put(Pair.of(p, q), new HashSet<>());
             }
         }
         this.changed = new HashSet<>();
         this.comparator = comparator;
     }
+
+    public abstract Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier);
 
     public abstract Set<Pair<State, State>> iterateOnce(
             Set<Pair<State, State>> frontier
@@ -39,14 +47,26 @@ public abstract class FixpointVector<T> {
 
     public abstract Set<Pair<State, State>> frontier();
 
+    public Set<T> getOldInnerFrontier(State p, State q) {
+        return oldInnerFrontier.getOrDefault(Pair.of(p, q), new HashSet<>());
+    }
+
     public boolean antichainInsert(Pair<State, State> statePair, Set<T> toAdd) {
         boolean removed = false;
         boolean added = false;
         for (T t : toAdd) {
-            removed = innerVector.get(statePair).removeIf(e -> !e.equals(t) && comparator.lesserOrEqual(t, e)) || removed;
+            removed = innerVector.get(statePair).removeIf(e -> {
+                boolean toRemove = !e.equals(t) && comparator.lesserOrEqual(t, e);
+                if (oldInnerFrontier.get(statePair).contains(e) && toRemove)
+                    oldInnerFrontier.get(statePair).remove(e);
+                return toRemove;
+            }) || removed;
             boolean existsLesser = innerVector.get(statePair).stream().anyMatch(e -> comparator.lesserOrEqual(e, t));
             if (!existsLesser) {
-                added = innerVector.get(statePair).add(t) || added;
+                boolean addedT = innerVector.get(statePair).add(t);
+                if (addedT)
+                    added = true;
+                    innerFrontier.get(statePair).add(t);
             }
         }
         return removed || added;
@@ -63,6 +83,22 @@ public abstract class FixpointVector<T> {
     public void updateCopy() {
         for (Pair<State, State> pq : changed) {
             innerVectorCopy.put(pq, new HashSet<>(innerVector.get(pq)));
+        }
+    }
+
+    public void updateInnerFrontier() {
+        this.oldInnerFrontier = new HashMap<>(innerFrontier);
+        this.innerFrontier = new HashMap<>();
+        for (Pair<State, State> statePair : a.getAllStatePairs()) {
+            innerFrontier.put(statePair, new HashSet<>());
+        }
+    }
+
+    public void updateInnerFrontierAll() {
+        this.oldInnerFrontier = new HashMap<>(this.innerVectorCopy);
+        this.innerFrontier = new HashMap<>();
+        for (Pair<State, State> statePair : a.getAllStatePairs()) {
+            innerFrontier.put(statePair, new HashSet<>());
         }
     }
 

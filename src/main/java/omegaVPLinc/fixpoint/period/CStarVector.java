@@ -22,32 +22,37 @@ public class CStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
     }
 
     @Override
+    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
+        changed = new HashSet<>();
+        for (Pair<State, State> pq : frontier) {
+            State p = pq.fst();
+            State q = pq.snd();
+            // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
+            for (Symbol r : p.getReturnSuccessors().keySet()) {
+                if ((p.isFinal() || q.isFinal()) && p.getReturnSuccessors(r, a.getEmptyStackSymbol()).contains(q))
+                    if (antichainInsert(pq, Set.of(b.contextPair(r))))
+                        changed.add(pq);
+            }
+        }
+        return new HashSet<>(changed);
+    }
+
+    @Override
     public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
             // X'_{p, q}
-            if (antichainInsert(pq, wStarVector.getInnerVectorCopy().get(pq)))
+            if (antichainInsert(pq, wStarVector.getOldInnerFrontier(p, q)))
                 changed.add(pq);
-            // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
-            for (Symbol r : p.getReturnSuccessors().keySet()) {
-                for (State pPrime : p.getReturnSuccessors(r, a.getEmptyStackSymbol())) {
-                    if (p.isFinal() || pPrime.isFinal()) {
-                        if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(r)), cVector.getInnerVector().get(Pair.of(pPrime, q)))))
-                            changed.add(pq);
-                    }
-                    if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(r)), innerVectorCopy.get(Pair.of(pPrime, q)))))
-                        changed.add(pq);
-                }
-            }
             // Phi(X, X')_{p, q}
             for (State qPrime : a.getStates()) {
-                if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && ! cVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
+                if (!getOldInnerFrontier(p, qPrime).isEmpty() || !cVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
                     if (antichainInsert(pq, State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), cVector.getInnerVectorCopy().get(Pair.of(qPrime, q)))))
                         changed.add(pq);
                 }
-                if (!cVector.getInnerVectorCopy().get(Pair.of(p, qPrime)).isEmpty() && ! innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
+                if (!cVector.getOldInnerFrontier(p, qPrime).isEmpty() || !getOldInnerFrontier(qPrime, q).isEmpty()) {
                     if (antichainInsert(pq, State.composeP(cVector.getInnerVectorCopy().get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q)))))
                         changed.add(pq);
                 }

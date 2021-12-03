@@ -18,7 +18,7 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -29,11 +29,21 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
                     changed.add(pq);
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
             for (Symbol s : p.getInternalSuccessors().keySet()) {
-                for (State pPrime : p.getInternalSuccessors(s)) {
-                    if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(s)), innerVectorCopy.get(Pair.of(pPrime, q)))))
+                if (p.getInternalSuccessors(s).contains(q)) {
+                    if (antichainInsert(pq, Set.of(b.contextPair(s))))
                         changed.add(pq);
                 }
             }
+        }
+        return new HashSet<>(changed);
+    }
+
+    @Override
+    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+        changed = new HashSet<>();
+        for (Pair<State, State> pq : frontier) {
+            State p = pq.fst();
+            State q = pq.snd();
             // Union of cX_{p', q'}r for
             // (p, c, p', g) in callTransitions and
             // (q', r, g, q) in returnTransitions
@@ -41,7 +51,7 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
                 for (State pPrime : p.getCallSuccessors(c)) {
                     for (Symbol r : q.getReturnPredecessors().keySet()) {
                         for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
-                            if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(c)), State.composeP(innerVectorCopy.get(Pair.of(pPrime, qPrime)), Set.of(b.contextPair(r))))))
+                            if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(c)), State.composeP(getOldInnerFrontier(pPrime, qPrime), Set.of(b.contextPair(r))))))
                                 changed.add(pq);
                         }
                     }
@@ -49,7 +59,7 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
             }
             // Union of X_{p, q'}X_{q', q} for q' in states of A
             for (State qPrime : a.getStates()) {
-                if (!innerVectorCopy.get(Pair.of(p, qPrime)).isEmpty() && !innerVectorCopy.get(Pair.of(qPrime, q)).isEmpty()) {
+                if (!getOldInnerFrontier(p, qPrime).isEmpty() || !getOldInnerFrontier(qPrime, q).isEmpty()) {
                     if (antichainInsert(pq, State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q)))))
                         changed.add(pq);
                 }

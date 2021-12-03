@@ -49,10 +49,38 @@ public class Prefixes {
             for (Symbol c : p.getCallSuccessors().keySet()) {
                 for (State q : p.getCallSuccessors(c)) {
                     frontierU.add(Pair.of(p, q));
+                    frontierR.add(Pair.of(p, q));
+                }
+            }
+            for (Symbol r : p.getReturnSuccessors().keySet()) {
+                for (State q : p.getReturnSuccessors(r, a.getEmptyStackSymbol())) {
+                    frontierC.add(Pair.of(p, q));
+                }
+            }
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                for (State q : p.getInternalSuccessors(s)) {
+                    frontierW.add(Pair.of(p, q));
                 }
             }
         }
-        int i = 0;
+        changedW = W.initial(frontierW);
+        changedC = C.initial(frontierC);
+        changedR = R.initial(frontierR);
+        changedU = U.initial(frontierU);
+        logger.info("Iteration number 0 complete");
+        W.updateCopy();
+        C.updateCopy();
+        R.updateCopy();
+        U.updateCopy();
+        W.updateInnerFrontier();
+        C.updateInnerFrontier();
+        R.updateInnerFrontier();
+        U.updateInnerFrontier();
+        frontierW = W.frontier();
+        frontierC = C.frontier();
+        frontierR = R.frontier();
+        frontierU = U.frontier();
+        int i = 1;
         while (!changedW.isEmpty()
                 || !changedC.isEmpty()
                 || !changedR.isEmpty()
@@ -63,9 +91,13 @@ public class Prefixes {
             changedU = U.iterateOnce(frontierU);
             logger.info("Iteration number {} complete", i);
             W.updateCopy();
+            W.updateInnerFrontier();
             C.updateCopy();
+            C.updateInnerFrontier();
             R.updateCopy();
+            R.updateInnerFrontier();
             U.updateCopy();
+            U.updateInnerFrontier();
             frontierW = W.frontier();
             frontierC = C.frontier();
             frontierR = R.frontier();

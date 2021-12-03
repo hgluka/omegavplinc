@@ -26,8 +26,10 @@ public abstract class CVector<T> extends FixpointVector<T> {
             State q = pq.snd();
 
             for (State pPrime : a.getStates()) {
-                frontier.add(Pair.of(p, pPrime));
-                frontier.add(Pair.of(pPrime, q));
+                if (!getInnerVector().get(Pair.of(q, pPrime)).isEmpty())
+                    frontier.add(Pair.of(p, pPrime));
+                if (!getInnerVector().get(Pair.of(pPrime, p)).isEmpty())
+                    frontier.add(Pair.of(pPrime, q));
             }
         }
         return frontier;

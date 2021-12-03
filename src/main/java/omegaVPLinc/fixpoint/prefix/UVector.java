@@ -29,7 +29,7 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -41,12 +41,22 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                         changed.add(pq);
                 }
             }
+        }
+        return new HashSet<>(changed);
+    }
+
+    @Override
+    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+        changed = new HashSet<>();
+        for (Pair<State, State> pq : frontier) {
+            State p = pq.fst();
+            State q = pq.snd();
             // Y_{p, p'}T_{p',q'}Z_{q', q}
             for (State pPrime : a.getStates()) {
                 if (!cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)).isEmpty()) {
                     for (State qPrime : a.getStates()) {
-                        if (!innerVectorCopy.get(Pair.of(pPrime, qPrime)).isEmpty() && !rVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
-                            if (antichainInsert(pq, State.composeS(cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))))))
+                        if (!cVector.getOldInnerFrontier(p, pPrime).isEmpty() || !getOldInnerFrontier(pPrime, qPrime).isEmpty() && !rVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
+                            if (antichainInsert(pq, State.composeS(cVector.getOldInnerFrontier(p, pPrime), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), rVector.getOldInnerFrontier(qPrime, q)))))
                                 changed.add(pq);
                         }
                     }
