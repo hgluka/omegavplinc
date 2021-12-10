@@ -84,6 +84,16 @@ public class ParseAndCheckTest {
         assertInclusion("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats", "src/test/resources/union.ats");
     }
 
+    @Test
+    void parseAndCheckPng2IcoTest() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/png2ico1.ats", "src/test/resources/png2ico2.ats");
+    }
+
+    @Test
+    void parseAndCheckPng2IcoReversedTest() throws IOException, Parser.ParseError {
+        assertNoInclusion("src/test/resources/png2ico2.ats", "src/test/resources/png2ico1.ats");
+    }
+
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
         Parser parserA = new Parser(a);
         Parser parserB = new Parser(b);
