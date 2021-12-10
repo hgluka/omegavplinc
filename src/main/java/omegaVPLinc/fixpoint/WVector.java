@@ -11,11 +11,19 @@ import java.util.*;
 public abstract class WVector<T> extends FixpointVector<T> {
     public WVector(VPA a, VPA b, PartialComparator<T> comparator) {
         super(a, b, comparator);
+        for (State p : a.getStates()) {
+            frontier.add(Pair.of(p, p));
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                for (State q : p.getInternalSuccessors(s)) {
+                    frontier.add(Pair.of(p, q));
+                }
+            }
+        }
     }
 
     @Override
-    public Set<Pair<State, State>> frontier() {
-        Set<Pair<State, State>> frontier = new HashSet<>();
+    public void frontier() {
+        frontier = new HashSet<>();
         for (Pair<State, State> pq : changed) {
             State p = pq.fst();
             State q = pq.snd();
@@ -31,14 +39,6 @@ public abstract class WVector<T> extends FixpointVector<T> {
             }
 
             for (State pPrime : a.getStates()) {
-                /*
-                for (Symbol s : pPrime.getInternalSuccessors().keySet()) {
-                    for (State qPrime : a.getFromContext(s, pPrime)) {
-                        frontier.add(Pair.of(pPrime, qPrime));
-                    }
-                }
-
-                 */
                 if (!getInnerVector().get(Pair.of(q, pPrime)).isEmpty()) {
                     frontier.add(Pair.of(p, pPrime));
                 }
@@ -47,6 +47,5 @@ public abstract class WVector<T> extends FixpointVector<T> {
                 }
             }
         }
-        return frontier;
     }
 }

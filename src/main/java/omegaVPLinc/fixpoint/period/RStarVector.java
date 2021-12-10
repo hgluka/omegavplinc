@@ -19,11 +19,18 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
         super(a, b, new PairComparator());
         this.wStarVector = wStarVector;
         this.rVector = rVector;
+        for (State p : a.getStates()) {
+            for (Symbol c : p.getCallSuccessors().keySet()) {
+                for (State q : p.getCallSuccessors(c)) {
+                    if (p.isFinal() || q.isFinal())
+                        frontier.add(Pair.of(p, q));
+                }
+            }
+        }
     }
 
     @Override
-    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
-        changed = new HashSet<>();
+    public void initial() {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
@@ -35,11 +42,10 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -59,19 +65,20 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> frontier() {
-        Set<Pair<State, State>> frontier = new HashSet<>(wStarVector.getChanged());
+    public void frontier() {
+        frontier = new HashSet<>(wStarVector.getChanged());
         for (Pair<State, State> pq : rVector.getChanged()) {
             State p = pq.fst();
             State q = pq.snd();
 
             for (State pPrime : a.getStates()) {
-                frontier.add(Pair.of(p, pPrime));
-                frontier.add(Pair.of(pPrime, q));
+                if (!getInnerVector().get(Pair.of(q, pPrime)).isEmpty())
+                    frontier.add(Pair.of(p, pPrime));
+                if (!getInnerVector().get(Pair.of(pPrime, p)).isEmpty())
+                    frontier.add(Pair.of(pPrime, q));
             }
         }
         for (Pair<State, State> pq : changed) {
@@ -79,10 +86,11 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
             State q = pq.snd();
 
             for (State pPrime : a.getStates()) {
-                frontier.add(Pair.of(p, pPrime));
-                frontier.add(Pair.of(pPrime, q));
+                if (!rVector.getInnerVector().get(Pair.of(q, pPrime)).isEmpty())
+                    frontier.add(Pair.of(p, pPrime));
+                if (!rVector.getInnerVector().get(Pair.of(pPrime, p)).isEmpty())
+                    frontier.add(Pair.of(pPrime, q));
             }
         }
-        return frontier;
     }
 }

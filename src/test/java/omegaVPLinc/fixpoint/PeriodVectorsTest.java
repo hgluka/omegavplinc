@@ -5,10 +5,15 @@ import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.automaton.VPABuilder;
 import omegaVPLinc.fixpoint.period.*;
-import omegaVPLinc.utility.Pair;
+import omegaVPLinc.parser.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,6 +22,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PeriodVectorsTest {
+    private static final Logger logger = LoggerFactory.getLogger(PeriodVectorsTest.class);
+
     private VPA vpa;
 
     @BeforeEach
@@ -92,5 +99,18 @@ class PeriodVectorsTest {
         Periods periods = new Periods(vpa, vpa);
         int iterations = periods.iterate();
         assertEquals(8, iterations);
+    }
+    @Test
+    void testPeriodsBig() throws IOException, Parser.ParseError {
+        Parser parserA = new Parser("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats");
+        Parser parserB = new Parser("src/test/resources/union.ats");
+        VPA A = parserA.parse();
+        VPA B = parserB.parse();
+        Periods periods = new Periods(A, B);
+        Instant start = Instant.now();
+        int iterations = periods.iterate();
+        Instant end = Instant.now();
+        logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
+        assertEquals(16, iterations);
     }
 }

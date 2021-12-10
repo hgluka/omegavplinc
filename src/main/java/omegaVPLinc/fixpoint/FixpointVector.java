@@ -18,6 +18,8 @@ public abstract class FixpointVector<T> {
 
     protected Set<Pair<State, State>> changed;
 
+    protected Set<Pair<State, State>> frontier;
+
     protected PartialComparator<T> comparator;
 
     public FixpointVector(VPA a, VPA b, PartialComparator<T> comparator) {
@@ -36,16 +38,19 @@ public abstract class FixpointVector<T> {
             }
         }
         this.changed = new HashSet<>();
+        this.frontier = new HashSet<>();
         this.comparator = comparator;
     }
 
-    public abstract Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier);
+    public abstract void initial();
 
-    public abstract Set<Pair<State, State>> iterateOnce(
-            Set<Pair<State, State>> frontier
-    );
+    public abstract void iterateOnce();
 
-    public abstract Set<Pair<State, State>> frontier();
+    public abstract void frontier();
+
+    public Set<Pair<State, State>> getFrontier() {
+        return frontier;
+    }
 
     public Set<T> getOldInnerFrontier(State p, State q) {
         return oldInnerFrontier.getOrDefault(Pair.of(p, q), new HashSet<>());
@@ -88,15 +93,6 @@ public abstract class FixpointVector<T> {
 
     public void updateInnerFrontier() {
         this.oldInnerFrontier = new HashMap<>(innerFrontier);
-        this.innerFrontier = new HashMap<>();
-        for (Pair<State, State> statePair : a.getAllStatePairs()) {
-            innerFrontier.put(statePair, new HashSet<>());
-        }
-    }
-
-    public void updateInnerFrontierAll() {
-        this.oldInnerFrontier = new HashMap<>(this.innerVectorCopy);
-        this.innerFrontier = new HashMap<>();
         for (Pair<State, State> statePair : a.getAllStatePairs()) {
             innerFrontier.put(statePair, new HashSet<>());
         }

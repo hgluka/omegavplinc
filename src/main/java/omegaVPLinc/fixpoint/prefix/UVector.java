@@ -9,11 +9,9 @@ import omegaVPLinc.fixpoint.RVector;
 import omegaVPLinc.fixpoint.compare.MapComparator;
 import omegaVPLinc.utility.Pair;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class UVector extends FixpointVector<Map<State, Set<State>>> {
     private final CVector<Map<State, Set<State>>> cVector;
@@ -26,11 +24,17 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
         super(a, b, new MapComparator());
         this.cVector = cVector;
         this.rVector = rVector;
+        for (State p : a.getStates()) {
+            for (Symbol c : p.getCallSuccessors().keySet()) {
+                for (State q : p.getCallSuccessors(c)) {
+                    frontier.add(Pair.of(p, q));
+                }
+            }
+        }
     }
 
     @Override
-    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
-        changed = new HashSet<>();
+    public void initial() {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
@@ -42,11 +46,10 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -55,20 +58,21 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
             for (State pPrime : a.getStates()) {
                 if (!cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)).isEmpty()) {
                     for (State qPrime : a.getStates()) {
-                        if (!cVector.getOldInnerFrontier(p, pPrime).isEmpty() || !getOldInnerFrontier(pPrime, qPrime).isEmpty() && !rVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
-                            if (antichainInsert(pq, State.composeS(cVector.getOldInnerFrontier(p, pPrime), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), rVector.getOldInnerFrontier(qPrime, q)))))
-                                changed.add(pq);
+                        if (!innerVectorCopy.get(Pair.of(pPrime, qPrime)).isEmpty() && !rVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
+                            if (!cVector.getOldInnerFrontier(p, pPrime).isEmpty() || !getOldInnerFrontier(pPrime, qPrime).isEmpty() && !rVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
+                                if (antichainInsert(pq, State.composeS(cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))))))
+                                    changed.add(pq);
+                            }
                         }
                     }
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> frontier() {
-        Set<Pair<State, State>> frontier = new HashSet<>();
+    public void frontier() {
+        frontier = new HashSet<>();
         for (Pair<State, State> pq : changed) {
             for (State p : a.getStates()) {
                 if (!cVector.getInnerVectorCopy().get(Pair.of(p, pq.fst())).isEmpty()) {
@@ -92,6 +96,5 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                 frontier.add(Pair.of(qPrime, q));
             }
         }
-        return frontier;
     }
 }

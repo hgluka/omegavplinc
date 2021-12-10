@@ -18,8 +18,7 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
     }
 
     @Override
-    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
-        changed = new HashSet<>();
+    public void initial() {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
@@ -36,11 +35,10 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -66,6 +64,5 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 }

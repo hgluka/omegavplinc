@@ -36,15 +36,14 @@ public class Periods {
 
     public int iterate() {
         logger.info("Starting Period iteration.");
-        Set<Pair<State, State>> changedW = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedWS = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedC = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedCS = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedR = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedRS = new HashSet<>(Set.of(Pair.of(null, null)));
+        Set<Pair<State, State>> changedW;
+        Set<Pair<State, State>> changedWS;
+        Set<Pair<State, State>> changedC;
+        Set<Pair<State, State>> changedCS;
+        Set<Pair<State, State>> changedR;
+        Set<Pair<State, State>> changedRS;
 
         Set<Pair<State, State>> frontierW = new HashSet<>();
-
         Set<Pair<State, State>> frontierWS = new HashSet<>();
         Set<Pair<State, State>> frontierC = new HashSet<>();
         Set<Pair<State, State>> frontierCS = new HashSet<>();
@@ -75,12 +74,12 @@ public class Periods {
                 }
             }
         }
-        changedW = W.initial(frontierW);
-        changedWS = WS.initial(frontierWS);
-        changedC = C.initial(frontierC);
-        changedCS = CS.initial(frontierCS);
-        changedR = R.initial(frontierR);
-        changedRS = RS.initial(frontierRS);
+        W.initial();
+        WS.initial();
+        C.initial();
+        CS.initial();
+        R.initial();
+        RS.initial();
         logger.info("Iteration number 0 complete");
         W.updateCopy();
         WS.updateCopy();
@@ -94,25 +93,25 @@ public class Periods {
         CS.updateInnerFrontier();
         R.updateInnerFrontier();
         RS.updateInnerFrontier();
-        frontierW = W.frontier();
-        frontierWS = WS.frontier();
-        frontierC = C.frontier();
-        frontierCS = CS.frontier();
-        frontierR = R.frontier();
-        frontierRS = RS.frontier();
+        W.frontier();
+        WS.frontier();
+        C.frontier();
+        CS.frontier();
+        R.frontier();
+        RS.frontier();
         int i = 1;
-        while (!changedW.isEmpty()
-                || !changedWS.isEmpty()
-                || !changedC.isEmpty()
-                || !changedCS.isEmpty()
-                || !changedR.isEmpty()
-                || !changedRS.isEmpty()) {
-            changedW = W.iterateOnce(frontierW);
-            changedWS = WS.iterateOnce(frontierWS);
-            changedC = C.iterateOnce(frontierC);
-            changedCS = CS.iterateOnce(frontierCS);
-            changedR = R.iterateOnce(frontierR);
-            changedRS = RS.iterateOnce(frontierRS);
+        while (!W.getChanged().isEmpty()
+                || !WS.getChanged().isEmpty()
+                || !C.getChanged().isEmpty()
+                || !CS.getChanged().isEmpty()
+                || !R.getChanged().isEmpty()
+                || !RS.getChanged().isEmpty()) {
+            W.iterateOnce();
+            WS.iterateOnce();
+            C.iterateOnce();
+            CS.iterateOnce();
+            R.iterateOnce();
+            RS.iterateOnce();
             logger.info("Iteration number {} complete.", i);
             W.updateCopy();
             W.updateInnerFrontier();
@@ -126,12 +125,12 @@ public class Periods {
             R.updateInnerFrontier();
             RS.updateCopy();
             RS.updateInnerFrontier();
-            frontierW = W.frontier();
-            frontierWS = WS.frontier();
-            frontierC = C.frontier();
-            frontierCS = CS.frontier();
-            frontierR = R.frontier();
-            frontierRS = RS.frontier();
+            W.frontier();
+            WS.frontier();
+            C.frontier();
+            CS.frontier();
+            R.frontier();
+            RS.frontier();
             i++;
         }
         return i;

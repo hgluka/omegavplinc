@@ -6,6 +6,8 @@ import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.fixpoint.WVector;
 import omegaVPLinc.fixpoint.compare.PairComparator;
 import omegaVPLinc.utility.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,13 +15,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
+    private static final Logger logger = LoggerFactory.getLogger(PeriodWVector.class);
     public PeriodWVector(VPA a, VPA b) {
         super(a, b, new PairComparator());
     }
 
     @Override
-    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
-        changed = new HashSet<>();
+    public void initial() {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
@@ -35,11 +37,10 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -65,6 +66,5 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 }

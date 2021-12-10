@@ -5,15 +5,22 @@ import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.automaton.VPABuilder;
 import omegaVPLinc.fixpoint.prefix.*;
-import omegaVPLinc.utility.Pair;
+import omegaVPLinc.parser.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PrefixVectorsTest {
+    private static final Logger logger = LoggerFactory.getLogger(PrefixVectorsTest.class);
+
     private VPA vpa;
 
     @BeforeEach
@@ -89,5 +96,34 @@ class PrefixVectorsTest {
         Prefixes prefixes = new Prefixes(vpa, vpa);
         int iterations = prefixes.iterate();
         assertEquals(8, iterations);
+    }
+
+
+    @Test
+    void testPrefixesBig() throws IOException, Parser.ParseError {
+        Parser parserA = new Parser("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats");
+        Parser parserB = new Parser("src/test/resources/union.ats");
+        VPA A = parserA.parse();
+        VPA B = parserB.parse();
+        Prefixes prefixes = new Prefixes(A, B);
+        Instant start = Instant.now();
+        int iterations = prefixes.iterate();
+        Instant end = Instant.now();
+        logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
+        assertEquals(16, iterations);
+    }
+
+    @Test
+    void testPrefixesPalindromes() throws IOException, Parser.ParseError {
+        Parser parserA = new Parser("src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sub.autfilt.ats");
+        Parser parserB = new Parser("src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sup.autfilt.ats");
+        VPA A = parserA.parse();
+        VPA B = parserB.parse();
+        Prefixes prefixes = new Prefixes(A, B);
+        Instant start = Instant.now();
+        int iterations = prefixes.iterate();
+        Instant end = Instant.now();
+        logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
+        assertEquals(7, iterations);
     }
 }

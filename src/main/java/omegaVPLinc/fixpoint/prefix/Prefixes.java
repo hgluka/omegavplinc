@@ -33,40 +33,10 @@ public class Prefixes {
 
     public int iterate() {
         logger.info("Starting Prefix iteration.");
-        Set<Pair<State, State>> changedW = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedC = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedR = new HashSet<>(Set.of(Pair.of(null, null)));
-        Set<Pair<State, State>> changedU = new HashSet<>(Set.of(Pair.of(null, null)));
-
-        Set<Pair<State, State>> frontierW = new HashSet<>();
-        for (State p : a.getStates()) {
-            frontierW.add(Pair.of(p, p));
-        }
-        Set<Pair<State, State>> frontierC = new HashSet<>();
-        Set<Pair<State, State>> frontierR = new HashSet<>();
-        Set<Pair<State, State>> frontierU = new HashSet<>();
-        for (State p : a.getStates()) {
-            for (Symbol c : p.getCallSuccessors().keySet()) {
-                for (State q : p.getCallSuccessors(c)) {
-                    frontierU.add(Pair.of(p, q));
-                    frontierR.add(Pair.of(p, q));
-                }
-            }
-            for (Symbol r : p.getReturnSuccessors().keySet()) {
-                for (State q : p.getReturnSuccessors(r, a.getEmptyStackSymbol())) {
-                    frontierC.add(Pair.of(p, q));
-                }
-            }
-            for (Symbol s : p.getInternalSuccessors().keySet()) {
-                for (State q : p.getInternalSuccessors(s)) {
-                    frontierW.add(Pair.of(p, q));
-                }
-            }
-        }
-        changedW = W.initial(frontierW);
-        changedC = C.initial(frontierC);
-        changedR = R.initial(frontierR);
-        changedU = U.initial(frontierU);
+        W.initial();
+        C.initial();
+        R.initial();
+        U.initial();
         logger.info("Iteration number 0 complete");
         W.updateCopy();
         C.updateCopy();
@@ -76,19 +46,19 @@ public class Prefixes {
         C.updateInnerFrontier();
         R.updateInnerFrontier();
         U.updateInnerFrontier();
-        frontierW = W.frontier();
-        frontierC = C.frontier();
-        frontierR = R.frontier();
-        frontierU = U.frontier();
+        W.frontier();
+        C.frontier();
+        R.frontier();
+        U.frontier();
         int i = 1;
-        while (!changedW.isEmpty()
-                || !changedC.isEmpty()
-                || !changedR.isEmpty()
-                || !changedU.isEmpty()) {
-            changedW = W.iterateOnce(frontierW);
-            changedC = C.iterateOnce(frontierC);
-            changedR = R.iterateOnce(frontierR);
-            changedU = U.iterateOnce(frontierU);
+        while (!W.getChanged().isEmpty()
+                || !C.getChanged().isEmpty()
+                || !R.getChanged().isEmpty()
+                || !U.getChanged().isEmpty()) {
+            W.iterateOnce();
+            C.iterateOnce();
+            R.iterateOnce();
+            U.iterateOnce();
             logger.info("Iteration number {} complete", i);
             W.updateCopy();
             W.updateInnerFrontier();
@@ -98,10 +68,10 @@ public class Prefixes {
             R.updateInnerFrontier();
             U.updateCopy();
             U.updateInnerFrontier();
-            frontierW = W.frontier();
-            frontierC = C.frontier();
-            frontierR = R.frontier();
-            frontierU = U.frontier();
+            W.frontier();
+            C.frontier();
+            R.frontier();
+            U.frontier();
             i++;
         }
         return i;

@@ -18,8 +18,7 @@ public class PeriodRVector extends RVector<Pair<Map<State, Set<State>>, Map<Stat
     }
 
     @Override
-    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
-        changed = new HashSet<>();
+    public void initial() {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
@@ -31,11 +30,10 @@ public class PeriodRVector extends RVector<Pair<Map<State, Set<State>>, Map<Stat
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -51,6 +49,5 @@ public class PeriodRVector extends RVector<Pair<Map<State, Set<State>>, Map<Stat
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 }

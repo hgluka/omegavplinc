@@ -17,11 +17,19 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
     public WStarVector(VPA a, VPA b, PeriodWVector wVector) {
         super(a, b, new PairComparator());
         this.wVector = wVector;
+        for (State p : a.getStates()) {
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                for (State q : p.getInternalSuccessors(s)) {
+                    if (p.isFinal() || q.isFinal()) {
+                        frontier.add(Pair.of(p, q));
+                    }
+                }
+            }
+        }
     }
 
     @Override
-    public Set<Pair<State, State>> initial(Set<Pair<State, State>> frontier) {
-        changed = new HashSet<>();
+    public void initial() {
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
             State q = pq.snd();
@@ -34,11 +42,10 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> iterateOnce(Set<Pair<State, State>> frontier) {
+    public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {
             State p = pq.fst();
@@ -74,30 +81,29 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
                 }
             }
         }
-        return new HashSet<>(changed);
     }
 
     @Override
-    public Set<Pair<State, State>> frontier() {
-        Set<Pair<State, State>> frontier = new HashSet<>();
+    public void frontier() {
+        frontier = new HashSet<>();
         for (Pair<State, State> pq : wVector.getChanged()) {
             State p = pq.fst();
             State q = pq.snd();
             for (Symbol c : p.getCallPredecessors().keySet()) {
-                for (String g : p.getCallPredecessors().get(c).keySet()) {
-                    for (State pPrime : p.getCallPredecessors().get(c).get(g)) {
-                        for (Symbol r : q.getReturnSuccessors().keySet()) {
-                            for (State qPrime : q.getReturnSuccessors().get(r).getOrDefault(g, new HashSet<>())) {
-                                if (pPrime.isFinal() || qPrime.isFinal())
-                                    frontier.add(Pair.of(pPrime, qPrime));
-                            }
+                for (State pPrime : p.getCallPredecessors(c)) {
+                    for (Symbol r : q.getReturnSuccessors().keySet()) {
+                        for (State qPrime : q.getReturnSuccessors(r, pPrime.getName())) {
+                            if (pPrime.isFinal() || qPrime.isFinal())
+                                frontier.add(Pair.of(pPrime, qPrime));
                         }
                     }
                 }
             }
             for (State qPrime : a.getStates()) {
-                frontier.add(Pair.of(p, qPrime));
-                frontier.add(Pair.of(qPrime, q));
+                if (!getInnerVector().get(Pair.of(q, qPrime)).isEmpty())
+                    frontier.add(Pair.of(p, qPrime));
+                if (!getInnerVector().get(Pair.of(qPrime, p)).isEmpty())
+                    frontier.add(Pair.of(qPrime, q));
             }
         }
         for (Pair<State, State> pq : changed) {
@@ -105,22 +111,20 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
             State q = pq.snd();
 
             for (Symbol c : p.getCallPredecessors().keySet()) {
-                for (String g : p.getCallPredecessors().get(c).keySet()) {
-                    for (State pPrime : p.getCallPredecessors().get(c).get(g)) {
-                        for (Symbol r : q.getReturnSuccessors().keySet()) {
-                            for (State qPrime : q.getReturnSuccessors().get(r).getOrDefault(g, new HashSet<>())) {
-                                frontier.add(Pair.of(pPrime, qPrime));
-                            }
+                for (State pPrime : p.getCallPredecessors(c)) {
+                    for (Symbol r : q.getReturnSuccessors().keySet()) {
+                        for (State qPrime : q.getReturnSuccessors(r, pPrime.getName())) {
+                            frontier.add(Pair.of(pPrime, qPrime));
                         }
                     }
                 }
             }
-
             for (State pPrime : a.getStates()) {
-                frontier.add(Pair.of(p, pPrime));
-                frontier.add(Pair.of(pPrime, q));
+                if (!wVector.getInnerVector().get(Pair.of(q, pPrime)).isEmpty())
+                    frontier.add(Pair.of(p, pPrime));
+                if (!wVector.getInnerVector().get(Pair.of(pPrime, p)).isEmpty())
+                    frontier.add(Pair.of(pPrime, q));
             }
         }
-        return frontier;
     }
 }

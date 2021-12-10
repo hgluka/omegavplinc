@@ -53,6 +53,8 @@ public class State {
 
     public static Set<Map<State, Set<State>>> composeS(Set<Map<State, Set<State>>> E, Set<Map<State, Set<State>>> D) {
         Set<Map<State, Set<State>>> ED = new HashSet<>();
+        if (E.isEmpty() || D.isEmpty())
+            return ED;
         for (Map<State, Set<State>> e : E) {
             for (Map<State, Set<State>> d : D) {
                 Map<State, Set<State>> ed = composeM(e, d);
@@ -66,6 +68,13 @@ public class State {
         Map<State, Set<State>> ed = new HashMap<>();
         if (e.isEmpty() || d.isEmpty())
             return ed;
+        for (Map.Entry<State, Set<State>> entryE : e.entrySet()) {
+            for (State q : entryE.getValue()) {
+                if (d.containsKey(q))
+                    ed.computeIfAbsent(entryE.getKey(), k -> new HashSet<>()).addAll(d.get(q));
+            }
+        }
+        /*
         for (State p : e.keySet()) {
             for (State q : e.get(p)) {
                 if (d.containsKey(q)) {
@@ -73,6 +82,7 @@ public class State {
                 }
             }
         }
+         */
         return ed;
     }
 
@@ -89,6 +99,8 @@ public class State {
             Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> D
     ) {
         Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> ED = new HashSet<>();
+        if (E.isEmpty() || D.isEmpty())
+            return ED;
         for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> e : E) {
             for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> d : D) {
                 Map<State, Set<State>> ed1 = composeM(e.fst(), d.fst());
