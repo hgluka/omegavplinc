@@ -94,6 +94,11 @@ public class ParseAndCheckTest {
         assertNoInclusion("src/test/resources/png2ico2.ats", "src/test/resources/png2ico1.ats");
     }
 
+    @Test
+    void check_throttleStd() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/throttle-std1.ats", "src/test/resources/throttle-std2.ats");
+    }
+
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
         Parser parserA = new Parser(a);
         Parser parserB = new Parser(b);
@@ -103,7 +108,7 @@ public class ParseAndCheckTest {
         Instant start = Instant.now();
         boolean isIncluded = checker.checkInclusion();
         Instant end = Instant.now();
-        logger.info("The check took " + Duration.between(start, end).toSeconds() + " seconds.");
+        logger.info("The check took " + Duration.between(start, end).toMillis() + " milliseconds.");
         assertTrue(isIncluded);
     }
 
@@ -116,7 +121,7 @@ public class ParseAndCheckTest {
         Instant start = Instant.now();
         boolean isIncluded = checker.checkInclusion();
         Instant end = Instant.now();
-        logger.info("The check took " + Duration.between(start, end).toSeconds() + " seconds.");
+        logger.info("The check took " + Duration.between(start, end).toMillis() + " milliseconds.");
         assertFalse(isIncluded);
     }
 }
