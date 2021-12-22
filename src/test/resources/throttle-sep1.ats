@@ -1,0 +1,27 @@
+NestedWordAutomaton nwa = (
+	callAlphabet = {c0},
+	internalAlphabet = {a2 a3 a4},
+	returnAlphabet = {r1},
+	states = {q0 q1 q2 q3 q4 q5 q6 q7 q8 q9},
+	initialStates = {q4},
+	finalStates = {q5},
+	callTransitions = {
+		(q0 c0 q6)
+		(q2 c0 q0)
+		(q4 c0 q0)
+	},
+	internalTransitions = {
+		(q1 a3 q2)
+		(q6 a2 q7)
+		(q7 a4 q8)
+		(q8 a2 q9)
+	},
+	returnTransitions = {
+		(q2 q2 r1 q3)
+		(q2 q4 r1 q5)
+		(q3 q2 r1 q3)
+		(q3 q4 r1 q5)
+		(q7 q0 r1 q1)
+		(q9 q0 r1 q1)
+	}
+);

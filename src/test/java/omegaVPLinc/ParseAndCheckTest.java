@@ -17,7 +17,7 @@ public class ParseAndCheckTest {
     private static final Logger logger = LoggerFactory.getLogger(ParseAndCheckTest.class);
 
     @Test
-    void parseAndCheckTest() throws IOException, Parser.ParseError {
+    void check_test() throws IOException, Parser.ParseError {
         Parser parserA = new Parser("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats");
         Parser parserB = new Parser("src/test/resources/McCarthy91.bpl_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
         VPA A = parserA.parse();
@@ -33,70 +33,97 @@ public class ParseAndCheckTest {
     }
 
     @Test
-    void parseAndCheckSturmianRecurrentTest() throws IOException, Parser.ParseError {
+    void check_sturmianRecurrent() throws IOException, Parser.ParseError {
         assertInclusion("src/test/resources/All_factors_of_Sturmian_words_are_recurrent_sub.autfilt.ats",
                 "src/test/resources/All_factors_of_Sturmian_words_are_recurrent_sup.autfilt.ats");
     }
 
     @Test
-    void parseAndCheckSturmianPalindromesTest() throws IOException, Parser.ParseError {
+    void check_sturmianPalindromes() throws IOException, Parser.ParseError {
         assertInclusion("src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sub.autfilt.ats",
                 "src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sup.autfilt.ats");
     }
 
     @Test
-    void parseAndCheckSturmianPalindromesReversedTest() throws IOException, Parser.ParseError {
+    void check_sturmianPalindromes_reversed() throws IOException, Parser.ParseError {
         assertNoInclusion("src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sup.autfilt.ats",
                 "src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sub.autfilt.ats");
     }
 
     @Test
-    void parseAndCheckOstrowskiTest() throws IOException, Parser.ParseError {
+    void check_ostrowski() throws IOException, Parser.ParseError {
         assertInclusion("src/test/resources/Addition_of_Ostrowski-a_representations_is_a_function_(ie,_there_is_an_output_for_every_input)_sub.autfilt.ats",
                 "src/test/resources/Addition_of_Ostrowski-a_representations_is_a_function_(ie,_there_is_an_output_for_every_input)_sup.autfilt.ats");
     }
 
     @Test
-    void parseAndCheckNaturalNumbersTest() throws IOException, Parser.ParseError {
+    void check_naturalNumbers() throws IOException, Parser.ParseError {
         assertInclusion("src/test/resources/All_natural_numbers_other_than_0_have_a_predecessor_sub.autfilt.ats",
                 "src/test/resources/All_natural_numbers_other_than_0_have_a_predecessor_sup.autfilt.aligned.ats");
     }
 
     @Test
-    void parseAndCheckLazyOstrowskiTest() throws IOException, Parser.ParseError {
+    void check_lazyOstrowski() throws IOException, Parser.ParseError {
         assertInclusion("src/test/resources/The_lazy_Ostrowski_representation_is_unique_sub.autfilt.ats",
                 "src/test/resources/The_lazy_Ostrowski_representation_is_unique_sup.autfilt.ats");
     }
 
     @Test
-    void parseAndCheckLazyOstrowskiReversedTest() throws IOException, Parser.ParseError {
+    void check_lazyOstrowski_reversed() throws IOException, Parser.ParseError {
         assertNoInclusion("src/test/resources/The_lazy_Ostrowski_representation_is_unique_sup.autfilt.ats",
                 "src/test/resources/The_lazy_Ostrowski_representation_is_unique_sub.autfilt.ats");
     }
 
     @Test
-    void parseAndCheckSpecialFactorsReversedTest() throws IOException, Parser.ParseError {
+    void check_specialFactors_reversed() throws IOException, Parser.ParseError {
         assertNoInclusion("src/test/resources/Specal_factors_are_unique_sup.autfilt.aligned.ats", "src/test/resources/Specal_factors_are_unique_sub.autfilt.ats");
     }
 
     @Test
-    void parseAndCheckBigTest() throws IOException, Parser.ParseError {
+    void check_mccarthy91() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats", "src/test/resources/union.ats");
         assertInclusion("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats", "src/test/resources/union.ats");
     }
 
     @Test
-    void parseAndCheckPng2IcoTest() throws IOException, Parser.ParseError {
+    void check_png2ico() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/png2ico1.ats", "src/test/resources/png2ico2.ats");
         assertInclusion("src/test/resources/png2ico1.ats", "src/test/resources/png2ico2.ats");
     }
 
     @Test
-    void parseAndCheckPng2IcoReversedTest() throws IOException, Parser.ParseError {
+    void check_png2ico_reversed() throws IOException, Parser.ParseError {
         assertNoInclusion("src/test/resources/png2ico2.ats", "src/test/resources/png2ico1.ats");
     }
 
     @Test
     void check_throttleStd() throws IOException, Parser.ParseError {
         assertInclusion("src/test/resources/throttle-std1.ats", "src/test/resources/throttle-std2.ats");
+        assertInclusion("src/test/resources/throttle-std1.ats", "src/test/resources/throttle-std2.ats");
+    }
+
+    @Test
+    void check_throttleSep() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/throttle-sep1.ats", "src/test/resources/throttle-sep2.ats");
+        assertInclusion("src/test/resources/throttle-sep1.ats", "src/test/resources/throttle-sep2.ats");
+    }
+
+    @Test
+    void check_gzip() throws IOException, Parser.ParseError {
+        // without minimization via ultimate: 4h6m
+        assertInclusion("src/test/resources/gzip1.ats", "src/test/resources/gzip2.ats");
+    }
+
+    @Test
+    void check_gzip_reduced() throws IOException, Parser.ParseError {
+        // with minimization via ultimate: 6172827.7ms (1h43m)
+        assertInclusion("src/test/resources/gzip1_reduced.ats", "src/test/resources/gzip2_reduced.ats");
+    }
+
+    @Test
+    void check_gzipFixed_reduced() throws IOException, Parser.ParseError {
+        // with minimization via ultimate: 24817.55ms
+        assertInclusion("src/test/resources/gzip1_reduced.ats", "src/test/resources/gzip3_reduced.ats");
     }
 
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
