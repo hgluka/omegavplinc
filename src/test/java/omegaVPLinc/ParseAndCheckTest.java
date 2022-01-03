@@ -124,6 +124,7 @@ public class ParseAndCheckTest {
     void check_gzipFixed_reduced() throws IOException, Parser.ParseError {
         // with minimization via ultimate: 24817.55ms
         assertInclusion("src/test/resources/gzip1_reduced.ats", "src/test/resources/gzip3_reduced.ats");
+        assertInclusion("src/test/resources/gzip1_reduced.ats", "src/test/resources/gzip3_reduced.ats");
     }
 
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
