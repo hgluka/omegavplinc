@@ -44,7 +44,9 @@ public class PrefixCVector extends CVector<Map<State, Set<State>>> {
             // Union of Y_{p, q'}Y_{q', q}
             for (State qPrime : a.getStates()) {
                 if (!getOldInnerFrontier(p, qPrime).isEmpty() || !getOldInnerFrontier(qPrime, q).isEmpty()) {
-                    if (antichainInsert(pq, State.composeS(innerVectorCopy.get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                    if (antichainInsert(pq, State.composeS(getOldInnerFrontier(p, qPrime), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                        changed.add(pq);
+                    if (antichainInsert(pq, State.composeS(innerVectorCopy.get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
                         changed.add(pq);
                 }
             }

@@ -55,11 +55,15 @@ public class CStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
             // Phi(X, X')_{p, q}
             for (State qPrime : a.getStates()) {
                 if (!getOldInnerFrontier(p, qPrime).isEmpty() || !cVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
-                    if (antichainInsert(pq, State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), cVector.getInnerVectorCopy().get(Pair.of(qPrime, q)))))
+                    if (antichainInsert(pq, State.composeP(getOldInnerFrontier(p, qPrime), cVector.getInnerVectorCopy().get(Pair.of(qPrime, q)))))
+                        changed.add(pq);
+                    if (antichainInsert(pq, State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), cVector.getOldInnerFrontier(qPrime, q))))
                         changed.add(pq);
                 }
                 if (!cVector.getOldInnerFrontier(p, qPrime).isEmpty() || !getOldInnerFrontier(qPrime, q).isEmpty()) {
-                    if (antichainInsert(pq, State.composeP(cVector.getInnerVectorCopy().get(Pair.of(p, qPrime)), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                    if (antichainInsert(pq, State.composeP(cVector.getOldInnerFrontier(p, qPrime), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                        changed.add(pq);
+                    if (antichainInsert(pq, State.composeP(cVector.getInnerVectorCopy().get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
                         changed.add(pq);
                 }
             }

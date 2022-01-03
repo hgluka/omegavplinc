@@ -74,15 +74,6 @@ public class State {
                     ed.computeIfAbsent(entryE.getKey(), k -> new HashSet<>()).addAll(d.get(q));
             }
         }
-        /*
-        for (State p : e.keySet()) {
-            for (State q : e.get(p)) {
-                if (d.containsKey(q)) {
-                    ed.computeIfAbsent(p, k -> new HashSet<>()).addAll(d.get(q));
-                }
-            }
-        }
-         */
         return ed;
     }
 

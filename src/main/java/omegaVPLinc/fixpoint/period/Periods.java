@@ -36,44 +36,6 @@ public class Periods {
 
     public int iterate() {
         logger.info("Starting Period iteration.");
-        Set<Pair<State, State>> changedW;
-        Set<Pair<State, State>> changedWS;
-        Set<Pair<State, State>> changedC;
-        Set<Pair<State, State>> changedCS;
-        Set<Pair<State, State>> changedR;
-        Set<Pair<State, State>> changedRS;
-
-        Set<Pair<State, State>> frontierW = new HashSet<>();
-        Set<Pair<State, State>> frontierWS = new HashSet<>();
-        Set<Pair<State, State>> frontierC = new HashSet<>();
-        Set<Pair<State, State>> frontierCS = new HashSet<>();
-        Set<Pair<State, State>> frontierR = new HashSet<>();
-        Set<Pair<State, State>> frontierRS = new HashSet<>();
-        for (State p : a.getStates()) {
-            frontierW.add(Pair.of(p, p));
-            for (Symbol c : p.getCallSuccessors().keySet()) {
-                for (State q : p.getCallSuccessors(c)) {
-                    if (p.isFinal() || q.isFinal())
-                        frontierRS.add(Pair.of(p, q));
-                    frontierR.add(Pair.of(p, q));
-                }
-            }
-            for (Symbol r : p.getReturnSuccessors().keySet()) {
-                for (State q : p.getReturnSuccessors(r, a.getEmptyStackSymbol())) {
-                    if (p.isFinal() || q.isFinal())
-                        frontierCS.add(Pair.of(p, q));
-                    frontierC.add(Pair.of(p, q));
-                }
-            }
-            for (Symbol s : p.getInternalSuccessors().keySet()) {
-                for (State q : p.getInternalSuccessors(s)) {
-                    if (p.isFinal() || q.isFinal()) {
-                        frontierWS.add(Pair.of(p, q));
-                    }
-                    frontierW.add(Pair.of(p, q));
-                }
-            }
-        }
         W.initial();
         WS.initial();
         C.initial();
