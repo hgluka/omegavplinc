@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class Lexer {
     public enum Token {
-        WORD("[_a-zA-Z][_a-zA-Z0-9]*"),
+        WORD("([_a-zA-Z][_a-zA-Z0-9]*)|(\"[^\"]+\")"),
         EQ("="),
         LBR("\\{"), RBR("\\}"),
         LPR("\\("), RPR("\\)"),
