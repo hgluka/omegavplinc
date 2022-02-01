@@ -117,3 +117,6 @@ Temporary Items
 
 # Profiling
 *.hprof
+
+# ultimate release for testing
+/Ultimate/
