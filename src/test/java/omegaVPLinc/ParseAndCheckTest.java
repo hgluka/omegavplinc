@@ -129,32 +129,32 @@ public class ParseAndCheckTest {
 
     @Test
     void check_2nested() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/sv-comp-examples/2Nested-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/2Nested-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-        assertInclusion("src/test/resources/sv-comp-examples/2Nested-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/2Nested-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/2Nested-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/2Nested-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/2Nested-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/2Nested-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
     }
 
     @Test
     void check_4nestedWith3Variables() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/sv-comp-examples/4NestedWith3Variables-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/4NestedWith3Variables-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-        assertInclusion("src/test/resources/sv-comp-examples/4NestedWith3Variables-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/4NestedWith3Variables-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/4NestedWith3Variables-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/4NestedWith3Variables-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/4NestedWith3Variables-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/4NestedWith3Variables-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
     }
 
     @Test
     void check_brockschmidtCookFuhs() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/sv-comp-examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-        assertInclusion("src/test/resources/sv-comp-examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
     }
 
     @Test
     void check_cairo() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/sv-comp-examples/Cairo.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/Cairo.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-        assertInclusion("src/test/resources/sv-comp-examples/Cairo.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/Cairo.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/Cairo.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/Cairo.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/Cairo.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/Cairo.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
     }
 
     @Test
     void check_cairoStep2() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/sv-comp-examples/Cairo_step2-1.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/Cairo_step2-1.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-        assertInclusion("src/test/resources/sv-comp-examples/Cairo_step2-1.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/sv-comp-examples/Cairo_step2-1.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/Cairo_step2-1.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/Cairo_step2-1.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+        assertInclusion("src/test/resources/svcomp_examples/Cairo_step2-1.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/Cairo_step2-1.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
     }
 
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
