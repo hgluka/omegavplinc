@@ -98,6 +98,19 @@ class PrefixVectorsTest {
         assertEquals(8, iterations);
     }
 
+    @Test
+    void testPrefixesBigA() throws IOException, Parser.ParseError {
+        Parser parserA = new Parser("src/test/resources/svcomp_examples_processed/diskperf_simpl1.cil.c_A.ats");
+        Parser parserB = new Parser("src/test/resources/svcomp_examples_processed/diskperf_simpl1.cil.c_Bunion.ats");
+        VPA A = parserA.parse();
+        VPA B = parserB.parse();
+        Prefixes prefixes = new Prefixes(A, B);
+        Instant start = Instant.now();
+        int iterations = prefixes.iterate();
+        Instant end = Instant.now();
+        logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
+    }
+
 
     @Test
     void testPrefixesBig() throws IOException, Parser.ParseError {

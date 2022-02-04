@@ -113,4 +113,17 @@ class PeriodVectorsTest {
         logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
         assertEquals(16, iterations);
     }
+
+    @Test
+    void testPeriodsBigA() throws IOException, Parser.ParseError {
+        Parser parserA = new Parser("src/test/resources/svcomp_examples_processed/diskperf_simpl1.cil.c_A.ats");
+        Parser parserB = new Parser("src/test/resources/svcomp_examples_processed/diskperf_simpl1.cil.c_Bunion.ats");
+        VPA A = parserA.parse();
+        VPA B = parserB.parse();
+        Periods periods = new Periods(A, B);
+        Instant start = Instant.now();
+        int iterations = periods.iterate();
+        Instant end = Instant.now();
+        logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
+    }
 }

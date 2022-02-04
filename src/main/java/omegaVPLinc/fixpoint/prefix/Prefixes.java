@@ -53,8 +53,7 @@ public class Prefixes {
         int i = 1;
         while (!W.getChanged().isEmpty()
                 || !C.getChanged().isEmpty()
-                || !R.getChanged().isEmpty()
-                || !U.getChanged().isEmpty()) {
+                || !R.getChanged().isEmpty()) {
             W.iterateOnce();
             C.iterateOnce();
             R.iterateOnce();
@@ -65,14 +64,15 @@ public class Prefixes {
             C.updateInnerFrontier();
             R.updateCopy();
             R.updateInnerFrontier();
-            U.updateCopy();
-            U.updateInnerFrontier();
             W.frontier();
             C.frontier();
             R.frontier();
-            U.frontier();
             i++;
         }
+        U.iterateOnce();
+        U.updateCopy();
+        U.updateInnerFrontier();
+        logger.info("Prefix fixpoint complete after {} iterations.", i);
         return i;
     }
 

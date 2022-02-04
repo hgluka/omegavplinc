@@ -744,6 +744,6 @@ NestedWordAutomaton nwa = (
 		(q25 q22 r1 q25)
 		(q25 q23 r1 q25)
 		(q25 q24 r1 q25)
-		(q25 q25 r1 q2)
+		(q25 q25 r1 q25)
 	}
 );
