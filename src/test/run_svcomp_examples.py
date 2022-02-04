@@ -2,6 +2,9 @@ import glob
 import pprint
 import subprocess
 from pathlib import Path
+import regex
+import os
+import csv
 
 class Example:
     def __init__(self, name, A, Bs):
@@ -9,6 +12,7 @@ class Example:
         self.A = A
         self.Bs = Bs
         self.B = ""
+        self.timeout = 30  # 30 seconds TODO: change to 3600 before running
 
     def __repr__(self):
         return str(len(self.Bs))
@@ -33,9 +37,50 @@ class Example:
                 with open("resources/svcomp_examples_processed/" + self.name + "_Bunion.ats", "w") as b:
                     b.write(bp.stdout[bp.stdout.find("NestedWordAutomaton"):bp.stdout.find("\n);\n")+4])
                     successful = True
+            else:
+                print("Union calculation for " + self.name + " wasn't successful.")
         except subprocess.TimeoutExpired:
             print("Example: {} timed out.".format(self.name))
         return successful
+
+    def run_ultimate(self):
+        env_with_java11 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin:' + os.environ['PATH']}
+        real_time = -1.0
+        self_reported_time = -1.0
+        subprocess.run(["sed", "-i", "s|BuchiCegarLoopAbstraction0 = (|A = (|", self.A])
+        subprocess.run(["sed", "-i", "1s|automaton = (|B = (|", self.B])
+        with open("../../Ultimate/run_example.ats", "w") as re:
+            re.write("parseAutomata(\"../src/test/" + self.A + "\");\n")
+            re.write("parseAutomata(\"../src/test/" + self.B + "\");\n")
+            re.write("assert(buchiIsEmpty(buchiIntersect(A, complement(B))));")
+        try:
+            rup = subprocess.run(["time", "-p", "./AutomataScriptInterpreter.sh", "run_example.ats"], env=env_with_java11, timeout=self.timeout, cwd="../../Ultimate/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            if not rup.returncode and "RESULT: Ultimate proved your program to be correct!" in rup.stdout:
+                real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
+                self_reported_time = sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=([^}]+)}", rup.stdout).captures(1))
+            else:
+                real_time = -2.0
+                self_reported_time = -2.0
+        except subprocess.TimeoutExpired:
+            pass
+        return real_time, self_reported_time
+
+    def run_omegaVPLinc(self):
+        env_with_java17 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.17.0-openjdk-amd64/bin:' + os.environ['PATH']}
+        real_time = -1.0
+        self_reported_time = -1.0
+        try:
+            rup = subprocess.run(["time", "-p", "java", "-jar", "build/libs/omegaVPLinc-1.0.jar", "src/test/" + self.A, "src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            if not rup.returncode and "is a subset of" in rup.stdout:
+                real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
+                self_reported_time = float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
+            else:
+                real_time = -2.0
+                self_reported_time = -2.0
+        except subprocess.TimeoutExpired:
+            pass
+        return real_time, self_reported_time
+
 
 
 examples = {}
@@ -61,19 +106,40 @@ pp = pprint.PrettyPrinter(indent=4)
 examples_nonempty = {key : examples[key] for key in examples if examples[key].A and examples[key].Bs}
 finished_unions = 0
 count = 0
-for example in examples_nonempty:
-    if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file():
-        examples_nonempty[example].acopy()
-    else:
-        examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
-    if not Path("resources/svcomp_example_processed/" + example + "_Bunion.ats").is_file():
+for example in list(examples_nonempty.keys()):
+    if not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file():
         print(str(count) + ": Running union calculation for " + example + ".")
         if examples_nonempty[example].bunion():
             finished_unions += 1
+            if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file():
+                examples_nonempty[example].acopy()
+            else:
+                examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
+        else:
+            subprocess.run(["mv", examples_nonempty[example].A[0], "resources/svcomp_examples_timedout/"])
+            for B in examples_nonempty[example].Bs:
+                subprocess.run(["mv", B[0], "resources/svcomp_examples_timedout/"])
+            print("Moved to different directory.")
+            del examples_nonempty[example]
     else:
         examples_nonempty[example].B = "resources/svcomp_examples_processed/" + example + "_Bunion.ats"
+        if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file():
+            examples_nonempty[example].acopy()
+        else:
+            examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
     count += 1
+
 print("Total examples: {}".format(len(examples)))
 print("Total examples without missing compoments: {}".format(len(examples_nonempty)))
 print("Total computed unions: {}".format(finished_unions))
 
+with open("time_results.csv", "w") as results:
+    wr = csv.writer(results)
+    wr.writerow(["example", "omegaVPLinc", "ultimate", "fadecider"])
+    for example in list(examples_nonempty.keys()):
+        print(example + ": running in ultimate.")
+        urt, usrt = examples_nonempty[example].run_ultimate()
+        print(example + ": running in omegaVPLinc.")
+        ort, osrt = examples_nonempty[example].run_omegaVPLinc()
+        print(example + ": " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")
+        wr.writerow([example, ort, urt, ""])
