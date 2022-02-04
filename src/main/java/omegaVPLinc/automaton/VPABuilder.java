@@ -1,11 +1,16 @@
 package omegaVPLinc.automaton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class VPABuilder {
+    private static final Logger logger = LoggerFactory.getLogger(VPABuilder.class);
+
     private Set<Symbol> callAlphabet;
     private final Map<String, Symbol> callAlphabetMap;
     private Set<Symbol> internalAlphabet;
@@ -98,6 +103,7 @@ public class VPABuilder {
             && this.internalAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.INTERNAL)
             && this.returnAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.RETURN)) {
                 if (this.states.contains(initialState)) {
+                    logger.info("Automaton has {} states.", this.states.size());
                     return new VPA(this.callAlphabet,
                             this.internalAlphabet,
                             this.returnAlphabet,

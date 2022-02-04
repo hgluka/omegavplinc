@@ -42,7 +42,7 @@ public class Periods {
         CS.initial();
         R.initial();
         RS.initial();
-        logger.info("Iteration number 0 complete");
+        // logger.info("Iteration number 0 complete");
         W.updateCopy();
         WS.updateCopy();
         C.updateCopy();
@@ -74,7 +74,7 @@ public class Periods {
             CS.iterateOnce();
             R.iterateOnce();
             RS.iterateOnce();
-            logger.info("Iteration number {} complete.", i);
+            // logger.info("Iteration number {} complete.", i);
             W.updateCopy();
             W.updateInnerFrontier();
             WS.updateCopy();
@@ -95,6 +95,7 @@ public class Periods {
             RS.frontier();
             i++;
         }
+        logger.info("Period fixpoint complete after {} iterations.", i);
         return i;
     }
 

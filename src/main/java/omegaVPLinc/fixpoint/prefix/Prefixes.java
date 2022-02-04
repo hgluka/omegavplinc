@@ -37,7 +37,7 @@ public class Prefixes {
         C.initial();
         R.initial();
         U.initial();
-        logger.info("Iteration number 0 complete");
+        // logger.info("Iteration number 0 complete");
         W.updateCopy();
         C.updateCopy();
         R.updateCopy();
@@ -58,8 +58,7 @@ public class Prefixes {
             W.iterateOnce();
             C.iterateOnce();
             R.iterateOnce();
-            U.iterateOnce();
-            logger.info("Iteration number {} complete", i);
+            // logger.info("Iteration number {} complete", i);
             W.updateCopy();
             W.updateInnerFrontier();
             C.updateCopy();

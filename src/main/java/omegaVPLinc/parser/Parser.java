@@ -64,7 +64,7 @@ public class Parser {
 
     private void parseAutomaton() throws ParseError {
         acceptWord("NestedWordAutomaton");
-        acceptWord("nwa");
+        accept(Lexer.Token.WORD);
         accept(Lexer.Token.EQ);
         accept(Lexer.Token.LPR);
         parseDefinitions();
