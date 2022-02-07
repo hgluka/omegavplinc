@@ -157,6 +157,11 @@ public class ParseAndCheckTest {
         assertInclusion("src/test/resources/svcomp_examples/Cairo_step2-1.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/Cairo_step2-1.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
     }
 
+    @Test
+    void check_ddlm2013() throws IOException, Parser.ParseError {
+        assertNoInclusion("src/test/resources/svcomp_examples_processed/ddlm2013.i_A.ats", "src/test/resources/svcomp_examples_processed/ddlm2013.i_Bunion.ats");
+    }
+
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
         Parser parserA = new Parser(a);
         Parser parserB = new Parser(b);

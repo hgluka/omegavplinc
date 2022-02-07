@@ -59,7 +59,7 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                 if (!cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)).isEmpty()) {
                     for (State qPrime : a.getStates()) {
                         if (!innerVectorCopy.get(Pair.of(pPrime, qPrime)).isEmpty() && !rVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
-                            if (!cVector.getOldInnerFrontier(p, pPrime).isEmpty() || !getOldInnerFrontier(pPrime, qPrime).isEmpty() && !rVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
+                            if (!cVector.getOldInnerFrontier(p, pPrime).isEmpty() || !getOldInnerFrontier(pPrime, qPrime).isEmpty() || !rVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
                                 if (antichainInsert(pq, State.composeS(cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))))))
                                     changed.add(pq);
                             }

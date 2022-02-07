@@ -57,6 +57,7 @@ public class Prefixes {
             W.iterateOnce();
             C.iterateOnce();
             R.iterateOnce();
+            U.iterateOnce();
             // logger.info("Iteration number {} complete", i);
             W.updateCopy();
             W.updateInnerFrontier();
@@ -64,14 +65,14 @@ public class Prefixes {
             C.updateInnerFrontier();
             R.updateCopy();
             R.updateInnerFrontier();
+            U.updateCopy();
+            U.updateInnerFrontier();
             W.frontier();
             C.frontier();
             R.frontier();
+            U.frontier();
             i++;
         }
-        U.iterateOnce();
-        U.updateCopy();
-        U.updateInnerFrontier();
         logger.info("Prefix fixpoint complete after {} iterations.", i);
         return i;
     }
