@@ -162,6 +162,16 @@ public class ParseAndCheckTest {
         assertNoInclusion("src/test/resources/svcomp_examples_processed/ddlm2013.i_A.ats", "src/test/resources/svcomp_examples_processed/ddlm2013.i_Bunion.ats");
     }
 
+    @Test
+    void check_cstrncatMixedAlloca() throws IOException, Parser.ParseError {
+        assertNoInclusion("src/test/resources/svcomp_examples_processed/cstrncat_mixed_alloca.i_A.ats", "src/test/resources/svcomp_examples_processed/cstrncat_mixed_alloca.i_Bunion.ats");
+    }
+
+    @Test
+    void check_recMallocEx2() throws IOException, Parser.ParseError {
+        assertNoInclusion("src/test/resources/svcomp_examples_processed/rec_malloc_ex2.i_A.ats", "src/test/resources/svcomp_examples_processed/rec_malloc_ex2.i_Bunion.ats");
+    }
+
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
         Parser parserA = new Parser(a);
         Parser parserB = new Parser(b);
