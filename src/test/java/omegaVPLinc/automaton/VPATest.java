@@ -1,8 +1,11 @@
 package omegaVPLinc.automaton;
 
+import omegaVPLinc.algorithm.InclusionChecker;
+import omegaVPLinc.parser.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,6 +63,15 @@ public class VPATest {
                 vpa.getState("q1").get(),
                 Set.of(vpa.getState("q0").get()));
         assertEquals(expectedContextOfR, contextOfR);
+    }
 
+    @Test
+    void testWriteToNbvpa() throws IOException, Parser.ParseError {
+        Parser parserA = new Parser("src/test/resources/svcomp_examples_processed/ddlm2013.i_A.ats");
+        Parser parserB = new Parser("src/test/resources/svcomp_examples_processed/ddlm2013.i_Bunion.ats");
+        VPA A = parserA.parse();
+        VPA B = parserB.parse();
+        A.writeToNPVPA("src/test/resources/svcomp_examples_npvpa/ddlm2013.i_A.npvpa");
+        B.writeToNPVPA("src/test/resources/svcomp_examples_npvpa/ddlm2013.i_Bunion.npvpa");
     }
 }

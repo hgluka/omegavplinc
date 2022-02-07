@@ -2,6 +2,9 @@ package omegaVPLinc.automaton;
 
 import omegaVPLinc.utility.Pair;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class VPA {
@@ -46,6 +49,73 @@ public class VPA {
                 this.finalEpsilonContext.put(p, new HashSet<>(Set.of(p)));
         }
         this.emptyStackSymbol = "empty";
+    }
+
+    public boolean writeToNPVPA(String path) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        writer.write("automaton \"npvpa\";\nalphabet;\n");
+        HashMap<Symbol, Integer> symbol_map = new HashMap<>();
+        Integer i = 0;
+        for (Symbol c : this.callAlphabet) {
+            writer.write(i + " < " + c.getSymbol() + ";\n");
+            symbol_map.put(c, i);
+            i++;
+        }
+        for (Symbol r : this.returnAlphabet) {
+            writer.write(i + " > " + r.getSymbol() + ";\n");
+            symbol_map.put(r, i);
+            i++;
+        }
+        for (Symbol s : this.internalAlphabet) {
+            writer.write(i + " " + s.getSymbol() + ";\n");
+            symbol_map.put(s, i);
+            i++;
+        }
+        HashMap<State, Integer> state_map = new HashMap<>();
+        i = 0;
+        writer.write("states;\n");
+        for (State p : states) {
+            if (p.isFinal())
+                writer.write(i + " 2 " + p.getName() + ";\n");
+            else
+                writer.write(i + " 1 " + p.getName() + ";\n");
+            state_map.put(p, i);
+            i++;
+        }
+        HashMap<String, Integer> stack_map = new HashMap<>();
+        i = 0;
+        writer.write("stack;\n");
+        for (String s : stackAlphabet) {
+            writer.write(i + " " + s + ";\n");
+            stack_map.put(s, i);
+        }
+        writer.write("initial " + state_map.get(initialState) + ";\n");
+        writer.write("transitions;\n");
+        for (State p : states) {
+            for (Symbol c : p.getCallSuccessors().keySet()) {
+                for (State q : p.getCallSuccessors(c)) {
+                    writer.write(state_map.get(p) + " " + symbol_map.get(c) + " " + "(" + state_map.get(q) +","+state_map.get(q)+");\n");
+                }
+            }
+        }
+        for (State p : states) {
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                for (State q : p.getInternalSuccessors(s)) {
+                    writer.write(state_map.get(p) + " " + symbol_map.get(s) + " " + state_map.get(q) + ";\n");
+                }
+            }
+        }
+        for (State p : states) {
+            for (Symbol r : p.getReturnSuccessors().keySet()) {
+                for (String s : p.getReturnSuccessors().get(r).keySet()) {
+                    for (State q : p.getReturnSuccessors(r, s)) {
+                        writer.write(state_map.get(p) + " " + stack_map.get(s) + " " + symbol_map.get(r) + " " + state_map.get(q) + ";\n");
+                    }
+                }
+            }
+        }
+        writer.close();
+        return true;
     }
 
     public String getEmptyStackSymbol() {
