@@ -43,7 +43,7 @@ class Example:
             print("Example: {} timed out.".format(self.name))
         return successful
 
-    def run_ultimate(self):
+    def run_ultimate(self, output=False):
         env_with_java11 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin:' + os.environ['PATH']}
         real_time = -1.0
         self_reported_time = -1.0
@@ -55,6 +55,12 @@ class Example:
             re.write("assert(buchiIsEmpty(buchiIntersect(A, complement(B))));")
         try:
             rup = subprocess.run(["time", "-p", "./AutomataScriptInterpreter.sh", "run_example.ats"], env=env_with_java11, timeout=self.timeout, cwd="../../Ultimate/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            if output:
+                with open("experiment_output/output_"+self.name+".txt", "w") as o:
+                    o.write("STDOUT:\n")
+                    o.write(rup.stdout)
+                    o.write("\nSTDERR:\n")
+                    o.write(rup.stderr)
             if not rup.returncode and "RESULT: Ultimate proved your program to be correct!" in rup.stdout:
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=([^}]+)}", rup.stdout).captures(1))
@@ -65,12 +71,18 @@ class Example:
             pass
         return real_time, self_reported_time
 
-    def run_omegaVPLinc(self):
+    def run_omegaVPLinc(self, output=False):
         env_with_java17 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.17.0-openjdk-amd64/bin:' + os.environ['PATH']}
         real_time = -1.0
         self_reported_time = -1.0
         try:
             rup = subprocess.run(["time", "-p", "java", "-jar", "build/libs/omegaVPLinc-1.0.jar", "src/test/" + self.A, "src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            if output:
+                with open("experiment_output/output_"+self.name+".txt", "w") as o:
+                    o.write("STDOUT:\n")
+                    o.write(rup.stdout)
+                    o.write("\nSTDERR:\n")
+                    o.write(rup.stderr)
             if not rup.returncode and "is a subset of" in rup.stdout:
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
@@ -128,6 +140,30 @@ for example in list(examples_nonempty.keys()):
         else:
             examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
     count += 1
+
+print("Total examples: {}".format(len(examples)))
+print("Total examples without missing compoments: {}".format(len(examples_nonempty)))
+print("Total computed unions: {}".format(finished_unions))
+
+done_examples = []
+rerun_ultimate = []
+rerun_omegaVPLinc = []
+with open("time_results.csv", "r") as results:
+    reader = csv.DictReader(results)
+    for row in reader:
+        done_examples.append(row['example'])
+        if row['ultimate'] == '-2.0':
+            rerun_ultimate.append(row['example'])
+        if row['omegaVPLinc'] == '-2.0':
+            rerun_omegaVPLinc.append(row['example'])
+
+for example in list(examples_nonempty.keys()):
+    subprocess.run(["sed", "-i", "s|BuchiCegarLoopAbstraction0 = (|A = (|", examples_nonempty[example].A])
+    subprocess.run(["sed", "-i", "1s|automaton = (|B = (|", examples_nonempty[example].B])
+    if example not in done_examples:
+        subprocess.run(["mv", examples_nonempty[example].A, "resources/svcomp_examples_notdone/"])
+        subprocess.run(["mv", examples_nonempty[example].B, "resources/svcomp_examples_notdone/"])
+        del examples_nonempty[example]
 
 print("Total examples: {}".format(len(examples)))
 print("Total examples without missing compoments: {}".format(len(examples_nonempty)))

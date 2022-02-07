@@ -27,11 +27,6 @@ test {
     useJUnitPlatform()
     minHeapSize = "1g"
     maxHeapSize = "4g"
-
-    filter {
-        excludeTestsMatching "omegaVPLinc.ParseAndCheckTest"
-        excludeTestsMatching "omegaVPLinc.fixpoint.*"
-    }
 }
 
 jar {
