@@ -86,6 +86,9 @@ class Example:
             if not rup.returncode and "is a subset of" in rup.stdout:
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
+            elif not rup.returncode and "is not a subset of" in rup.stdout:
+                real_time = -float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
+                self_reported_time = -float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
             else:
                 real_time = -2.0
                 self_reported_time = -2.0
@@ -171,36 +174,32 @@ print("Total examples without missing compoments: {}".format(len(examples_nonemp
 print("Total computed unions: {}".format(finished_unions))
 
 done_examples = []
-rerun_ultimate = []
-rerun_omegaVPLinc = []
-with open("time_results.csv", "r") as results:
+with open("time_results_new.csv", "r") as results:
     reader = csv.DictReader(results)
     for row in reader:
         done_examples.append(row['example'])
-        if row['ultimate'] == '-2.0':
-            rerun_ultimate.append(row['example'])
-        if row['omegaVPLinc'] == '-2.0':
-            rerun_omegaVPLinc.append(row['example'])
 
 for example in list(examples_nonempty.keys()):
     if example not in done_examples:
         del examples_nonempty[example]
 
 print("Total examples: {}".format(len(examples)))
-print("Total examples without missing compoments: {}".format(len(examples_nonempty)))
-print("Total computed unions: {}".format(finished_unions))
+print("Total examples to be tested: {}".format(len(examples_nonempty)))
 
-with open("time_results_new.csv", "w") as results:
+with open("time_results_omegaVPLinc_only.csv", "w") as results:
     wr = csv.writer(results)
     wr.writerow(["example", "omegaVPLinc", "ultimate", "fadecider"])
-    for example in list(examples_nonempty.keys()):
+    for example in examples_nonempty:
+        """
         urt = -3.0
         if example in rerun_ultimate:
             print(example + ": running in ultimate.")
             urt, usrt = examples_nonempty[example].run_ultimate()
-        print(example + ": running in omegaVPLinc.")
-        ort, osrt = examples_nonempty[example].run_omegaVPLinc()
+
         print(example + ": running in fadecider.")
         frt, fsrt = examples_nonempty[example].run_fadecider()
-        print(example + ": " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate), " + str(frt) + "(fadecider)")
-        wr.writerow([example, ort, urt, frt])
+        """
+        print(example + ": running in omegaVPLinc.")
+        ort, osrt = examples_nonempty[example].run_omegaVPLinc()
+        print(example + ": " + str(ort) + "(omegaVPLinc)")  # + str(urt) + "(ultimate), " + str(frt) + "(fadecider)")
+        wr.writerow([example, ort, "", ""])

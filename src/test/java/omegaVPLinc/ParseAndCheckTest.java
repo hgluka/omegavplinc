@@ -172,6 +172,11 @@ public class ParseAndCheckTest {
         assertNoInclusion("src/test/resources/svcomp_examples_processed/rec_malloc_ex2.i_A.ats", "src/test/resources/svcomp_examples_processed/rec_malloc_ex2.i_Bunion.ats");
     }
 
+    @Test
+    void check_minepumpSpec3Product01() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/svcomp_examples_processed/minepump_spec3_product01.cil.c_A.ats", "src/test/resources/svcomp_examples_processed/minepump_spec3_product01.cil.c_Bunion.ats");
+    }
+
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
         Parser parserA = new Parser(a);
         Parser parserB = new Parser(b);
