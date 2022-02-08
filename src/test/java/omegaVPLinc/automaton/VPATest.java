@@ -4,14 +4,20 @@ import omegaVPLinc.algorithm.InclusionChecker;
 import omegaVPLinc.parser.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class VPATest {
+    private static final Logger logger = LoggerFactory.getLogger(VPATest.class);
     private VPA vpa;
     private Map<String, Symbol> alphabet;
 
@@ -66,12 +72,30 @@ public class VPATest {
     }
 
     @Test
-    void testWriteToNbvpa() throws IOException, Parser.ParseError {
+    void testWriteToNpvpa() throws IOException, Parser.ParseError {
         Parser parserA = new Parser("src/test/resources/svcomp_examples_processed/ddlm2013.i_A.ats");
         Parser parserB = new Parser("src/test/resources/svcomp_examples_processed/ddlm2013.i_Bunion.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
         A.writeToNPVPA("src/test/resources/svcomp_examples_npvpa/ddlm2013.i_A.npvpa");
         B.writeToNPVPA("src/test/resources/svcomp_examples_npvpa/ddlm2013.i_Bunion.npvpa");
+    }
+
+    @Test
+    void testWriteAllToNpvpa() throws IOException, Parser.ParseError {
+        File dir = new File("src/test/resources/svcomp_examples_processed/");
+        File[] directoryListing = dir.listFiles();
+        VPA A;
+        Parser parser;
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                if (!Files.exists(Path.of("src/test/resources/svcomp_examples_npvpa/" + child.getName().substring(0, child.getName().length() - 3) + "npvpa"))) {
+                    parser = new Parser(child.getAbsolutePath());
+                    A = parser.parse();
+                    logger.info("src/test/resources/svcomp_examples_npvpa/" + child.getName().substring(0, child.getName().length() - 3) + "npvpa");
+                    A.writeToNPVPA("src/test/resources/svcomp_examples_npvpa/" + child.getName().substring(0, child.getName().length() - 3) + "npvpa");
+                }
+            }
+        }
     }
 }

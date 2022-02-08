@@ -12,7 +12,7 @@ class Example:
         self.A = A
         self.Bs = Bs
         self.B = ""
-        self.timeout = 30  # 30 seconds TODO: change to 3600 before running
+        self.timeout = 3600  # 30 seconds TODO: change to 3600 before running
 
     def __repr__(self):
         return str(len(self.Bs))
@@ -54,7 +54,7 @@ class Example:
             re.write("parseAutomata(\"../src/test/" + self.B + "\");\n")
             re.write("assert(buchiIsEmpty(buchiIntersect(A, complement(B))));")
         try:
-            rup = subprocess.run(["time", "-p", "./AutomataScriptInterpreter.sh", "run_example.ats"], env=env_with_java11, timeout=self.timeout, cwd="../../Ultimate/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            rup = subprocess.run(["/bin/bash", "-c", "time -p ./AutomataScriptInterpreter.sh run_example.ats"], env=env_with_java11, timeout=self.timeout, cwd="../../Ultimate/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             if output:
                 with open("experiment_output/output_"+self.name+".txt", "w") as o:
                     o.write("STDOUT:\n")
@@ -76,7 +76,7 @@ class Example:
         real_time = -1.0
         self_reported_time = -1.0
         try:
-            rup = subprocess.run(["time", "-p", "java", "-jar", "build/libs/omegaVPLinc-1.0.jar", "src/test/" + self.A, "src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            rup = subprocess.run(["/bin/bash", "-c", "time -p java -jar build/libs/omegaVPLinc-1.0.jar src/test/" + self.A + " src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", capture_output=True, universal_newlines=True)
             if output:
                 with open("experiment_output/output_"+self.name+".txt", "w") as o:
                     o.write("STDOUT:\n")
@@ -92,6 +92,31 @@ class Example:
         except subprocess.TimeoutExpired:
             pass
         return real_time, self_reported_time
+
+    def run_fadecider(self, output=False):
+        real_time = -1.0
+        self_reported_time = -1.0
+        with open("fadecider_script.sh", "w") as es:
+            es.write("#!/bin/bash\ncat " + self.A.replace("processed", "npvpa").replace(".ats", ".npvpa") + " | ../../fadecider/bin/fadecider -s npvpa -pc -pr -a " + self.B.replace("processed", "npvpa").replace(".ats", ".npvpa"))
+        subprocess.run(["chmod", "+x", "fadecider_script.sh"])
+        try:
+            rup = subprocess.run(["/bin/bash", "-c", "time -p ./fadecider_script.sh"], timeout=self.timeout, capture_output=True, universal_newlines=True)
+            if output:
+                with open("experiment_output/output_"+self.name+".txt", "w") as o:
+                    o.write("STDOUT:\n")
+                    o.write(rup.stdout)
+                    o.write("\nSTDERR:\n")
+                    o.write(rup.stderr)
+            if not rup.returncode and "Automaton is subsumed." in rup.stdout:
+                real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
+                self_reported_time = float(regex.search(r"t = (\d+\.\d+) sec", rup.stdout).captures(1)[0])
+            else:
+                real_time = -2.0
+                real_time = -2.0
+        except subprocess.TimeoutExpired:
+            pass
+        return real_time, self_reported_time
+
 
 
 
@@ -119,11 +144,11 @@ examples_nonempty = {key : examples[key] for key in examples if examples[key].A 
 finished_unions = 0
 count = 0
 for example in list(examples_nonempty.keys()):
-    if not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file():
+    if not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.npvpa").is_file():
         print(str(count) + ": Running union calculation for " + example + ".")
         if examples_nonempty[example].bunion():
             finished_unions += 1
-            if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file():
+            if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file():
                 examples_nonempty[example].acopy()
             else:
                 examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
@@ -135,7 +160,7 @@ for example in list(examples_nonempty.keys()):
             del examples_nonempty[example]
     else:
         examples_nonempty[example].B = "resources/svcomp_examples_processed/" + example + "_Bunion.ats"
-        if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file():
+        if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_A.ats").is_file():
             examples_nonempty[example].acopy()
         else:
             examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
@@ -158,24 +183,24 @@ with open("time_results.csv", "r") as results:
             rerun_omegaVPLinc.append(row['example'])
 
 for example in list(examples_nonempty.keys()):
-    subprocess.run(["sed", "-i", "s|BuchiCegarLoopAbstraction0 = (|A = (|", examples_nonempty[example].A])
-    subprocess.run(["sed", "-i", "1s|automaton = (|B = (|", examples_nonempty[example].B])
     if example not in done_examples:
-        subprocess.run(["mv", examples_nonempty[example].A, "resources/svcomp_examples_notdone/"])
-        subprocess.run(["mv", examples_nonempty[example].B, "resources/svcomp_examples_notdone/"])
         del examples_nonempty[example]
 
 print("Total examples: {}".format(len(examples)))
 print("Total examples without missing compoments: {}".format(len(examples_nonempty)))
 print("Total computed unions: {}".format(finished_unions))
 
-with open("time_results.csv", "w") as results:
+with open("time_results_new.csv", "w") as results:
     wr = csv.writer(results)
     wr.writerow(["example", "omegaVPLinc", "ultimate", "fadecider"])
     for example in list(examples_nonempty.keys()):
-        print(example + ": running in ultimate.")
-        urt, usrt = examples_nonempty[example].run_ultimate()
+        urt = -3.0
+        if example in rerun_ultimate:
+            print(example + ": running in ultimate.")
+            urt, usrt = examples_nonempty[example].run_ultimate()
         print(example + ": running in omegaVPLinc.")
         ort, osrt = examples_nonempty[example].run_omegaVPLinc()
-        print(example + ": " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")
-        wr.writerow([example, ort, urt, ""])
+        print(example + ": running in fadecider.")
+        frt, fsrt = examples_nonempty[example].run_fadecider()
+        print(example + ": " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate), " + str(frt) + "(fadecider)")
+        wr.writerow([example, ort, urt, frt])
