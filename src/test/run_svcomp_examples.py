@@ -52,7 +52,7 @@ class Example:
         with open("../../Ultimate/run_example.ats", "w") as re:
             re.write("parseAutomata(\"../src/test/" + self.A + "\");\n")
             re.write("parseAutomata(\"../src/test/" + self.B + "\");\n")
-            re.write("assert(buchiIsEmpty(buchiIntersect(A, complement(B))));")
+            re.write("assert(buchiIsEmpty(buchiIntersect(A, buchiComplementFKV(B))));")
         try:
             rup = subprocess.run(["/bin/bash", "-c", "time -p ./AutomataScriptInterpreter.sh run_example.ats"], env=env_with_java11, timeout=self.timeout, cwd="../../Ultimate/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             if output:
@@ -64,6 +64,9 @@ class Example:
             if not rup.returncode and "RESULT: Ultimate proved your program to be correct!" in rup.stdout:
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=([^}]+)}", rup.stdout).captures(1))
+            if not rup.returncode and "RESULT: Ultimate proved your program to be incorrect!" in rup.stdout:
+                real_time = -float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
+                self_reported_time = -sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=([^}]+)}", rup.stdout).captures(1))
             else:
                 real_time = -2.0
                 self_reported_time = -2.0
@@ -75,6 +78,8 @@ class Example:
         env_with_java17 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.17.0-openjdk-amd64/bin:' + os.environ['PATH']}
         real_time = -1.0
         self_reported_time = -1.0
+        A_states = 0
+        B_states = 0
         try:
             rup = subprocess.run(["/bin/bash", "-c", "time -p java -jar build/libs/omegaVPLinc-1.0.jar src/test/" + self.A + " src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", capture_output=True, universal_newlines=True)
             if output:
@@ -84,6 +89,8 @@ class Example:
                     o.write("\nSTDERR:\n")
                     o.write(rup.stderr)
             if not rup.returncode and "is a subset of" in rup.stdout:
+                A_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[0]
+                B_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[1]
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
             elif not rup.returncode and "is not a subset of" in rup.stdout:
@@ -94,7 +101,7 @@ class Example:
                 self_reported_time = -2.0
         except subprocess.TimeoutExpired:
             pass
-        return real_time, self_reported_time
+        return A_states, B_states, real_time, self_reported_time
 
     def run_fadecider(self, output=False):
         real_time = -1.0
@@ -186,20 +193,13 @@ for example in list(examples_nonempty.keys()):
 print("Total examples: {}".format(len(examples)))
 print("Total examples to be tested: {}".format(len(examples_nonempty)))
 
-with open("time_results_omegaVPLinc_only.csv", "w") as results:
+with open("time_results_omegaVPLinc+ultimate.csv", "w") as results:
     wr = csv.writer(results)
-    wr.writerow(["example", "omegaVPLinc", "ultimate", "fadecider"])
-    for example in examples_nonempty:
-        """
-        urt = -3.0
-        if example in rerun_ultimate:
-            print(example + ": running in ultimate.")
-            urt, usrt = examples_nonempty[example].run_ultimate()
-
-        print(example + ": running in fadecider.")
-        frt, fsrt = examples_nonempty[example].run_fadecider()
-        """
+    wr.writerow(["example","A_states", "B_states", "omegaVPLinc", "ultimate"])
+    for example in list(examples_nonempty.keys())[:50]:
         print(example + ": running in omegaVPLinc.")
-        ort, osrt = examples_nonempty[example].run_omegaVPLinc()
-        print(example + ": " + str(ort) + "(omegaVPLinc)")  # + str(urt) + "(ultimate), " + str(frt) + "(fadecider)")
-        wr.writerow([example, ort, "", ""])
+        A_states, B_states, ort, osrt = examples_nonempty[example].run_omegaVPLinc()
+        print(example + ": running in ultimate.")
+        urt, usrt = examples_nonempty[example].run_ultimate()
+        print(example + ": " + str(ort) + "(omegaVPLinc)" + str(urt) + "(ultimate)")  # + str(frt) + "(fadecider)")
+        wr.writerow([example, A_states, B_states, ort, urt])

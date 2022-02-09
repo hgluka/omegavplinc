@@ -64,6 +64,8 @@ public abstract class FixpointVector<T> {
                 boolean toRemove = !e.equals(t) && comparator.lesserOrEqual(t, e);
                 if (oldInnerFrontier.get(statePair).contains(e) && toRemove)
                     oldInnerFrontier.get(statePair).remove(e);
+                if (innerFrontier.get(statePair).contains(e) && toRemove)
+                    innerFrontier.get(statePair).remove(e);
                 return toRemove;
             }) || removed;
             boolean existsLesser = innerVector.get(statePair).stream().anyMatch(e -> comparator.lesserOrEqual(e, t));
