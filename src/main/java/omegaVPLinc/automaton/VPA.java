@@ -154,13 +154,9 @@ public class VPA {
             }
             case RETURN -> {
                 for (State from : states) {
-                    Set<State> ctxFromState = new HashSet<>();
-                    for (String stackSymbol : stackAlphabet) {
-                        Set<State> ctxOfStackSymbol = from.getReturnSuccessors()
-                                .getOrDefault(symbol, new HashMap<>())
-                                .getOrDefault(stackSymbol, new HashSet<>());
-                        ctxFromState.addAll(ctxOfStackSymbol);
-                    }
+                    Set<State> ctxFromState = from.getReturnSuccessors()
+                            .getOrDefault(symbol, new HashMap<>())
+                            .getOrDefault(emptyStackSymbol, new HashSet<>());
                     if (!ctxFromState.isEmpty()) ctx.put(from, ctxFromState);
                 }
             }

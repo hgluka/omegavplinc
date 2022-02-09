@@ -52,8 +52,12 @@ public class PeriodWVector extends WVector<Pair<Map<State, Set<State>>, Map<Stat
                 for (State pPrime : p.getCallSuccessors(c)) {
                     for (Symbol r : q.getReturnPredecessors().keySet()) {
                         for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
+                            if (antichainInsert(pq, State.cErP(c, getOldInnerFrontier(pPrime, qPrime), r)))
+                                changed.add(pq);
+                            /*
                             if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(c)), State.composeP(getOldInnerFrontier(pPrime, qPrime), Set.of(b.contextPair(r))))))
                                 changed.add(pq);
+                             */
                         }
                     }
                 }

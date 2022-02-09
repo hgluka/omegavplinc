@@ -77,6 +77,50 @@ public class State {
         return ed;
     }
 
+    public static Map<State, Set<State>> cerM(Symbol c, Map<State, Set<State>> e, Symbol r) {
+        Map<State, Set<State>> cer = new HashMap<>();
+        for (State pPrime : e.keySet()) {
+            for (State qPrime : e.get(pPrime)) {
+                for (State p : pPrime.getCallPredecessors(c)) {
+                    for (State q : qPrime.getReturnSuccessors(r, p.getName())) {
+                        cer.computeIfAbsent(p, k -> new HashSet<>()).add(q);
+                    }
+                }
+            }
+        }
+        return cer;
+    }
+
+    public static Set<Map<State, Set<State>>> cErS(Symbol c, Set<Map<State, Set<State>>> E, Symbol r) {
+        Set<Map<State, Set<State>>> cEr = new HashSet<>();
+        for (Map<State, Set<State>> e : E) {
+            cEr.add(State.cerM(c, e, r));
+        }
+        return cEr;
+    }
+
+    public static Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> cErP(Symbol c, Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> E, Symbol r) {
+        Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> cEr = new HashSet<>();
+        for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> e1e2 : E) {
+            Map<State, Set<State>> ce1r = cerM(c, e1e2.fst(), r);
+            Map<State, Set<State>> cerStar = new HashMap<>();
+            for (State pPrime : e1e2.fst().keySet()) {
+                for (State qPrime : e1e2.fst().get(pPrime)) {
+                    for (State p : pPrime.getCallPredecessors(c)) {
+                        for (State q : qPrime.getReturnSuccessors(r, p.getName())) {
+                            if ((e1e2.snd().containsKey(pPrime) && e1e2.snd().get(pPrime).contains(qPrime))
+                                || p.isFinal() || q.isFinal()) {
+                                cerStar.computeIfAbsent(p, k -> new HashSet<>()).add(q);
+                            }
+                        }
+                    }
+                }
+            }
+            cEr.add(Pair.of(ce1r, cerStar));
+        }
+        return cEr;
+    }
+
     public static Map<State, Set<State>> union(Map<State, Set<State>> e, Map<State, Set<State>> d) {
         Map<State, Set<State>> union = new HashMap<>(e);
         for (Map.Entry<State, Set<State>> entry : d.entrySet()) {

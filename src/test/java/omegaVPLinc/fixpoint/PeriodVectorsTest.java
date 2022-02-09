@@ -116,8 +116,8 @@ class PeriodVectorsTest {
 
     @Test
     void testPeriodsBigA() throws IOException, Parser.ParseError {
-        Parser parserA = new Parser("src/test/resources/svcomp_examples_processed/diskperf_simpl1.cil.c_A.ats");
-        Parser parserB = new Parser("src/test/resources/svcomp_examples_processed/diskperf_simpl1.cil.c_Bunion.ats");
+        Parser parserA = new Parser("src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_A.ats");
+        Parser parserB = new Parser("src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_Bunion.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
         Periods periods = new Periods(A, B);

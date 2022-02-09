@@ -50,8 +50,13 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                 for (State pPrime : p.getCallSuccessors(c)) {
                     for (Symbol r : q.getReturnPredecessors().keySet()) {
                         for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
+                            if (antichainInsert(pq, State.cErS(c, getOldInnerFrontier(pPrime, qPrime), r))) {
+                                changed.add(pq);
+                            }
+                            /*
                             if (antichainInsert(pq, State.composeS(Set.of(b.context(c)), State.composeS(getOldInnerFrontier(pPrime, qPrime), Set.of(b.context(r))))))
                                 changed.add(pq);
+                             */
                         }
                     }
                 }
