@@ -12,7 +12,7 @@ class Example:
         self.A = A
         self.Bs = Bs
         self.B = ""
-        self.timeout = 3600  # 30 seconds TODO: change to 3600 before running
+        self.timeout = 3600/2  # 30 seconds TODO: change to 3600 before running
 
     def __repr__(self):
         return str(len(self.Bs))

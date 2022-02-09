@@ -66,9 +66,10 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
                                 if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(c)), State.composeP(wVector.getOldInnerFrontier(pPrime, qPrime), Set.of(b.contextPair(r))))))
                                     changed.add(pq);
                                  */
+                            } else {
+                                if (antichainInsert(pq, State.cErP(c, getOldInnerFrontier(pPrime, qPrime), r)))
+                                    changed.add(pq);
                             }
-                            if (antichainInsert(pq, State.cErP(c, getOldInnerFrontier(pPrime, qPrime), r)))
-                                changed.add(pq);
                             /*
                             if (antichainInsert(pq, State.composeP(Set.of(b.contextPair(c)), State.composeP(getOldInnerFrontier(pPrime, qPrime), Set.of(b.contextPair(r))))))
                                 changed.add(pq);
