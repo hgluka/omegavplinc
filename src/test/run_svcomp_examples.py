@@ -56,17 +56,17 @@ class Example:
         try:
             rup = subprocess.run(["/bin/bash", "-c", "time -p ./AutomataScriptInterpreter.sh run_example.ats"], env=env_with_java11, timeout=self.timeout, cwd="../../Ultimate/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
             if output:
-                with open("experiment_output/output_"+self.name+".txt", "w") as o:
+                with open("experiment_output/"+self.name+"_ultimate.txt", "w") as o:
                     o.write("STDOUT:\n")
                     o.write(rup.stdout)
                     o.write("\nSTDERR:\n")
                     o.write(rup.stderr)
             if not rup.returncode and "RESULT: Ultimate proved your program to be correct!" in rup.stdout:
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
-                self_reported_time = sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=([^}]+)}", rup.stdout).captures(1))
-            if not rup.returncode and "RESULT: Ultimate proved your program to be incorrect!" in rup.stdout:
+                self_reported_time = sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=(\d+)}", rup.stdout).captures(1))
+            elif not rup.returncode and "RESULT: Ultimate proved your program to be incorrect!" in rup.stdout:
                 real_time = -float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
-                self_reported_time = -sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=([^}]+)}", rup.stdout).captures(1))
+                self_reported_time = -sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=(\d+)}", rup.stdout).captures(1))
             else:
                 real_time = -2.0
                 self_reported_time = -2.0
@@ -81,9 +81,9 @@ class Example:
         A_states = 0
         B_states = 0
         try:
-            rup = subprocess.run(["/bin/bash", "-c", "time -p java -jar build/libs/omegaVPLinc-1.0.jar src/test/" + self.A + " src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", capture_output=True, universal_newlines=True)
+            rup = subprocess.run(["/bin/bash", "-c", "time -p java -Xmx6g -jar build/libs/omegaVPLinc-1.0.jar src/test/" + self.A + " src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", capture_output=True, universal_newlines=True)
             if output:
-                with open("experiment_output/output_"+self.name+".txt", "w") as o:
+                with open("experiment_output/"+self.name+"_omegaVPLinc.txt", "w") as o:
                     o.write("STDOUT:\n")
                     o.write(rup.stdout)
                     o.write("\nSTDERR:\n")
@@ -94,6 +94,9 @@ class Example:
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
             elif not rup.returncode and "is not a subset of" in rup.stdout:
+                A_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[0]
+                B_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[1]
+
                 real_time = -float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = -float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
             else:
@@ -112,7 +115,7 @@ class Example:
         try:
             rup = subprocess.run(["/bin/bash", "-c", "time -p ./fadecider_script.sh"], timeout=self.timeout, capture_output=True, universal_newlines=True)
             if output:
-                with open("experiment_output/output_"+self.name+".txt", "w") as o:
+                with open("experiment_output/" + self.name +  "_fadecider.txt", "w") as o:
                     o.write("STDOUT:\n")
                     o.write(rup.stdout)
                     o.write("\nSTDERR:\n")
@@ -193,13 +196,20 @@ for example in list(examples_nonempty.keys()):
 print("Total examples: {}".format(len(examples)))
 print("Total examples to be tested: {}".format(len(examples_nonempty)))
 
-with open("time_results_omegaVPLinc+ultimate.csv", "w") as results:
+with open("time_omegaVPLinc+ultimate.csv", "w") as results:
     wr = csv.writer(results)
-    wr.writerow(["example","A_states", "B_states", "omegaVPLinc", "ultimate"])
+    # wr.writerow(["example","A_states", "B_states", "omegaVPLinc", "ultimate"])
+    wr.writerow(["ultimate"])
+    count = 1
     for example in list(examples_nonempty.keys())[:50]:
         print(example + ": running in omegaVPLinc.")
-        A_states, B_states, ort, osrt = examples_nonempty[example].run_omegaVPLinc()
-        print(example + ": running in ultimate.")
-        urt, usrt = examples_nonempty[example].run_ultimate()
-        print(example + ": " + str(ort) + "(omegaVPLinc)" + str(urt) + "(ultimate)")  # + str(frt) + "(fadecider)")
+        A_states, B_states, ort, osrt = examples_nonempty[example].run_omegaVPLinc(output=True)
+        print(example + ": finished in omegaVPLinc in " + str(ort) + " seconds.")
+        urt = -3.0
+        if count > 25:
+            print(example + ": running in ultimate.")
+            urt, usrt = examples_nonempty[example].run_ultimate(output=True)
+            print(example + ": finished in ultimate in " + str(urt) + " seconds.")
+        print(str(count) + " -  " + example + ": " + str(A_states) + "(A_states), " + str(B_states) + "(B_states), " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")  # + str(frt) + "(fadecider)")
         wr.writerow([example, A_states, B_states, ort, urt])
+        count += 1
