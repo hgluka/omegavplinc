@@ -154,9 +154,13 @@ def load_all_examples():
                 examples[prefix].Bs.append((atsfile, suffix.split(".")[0]))
     return {key : examples[key] for key in examples if examples[key].A and examples[key].Bs}
 
-def load_processed_examples():
+def load_processed_examples(directory):
     examples = {}
-    for atsfile in glob.iglob('resources/svcomp_examples_processed/*.ats'):
+    if (directory[-1] == '/')
+        file_pattern = directory + "*.ats"
+    else:
+        file_pattern = directory + "/*.ats"
+    for atsfile in glob.iglob(file_pattern):
         prefix = atsfile[:atsfile.rfind("_")].split("/")[2]
         suffix = atsfile[atsfile.rfind("_")+1:]
         if prefix not in examples:
@@ -228,7 +232,7 @@ if __name__=='__main__':
         csv_file = sys.argv[2]
     if option == "-r":
         print("Running examples and writing to: " + csv_file +".")
-        examples = load_processed_examples()
+        examples = load_processed_examples('resources/svcomp_examples_notdone/')
         run_processed(examples, csv_file)
         print("Written to: " + csv_file +".")
     elif option == "-u":
