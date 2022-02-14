@@ -88,6 +88,7 @@ public class VPA {
         for (String s : stackAlphabet) {
             writer.write(i + " " + s + ";\n");
             stack_map.put(s, i);
+            i++;
         }
         writer.write("initial " + state_map.get(initialState) + ";\n");
         writer.write("transitions;\n");

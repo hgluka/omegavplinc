@@ -182,6 +182,11 @@ public class ParseAndCheckTest {
         assertNoInclusion("src/test/resources/svcomp_examples_processed/Fibonacci02.c_A.ats", "src/test/resources/svcomp_examples_processed/Fibonacci02.c_Bunion.ats");
     }
 
+    @Test
+    void check_cllSearchRelabeled() throws IOException, Parser.ParseError {
+        assertNoInclusion("src/test/resources/fadecider_counterexample/A.ats", "src/test/resources/fadecider_counterexample/B.ats");
+    }
+
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {
         Parser parserA = new Parser(a);
         Parser parserB = new Parser(b);

@@ -73,12 +73,12 @@ public class VPATest {
 
     @Test
     void testWriteToNpvpa() throws IOException, Parser.ParseError {
-        Parser parserA = new Parser("src/test/resources/svcomp_examples_processed/ddlm2013.i_A.ats");
-        Parser parserB = new Parser("src/test/resources/svcomp_examples_processed/ddlm2013.i_Bunion.ats");
+        Parser parserA = new Parser("src/test/resources/fadecider_counterexample/A.ats");
+        Parser parserB = new Parser("src/test/resources/fadecider_counterexample/B.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        A.writeToNPVPA("src/test/resources/svcomp_examples_npvpa/ddlm2013.i_A.npvpa");
-        B.writeToNPVPA("src/test/resources/svcomp_examples_npvpa/ddlm2013.i_Bunion.npvpa");
+        A.writeToNPVPA("src/test/resources/fadecider_counterexample/A.npvpa");
+        B.writeToNPVPA("src/test/resources/fadecider_counterexample/B.npvpa");
     }
 
     @Test

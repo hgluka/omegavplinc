@@ -120,3 +120,7 @@ Temporary Items
 # ultimate release for testing
 /Ultimate/
 /fadecider/
+**/experiment_output/
+**/svcomp_examples*
+/src/test/time_*
+fadecider_script.sh

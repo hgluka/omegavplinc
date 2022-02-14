@@ -1,18 +1,20 @@
 import glob
-import pprint
 import subprocess
 from pathlib import Path
 import regex
 import os
+import sys
 import csv
+import string
+import random
 
 class Example:
-    def __init__(self, name, A, Bs):
+    def __init__(self, name, A, Bs, B):
         self.name = name
         self.A = A
         self.Bs = Bs
-        self.B = ""
-        self.timeout = 3600/2  # 30 seconds TODO: change to 3600 before running
+        self.B = B
+        self.timeout = 3600/2  # 30 seconds
 
     def __repr__(self):
         return str(len(self.Bs))
@@ -132,84 +134,107 @@ class Example:
 
 
 
-
-examples = {}
-for atsfile in glob.iglob('resources/svcomp_examples/*.ats'):
-    prefix = atsfile[:atsfile.rfind("_")].split("/")[2]
-    suffix = atsfile[atsfile.rfind("_")+1:]
-    if prefix not in examples:
-        A = ()
-        Bs = []
-        if "BuchiCegarLoopAbstraction" in suffix:
-            A = (atsfile, suffix.split(".")[0])
-        else:
-            Bs = [(atsfile, suffix.split(".")[0])]
-        examples[prefix] = Example(prefix, A, Bs)
-    else:
-        if "BuchiCegarLoopAbstraction" in suffix:
-            examples[prefix].A = (atsfile, suffix.split(".")[0])
-        else:
-            examples[prefix].Bs.append((atsfile, suffix.split(".")[0]))
-
-pp = pprint.PrettyPrinter(indent=4)
-# pp.pprint(examples)
-examples_nonempty = {key : examples[key] for key in examples if examples[key].A and examples[key].Bs}
-finished_unions = 0
-count = 0
-for example in list(examples_nonempty.keys()):
-    if not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.npvpa").is_file():
-        print(str(count) + ": Running union calculation for " + example + ".")
-        if examples_nonempty[example].bunion():
-            finished_unions += 1
-            if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file():
-                examples_nonempty[example].acopy()
+def load_all_examples():
+    examples = {}
+    for atsfile in glob.iglob('resources/svcomp_examples/*.ats'):
+        prefix = atsfile[:atsfile.rfind("_")].split("/")[2]
+        suffix = atsfile[atsfile.rfind("_")+1:]
+        if prefix not in examples:
+            A = ()
+            Bs = []
+            if "BuchiCegarLoopAbstraction" in suffix:
+                A = (atsfile, suffix.split(".")[0])
             else:
-                examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
+                Bs = [(atsfile, suffix.split(".")[0])]
+            examples[prefix] = Example(prefix, A, Bs, "")
         else:
-            subprocess.run(["mv", examples_nonempty[example].A[0], "resources/svcomp_examples_timedout/"])
-            for B in examples_nonempty[example].Bs:
-                subprocess.run(["mv", B[0], "resources/svcomp_examples_timedout/"])
-            print("Moved to different directory.")
-            del examples_nonempty[example]
-    else:
-        examples_nonempty[example].B = "resources/svcomp_examples_processed/" + example + "_Bunion.ats"
-        if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_A.ats").is_file():
-            examples_nonempty[example].acopy()
+            if "BuchiCegarLoopAbstraction" in suffix:
+                examples[prefix].A = (atsfile, suffix.split(".")[0])
+            else:
+                examples[prefix].Bs.append((atsfile, suffix.split(".")[0]))
+    return {key : examples[key] for key in examples if examples[key].A and examples[key].Bs}
+
+def load_processed_examples():
+    examples = {}
+    for atsfile in glob.iglob('resources/svcomp_examples_processed/*.ats'):
+        prefix = atsfile[:atsfile.rfind("_")].split("/")[2]
+        suffix = atsfile[atsfile.rfind("_")+1:]
+        if prefix not in examples:
+            A = ""
+            B = ""
+            if suffix == "A.ats":
+                A = atsfile
+            elif suffix == "Bunion.ats":
+                B = atsfile
+            examples[prefix] = Example(prefix, A, [], B)
         else:
-            examples_nonempty[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
-    count += 1
+            if suffix == "A.ats":
+                examples[prefix].A = atsfile
+            elif suffix == "Bunion.ats":
+                examples[prefix].B = atsfile
+    return examples
 
-print("Total examples: {}".format(len(examples)))
-print("Total examples without missing compoments: {}".format(len(examples_nonempty)))
-print("Total computed unions: {}".format(finished_unions))
-
-done_examples = []
-with open("time_results_new.csv", "r") as results:
-    reader = csv.DictReader(results)
-    for row in reader:
-        done_examples.append(row['example'])
-
-for example in list(examples_nonempty.keys()):
-    if example not in done_examples:
-        del examples_nonempty[example]
-
-print("Total examples: {}".format(len(examples)))
-print("Total examples to be tested: {}".format(len(examples_nonempty)))
-
-with open("time_omegaVPLinc+ultimate.csv", "w") as results:
-    wr = csv.writer(results)
-    # wr.writerow(["example","A_states", "B_states", "omegaVPLinc", "ultimate"])
-    wr.writerow(["ultimate"])
-    count = 1
-    for example in list(examples_nonempty.keys())[:50]:
-        print(example + ": running in omegaVPLinc.")
-        A_states, B_states, ort, osrt = examples_nonempty[example].run_omegaVPLinc(output=True)
-        print(example + ": finished in omegaVPLinc in " + str(ort) + " seconds.")
-        urt = -3.0
-        if count > 25:
-            print(example + ": running in ultimate.")
-            urt, usrt = examples_nonempty[example].run_ultimate(output=True)
-            print(example + ": finished in ultimate in " + str(urt) + " seconds.")
-        print(str(count) + " -  " + example + ": " + str(A_states) + "(A_states), " + str(B_states) + "(B_states), " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")  # + str(frt) + "(fadecider)")
-        wr.writerow([example, A_states, B_states, ort, urt])
+def calculate_unions(examples):
+    finished_unions = 0
+    count = 0
+    for example in list(examples.keys()):
+        if not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.npvpa").is_file():
+            print(str(count) + ": Running union calculation for " + example + ".")
+            if examples[example].bunion():
+                finished_unions += 1
+                if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file():
+                    examples[example].acopy()
+                else:
+                    examples[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
+            else:
+                subprocess.run(["mv", examples[example].A[0], "resources/svcomp_examples_timedout/"])
+                for B in examples[example].Bs:
+                    subprocess.run(["mv", B[0], "resources/svcomp_examples_timedout/"])
+                print("Moved to different directory.")
+                del examples[example]
+        else:
+            examples[example].B = "resources/svcomp_examples_processed/" + example + "_Bunion.ats"
+            if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_A.ats").is_file():
+                examples[example].acopy()
+            else:
+                examples[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
         count += 1
+
+def run_processed(examples, file):
+    with open(file, "w") as results:
+        wr = csv.writer(results)
+        wr.writerow(["example","A_states", "B_states", "omegaVPLinc", "ultimate"])
+        count = 1
+        for example in list(examples.keys())[:50]:
+            print(example + ": running in omegaVPLinc.")
+            A_states, B_states, ort, osrt = examples[example].run_omegaVPLinc(output=True)
+            print(example + ": finished in omegaVPLinc in " + str(ort) + " seconds.")
+            print(example + ": running in ultimate.")
+            urt, usrt = examples[example].run_ultimate(output=True)
+            print(example + ": finished in ultimate in " + str(urt) + " seconds.")
+            print(str(count) + " -  " + example + ": " + str(A_states) + "(A_states), " + str(B_states) + "(B_states), " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")  # + str(frt) + "(fadecider)")
+            wr.writerow([example, A_states, B_states, ort, urt])
+            count += 1
+
+if __name__=='__main__':
+    def random_string(length):
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(length))
+    option = "-r"
+    csv_file = "time_omegaVPLinc+ultimate_" + random_string(3) + ".csv"
+    if len(sys.argv) >= 2:
+        option = sys.argv[1]
+    if len(sys.argv) >= 3:
+        csv_file = sys.argv[2]
+    if option == "-r":
+        print("Running examples and writing to: " + csv_file +".")
+        examples = load_processed_examples()
+        run_processed(examples, csv_file)
+        print("Written to: " + csv_file +".")
+    elif option == "-u":
+        print("Running union calculations.")
+        examples = load_all_examples()
+        calculate_unions(examples)
+        print("Union calculations done.")
+    else:
+        print("Wrong option, try -r (run) or -u (unions)")
