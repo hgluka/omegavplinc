@@ -156,7 +156,7 @@ def load_all_examples():
 
 def load_processed_examples(directory):
     examples = {}
-    if (directory[-1] == '/')
+    if (directory[-1] == '/'):
         file_pattern = directory + "*.ats"
     else:
         file_pattern = directory + "/*.ats"
