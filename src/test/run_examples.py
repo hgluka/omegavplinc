@@ -1,3 +1,16 @@
+"""run_examples.py
+
+Usage:
+  run_examples.py (-r|-u) [-o CSV_FILE] [-s SKIP_FILE]
+  run_examples.py -h | --help
+
+Options:
+  -h --help     Show this screen.
+  -r            Run the examples.
+  -u            Calculate the unions.
+  -o CSV_FILE   Specify output csv_file.
+  -s SKIP_FILE Specify file with examples to skip.
+"""
 import glob
 import subprocess
 from pathlib import Path
@@ -7,6 +20,7 @@ import sys
 import csv
 import string
 import random
+from docopt import docopt
 
 class Example:
     def __init__(self, name, A, Bs, B):
@@ -14,7 +28,7 @@ class Example:
         self.A = A
         self.Bs = Bs
         self.B = B
-        self.timeout = 3600/2  # 30 seconds
+        self.timeout = 5 # 3600/2  # 30 seconds
 
     def __repr__(self):
         return str(len(self.Bs))
@@ -154,8 +168,16 @@ def load_all_examples():
                 examples[prefix].Bs.append((atsfile, suffix.split(".")[0]))
     return {key : examples[key] for key in examples if examples[key].A and examples[key].Bs}
 
-def load_processed_examples(directory):
+def load_processed_examples(directory, skip_file = None):
     examples = {}
+    to_skip = []
+    if skip_file is not None:
+        with open(skip_file, "r") as sf:
+            for line in sf.readlines():
+                if "," in line:
+                    to_skip.append(line.split(",")[0])
+                else:
+                    to_skip.append(line.strip())
     if (directory[-1] == '/'):
         file_pattern = directory + "*.ats"
     else:
@@ -163,6 +185,8 @@ def load_processed_examples(directory):
     for atsfile in glob.iglob(file_pattern):
         prefix = atsfile[:atsfile.rfind("_")].split("/")[2]
         suffix = atsfile[atsfile.rfind("_")+1:]
+        if prefix in to_skip:
+            continue
         if prefix not in examples:
             A = ""
             B = ""
@@ -221,24 +245,21 @@ def run_processed(examples, file):
             count += 1
 
 if __name__=='__main__':
+    arguments = docopt(__doc__, version='run_examples.py 1.0')
     def random_string(length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
-    option = "-r"
     csv_file = "time_omegaVPLinc+ultimate_" + random_string(3) + ".csv"
-    if len(sys.argv) >= 2:
-        option = sys.argv[1]
-    if len(sys.argv) >= 3:
-        csv_file = sys.argv[2]
-    if option == "-r":
+    if arguments['-o'] is not None:
+        csv_file = arguments['-o']
+    skip_file = arguments['-s']
+    if arguments['-r']:
         print("Running examples and writing to: " + csv_file +".")
-        examples = load_processed_examples('resources/svcomp_examples_notdone/')
+        examples = load_processed_examples('resources/svcomp_examples_notdone/', skip_file)
         run_processed(examples, csv_file)
         print("Written to: " + csv_file +".")
-    elif option == "-u":
+    elif arguments['-u']:
         print("Running union calculations.")
         examples = load_all_examples()
         calculate_unions(examples)
         print("Union calculations done.")
-    else:
-        print("Wrong option, try -r (run) or -u (unions)")
