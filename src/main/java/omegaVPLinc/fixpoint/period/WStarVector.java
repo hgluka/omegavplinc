@@ -45,6 +45,26 @@ public class WStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
     }
 
     @Override
+    public int computeFixpoint() {
+        int i = 0;
+        iterateOnce();
+        updateCopy();
+        updateInnerFrontier();
+        wVector.noChanged();
+        frontier();
+        i++;
+        while (!changed.isEmpty()) {
+            iterateOnce();
+            updateCopy();
+            updateInnerFrontier();
+            frontier();
+            i++;
+        }
+        allChanged();
+        return i;
+    }
+
+    @Override
     public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {

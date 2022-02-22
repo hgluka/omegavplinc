@@ -49,17 +49,17 @@ public class Prefixes {
 
         W.frontier();
         int w_iters = W.computeFixpoint();
+        logger.info("W fixpoint complete after {} iterations.", w_iters);
         C.frontier();
         int c_iters = C.computeFixpoint();
+        logger.info("C fixpoint complete after {} iterations.", c_iters);
         R.frontier();
         int r_iters = R.computeFixpoint();
+        logger.info("R fixpoint complete after {} iterations.", r_iters);
         U.frontier();
         int u_iters = U.computeFixpoint();
-
-        logger.info("W fixpoint complete after {} iterations.", w_iters);
-        logger.info("C fixpoint complete after {} iterations.", c_iters);
-        logger.info("R fixpoint complete after {} iterations.", r_iters);
         logger.info("U fixpoint complete after {} iterations.", u_iters);
+
         return w_iters + c_iters + r_iters + u_iters;
     }
 

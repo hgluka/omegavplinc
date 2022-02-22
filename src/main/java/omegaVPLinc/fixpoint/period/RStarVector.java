@@ -45,6 +45,26 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
     }
 
     @Override
+    public int computeFixpoint() {
+        int i = 0;
+        iterateOnce();
+        updateCopy();
+        updateInnerFrontier();
+        rVector.noChanged();
+        frontier();
+        i++;
+        while (!changed.isEmpty()) {
+            iterateOnce();
+            updateCopy();
+            updateInnerFrontier();
+            frontier();
+            i++;
+        }
+        allChanged();
+        return i;
+    }
+
+    @Override
     public void iterateOnce() {
         changed = new HashSet<>();
         for (Pair<State, State> pq : frontier) {

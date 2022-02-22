@@ -71,6 +71,26 @@ public class CStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
     }
 
     @Override
+    public int computeFixpoint() {
+        int i = 0;
+        iterateOnce();
+        updateCopy();
+        updateInnerFrontier();
+        cVector.noChanged();
+        frontier();
+        i++;
+        while (!changed.isEmpty()) {
+            iterateOnce();
+            updateCopy();
+            updateInnerFrontier();
+            frontier();
+            i++;
+        }
+        allChanged();
+        return i;
+    }
+
+    @Override
     public void frontier() {
         frontier = new HashSet<>(wStarVector.getChanged());
         for (Pair<State, State> pq : cVector.getChanged()) {

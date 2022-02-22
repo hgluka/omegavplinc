@@ -27,6 +27,27 @@ public abstract class CVector<T> extends FixpointVector<T> {
     }
 
     @Override
+    public int computeFixpoint() {
+        int i = 0;
+        iterateOnce();
+        updateCopy();
+        updateInnerFrontier();
+        wVector.noChanged();
+        frontier();
+        i++;
+        while (!changed.isEmpty()) {
+            iterateOnce();
+            updateCopy();
+            updateInnerFrontier();
+            frontier();
+            i++;
+        }
+        allChanged();
+        wVector.allChanged();
+        return i;
+    }
+
+    @Override
     public void frontier() {
         frontier = new HashSet<>(wVector.changed);
         for (Pair<State, State> pq : changed) {

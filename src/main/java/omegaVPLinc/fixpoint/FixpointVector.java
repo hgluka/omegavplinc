@@ -48,14 +48,24 @@ public abstract class FixpointVector<T> {
 
     public void allChanged() {
         changed = new HashSet<>();
+        for (Pair<State, State> pq : a.getAllStatePairs()) {
+            innerFrontier.put(pq, new HashSet<>());
+            oldInnerFrontier.put(pq, new HashSet<>());
+        }
         for (Pair<State, State> pq : getInnerVectorCopy().keySet()) {
-            if (!getInnerVectorCopy().get(pq).isEmpty())
+            if (!getInnerVectorCopy().get(pq).isEmpty()) {
+                oldInnerFrontier.put(pq, getInnerVectorCopy().get(pq));
                 changed.add(pq);
+            }
         }
     }
     
     public void noChanged() {
         changed = new HashSet<>();
+        for (Pair<State, State> pq : a.getAllStatePairs()) {
+            innerFrontier.put(pq, new HashSet<>());
+            oldInnerFrontier.put(pq, new HashSet<>());
+        }
     }
 
     public abstract void frontier();
@@ -93,6 +103,11 @@ public abstract class FixpointVector<T> {
 
     public int computeFixpoint() {
         int i = 0;
+        iterateOnce();
+        updateCopy();
+        updateInnerFrontier();
+        frontier();
+        i++;
         while (!changed.isEmpty()) {
             iterateOnce();
             updateCopy();
