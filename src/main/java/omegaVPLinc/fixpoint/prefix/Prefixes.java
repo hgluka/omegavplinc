@@ -46,37 +46,21 @@ public class Prefixes {
         C.updateInnerFrontier();
         R.updateInnerFrontier();
         U.updateInnerFrontier();
+
         W.frontier();
+        int w_iters = W.computeFixpoint();
         C.frontier();
+        int c_iters = C.computeFixpoint();
         R.frontier();
+        int r_iters = R.computeFixpoint();
         U.frontier();
-        int i = 1;
-        while (!W.getChanged().isEmpty()
-                || !C.getChanged().isEmpty()
-                || !R.getChanged().isEmpty()) {
-            W.iterateOnce();
-            C.iterateOnce();
-            R.iterateOnce();
-            // logger.info("Iteration number {} complete", i);
-            W.updateCopy();
-            W.updateInnerFrontier();
-            C.updateCopy();
-            C.updateInnerFrontier();
-            R.updateCopy();
-            R.updateInnerFrontier();
-            W.frontier();
-            C.frontier();
-            R.frontier();
-            i++;
-        }
-        while (!U.getChanged().isEmpty()) {
-            U.iterateOnce();
-            U.updateCopy();
-            U.updateInnerFrontier();
-            U.frontier();
-        }
-        logger.info("Prefix fixpoint complete after {} iterations.", i);
-        return i;
+        int u_iters = U.computeFixpoint();
+
+        logger.info("W fixpoint complete after {} iterations.", w_iters);
+        logger.info("C fixpoint complete after {} iterations.", c_iters);
+        logger.info("R fixpoint complete after {} iterations.", r_iters);
+        logger.info("U fixpoint complete after {} iterations.", u_iters);
+        return w_iters + c_iters + r_iters + u_iters;
     }
 
     public Set<Map<State, Set<State>>> getFromC(State p, State q) {

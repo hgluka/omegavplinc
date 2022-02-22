@@ -55,48 +55,26 @@ public class Periods {
         CS.updateInnerFrontier();
         R.updateInnerFrontier();
         RS.updateInnerFrontier();
+
         W.frontier();
+        int w_iters = W.computeFixpoint();
         WS.frontier();
+        int ws_iters = WS.computeFixpoint();
         C.frontier();
+        int c_iters = C.computeFixpoint();
         CS.frontier();
+        int cs_iters = CS.computeFixpoint();
         R.frontier();
+        int r_iters = R.computeFixpoint();
         RS.frontier();
-        int i = 1;
-        while (!W.getChanged().isEmpty()
-                || !WS.getChanged().isEmpty()
-                || !C.getChanged().isEmpty()
-                || !CS.getChanged().isEmpty()
-                || !R.getChanged().isEmpty()
-                || !RS.getChanged().isEmpty()) {
-            W.iterateOnce();
-            WS.iterateOnce();
-            C.iterateOnce();
-            CS.iterateOnce();
-            R.iterateOnce();
-            RS.iterateOnce();
-            // logger.info("Iteration number {} complete.", i);
-            W.updateCopy();
-            W.updateInnerFrontier();
-            WS.updateCopy();
-            WS.updateInnerFrontier();
-            C.updateCopy();
-            C.updateInnerFrontier();
-            CS.updateCopy();
-            CS.updateInnerFrontier();
-            R.updateCopy();
-            R.updateInnerFrontier();
-            RS.updateCopy();
-            RS.updateInnerFrontier();
-            W.frontier();
-            WS.frontier();
-            C.frontier();
-            CS.frontier();
-            R.frontier();
-            RS.frontier();
-            i++;
-        }
-        logger.info("Period fixpoint complete after {} iterations.", i);
-        return i;
+        int rs_iters = RS.computeFixpoint();
+        logger.info("W fixpoint complete after {} iterations.", w_iters);
+        logger.info("WS fixpoint complete after {} iterations.", ws_iters);
+        logger.info("C fixpoint complete after {} iterations.", c_iters);
+        logger.info("CS fixpoint complete after {} iterations.", cs_iters);
+        logger.info("R fixpoint complete after {} iterations.", r_iters);
+        logger.info("RS fixpoint complete after {} iterations.", rs_iters);
+        return w_iters + ws_iters + c_iters + cs_iters + r_iters + rs_iters;
     }
 
     public Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> getFromCS(State p, State q) {
