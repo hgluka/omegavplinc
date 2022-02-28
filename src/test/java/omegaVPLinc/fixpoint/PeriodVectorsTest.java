@@ -98,7 +98,7 @@ class PeriodVectorsTest {
     void testPeriods() {
         Periods periods = new Periods(vpa, vpa);
         int iterations = periods.iterate();
-        assertEquals(8, iterations);
+        assertEquals(16, iterations);
     }
     @Test
     void testPeriodsBig() throws IOException, Parser.ParseError {
@@ -111,7 +111,7 @@ class PeriodVectorsTest {
         int iterations = periods.iterate();
         Instant end = Instant.now();
         logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
-        assertEquals(16, iterations);
+        assertEquals(28, iterations);
     }
 
     @Test

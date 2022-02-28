@@ -95,7 +95,7 @@ class PrefixVectorsTest {
     void testPrefixes() {
         Prefixes prefixes = new Prefixes(vpa, vpa);
         int iterations = prefixes.iterate();
-        assertEquals(8, iterations);
+        assertEquals(13, iterations);
     }
 
     @Test
@@ -123,7 +123,7 @@ class PrefixVectorsTest {
         int iterations = prefixes.iterate();
         Instant end = Instant.now();
         logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
-        assertEquals(16, iterations);
+        assertEquals(23, iterations);
     }
 
     @Test
@@ -137,6 +137,6 @@ class PrefixVectorsTest {
         int iterations = prefixes.iterate();
         Instant end = Instant.now();
         logger.info("Prefix iterations took {} seconds.", Duration.between(start, end).toSeconds());
-        assertEquals(7, iterations);
+        assertEquals(10, iterations);
     }
 }

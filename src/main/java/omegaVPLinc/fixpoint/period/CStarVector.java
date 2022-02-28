@@ -76,6 +76,7 @@ public class CStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
         iterateOnce();
         updateCopy();
         updateInnerFrontier();
+        wStarVector.noChanged();
         cVector.noChanged();
         frontier();
         i++;
@@ -87,6 +88,7 @@ public class CStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
             i++;
         }
         allChanged();
+        wStarVector.allChanged();
         return i;
     }
 

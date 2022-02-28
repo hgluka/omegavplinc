@@ -50,6 +50,7 @@ public class RStarVector extends FixpointVector<Pair<Map<State, Set<State>>, Map
         iterateOnce();
         updateCopy();
         updateInnerFrontier();
+        wStarVector.noChanged();
         rVector.noChanged();
         frontier();
         i++;

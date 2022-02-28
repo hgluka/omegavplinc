@@ -183,8 +183,18 @@ public class ParseAndCheckTest {
     }
 
     @Test
-    void check_cllSearchRelabeled() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/fadecider_counterexample/A.ats", "src/test/resources/fadecider_counterexample/B.ats");
+    void check_bubbleSort2() throws IOException, Parser.ParseError {
+        assertNoInclusion("src/test/resources/svcomp_examples_notdone/bubble_sort-2.i_A.ats", "src/test/resources/svcomp_examples_notdone/bubble_sort-2.i_Bunion.ats");
+    }
+
+    @Test
+    void check_recMallocEx5() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/svcomp_examples_notdone/rec_malloc_ex5.i_A.ats", "src/test/resources/svcomp_examples_notdone/rec_malloc_ex5.i_Bunion.ats");
+    }
+
+    @Test
+    void check_diskPerfSimpl1() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_A.ats", "src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_Bunion.ats");
     }
 
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {

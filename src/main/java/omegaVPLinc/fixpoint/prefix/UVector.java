@@ -51,12 +51,11 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
     @Override
     public int computeFixpoint() {
         int i = 0;
-        cVector.noChanged();
-        rVector.noChanged();
         iterateOnce();
         updateCopy();
         updateInnerFrontier();
-
+        cVector.noChanged();
+        rVector.noChanged();
         frontier();
         i++;
         while (!changed.isEmpty()) {
