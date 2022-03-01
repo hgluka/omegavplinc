@@ -28,7 +28,7 @@ class Example:
         self.A = A
         self.Bs = Bs
         self.B = B
-        self.timeout = 5 # 3600/2  # 30 seconds
+        self.timeout = 3600/2 # 3600/2  # 30 seconds
 
     def __repr__(self):
         return str(len(self.Bs))
