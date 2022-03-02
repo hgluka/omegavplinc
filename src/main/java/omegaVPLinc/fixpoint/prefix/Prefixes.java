@@ -1,5 +1,6 @@
 package omegaVPLinc.fixpoint.prefix;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
@@ -63,11 +64,11 @@ public class Prefixes {
         return w_iters + c_iters + r_iters + u_iters;
     }
 
-    public Set<Map<State, Set<State>>> getFromC(State p, State q) {
+    public Set<Context> getFromC(State p, State q) {
         return C.getInnerVector().get(Pair.of(p, q));
     }
 
-    public Set<Map<State, Set<State>>> getFromU(State p, State q) {
+    public Set<Context> getFromU(State p, State q) {
         return U.getInnerVector().get(Pair.of(p, q));
     }
 

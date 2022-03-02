@@ -1,5 +1,6 @@
 package omegaVPLinc.fixpoint.period;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
@@ -77,11 +78,11 @@ public class Periods {
         return w_iters + ws_iters + c_iters + cs_iters + r_iters + rs_iters;
     }
 
-    public Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> getFromCS(State p, State q) {
+    public Set<Context> getFromCS(State p, State q) {
         return CS.getInnerVector().get(Pair.of(p, q));
     }
 
-    public Set<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> getFromRS(State p, State q) {
+    public Set<Context> getFromRS(State p, State q) {
         return RS.getInnerVector().get(Pair.of(p, q));
     }
 

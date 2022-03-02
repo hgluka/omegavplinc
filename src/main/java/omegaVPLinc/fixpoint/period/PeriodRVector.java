@@ -1,5 +1,6 @@
 package omegaVPLinc.fixpoint.period;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
@@ -12,8 +13,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class PeriodRVector extends RVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> {
-    public PeriodRVector(VPA a, VPA b, WVector<Pair<Map<State, Set<State>>, Map<State, Set<State>>>> wVector) {
+public class PeriodRVector extends RVector {
+    public PeriodRVector(VPA a, VPA b, WVector wVector) {
         super(a, b, new PairComparator(), wVector);
     }
 
@@ -44,9 +45,9 @@ public class PeriodRVector extends RVector<Pair<Map<State, Set<State>>, Map<Stat
             // Union of Z_{p, q'}Z_{q', q}
             for (State qPrime : a.getStates()) {
                 if (!getOldInnerFrontier(p, qPrime).isEmpty() || !getOldInnerFrontier(qPrime, q).isEmpty()) {
-                    if (antichainInsert(pq, State.composeP(getOldInnerFrontier(p, qPrime), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                    if (antichainInsert(pq, Context.compose(getOldInnerFrontier(p, qPrime), innerVectorCopy.get(Pair.of(qPrime, q)))))
                         changed.add(pq);
-                    if (antichainInsert(pq, State.composeP(innerVectorCopy.get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
+                    if (antichainInsert(pq, Context.compose(innerVectorCopy.get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
                         changed.add(pq);
                 }
             }

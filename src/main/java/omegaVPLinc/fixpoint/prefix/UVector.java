@@ -1,5 +1,6 @@
 package omegaVPLinc.fixpoint.prefix;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
@@ -13,14 +14,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class UVector extends FixpointVector<Map<State, Set<State>>> {
-    private final CVector<Map<State, Set<State>>> cVector;
-    private final RVector<Map<State, Set<State>>> rVector;
+public class UVector extends FixpointVector {
+    private final CVector cVector;
+    private final RVector rVector;
 
     public UVector(VPA a,
                    VPA b,
-                   CVector<Map<State, Set<State>>> cVector,
-                   RVector<Map<State, Set<State>>> rVector) {
+                   CVector cVector,
+                   RVector rVector) {
         super(a, b, new MapComparator());
         this.cVector = cVector;
         this.rVector = rVector;
@@ -80,7 +81,7 @@ public class UVector extends FixpointVector<Map<State, Set<State>>> {
                     for (State qPrime : a.getStates()) {
                         if (!innerVectorCopy.get(Pair.of(pPrime, qPrime)).isEmpty() && !rVector.getInnerVectorCopy().get(Pair.of(qPrime, q)).isEmpty()) {
                             if (!cVector.getOldInnerFrontier(p, pPrime).isEmpty() || !getOldInnerFrontier(pPrime, qPrime).isEmpty() || !rVector.getOldInnerFrontier(qPrime, q).isEmpty()) {
-                                if (antichainInsert(pq, State.composeS(cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)), State.composeS(innerVectorCopy.get(Pair.of(pPrime, qPrime)), rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))))))
+                                if (antichainInsert(pq, Context.compose(cVector.getInnerVectorCopy().get(Pair.of(p, pPrime)), Context.compose(innerVectorCopy.get(Pair.of(pPrime, qPrime)), rVector.getInnerVectorCopy().get(Pair.of(qPrime, q))))))
                                     changed.add(pq);
                             }
                         }

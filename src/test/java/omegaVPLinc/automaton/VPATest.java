@@ -11,8 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,13 +61,17 @@ public class VPATest {
 
     @Test
     void testContexts() {
-        Map<State, Set<State>> contextOfR = vpa.context(new Symbol("RETURN", "r"));
-        Map<State, Set<State>> expectedContextOfR = Map.of(
+        Context contextOfR = vpa.context(new Symbol("RETURN", "r"));
+        Context contextOfC = vpa.context(new Symbol("CALL", "c"));
+        System.out.println(contextOfC.getCtx());
+        Map<State, Set<State>> expectedContextOfR = new HashMap<>();
+        Map<State, Set<State>> expectedContextOfC = Map.of(
                 vpa.getState("q0").get(),
-                Set.of(vpa.getState("q1").get()),
-                vpa.getState("q1").get(),
                 Set.of(vpa.getState("q0").get()));
-        assertEquals(expectedContextOfR, contextOfR);
+        assertEquals(new LinkedList<>(List.of(new Symbol("RETURN", "r"))), contextOfR.getWord());
+        assertEquals(new LinkedList<>(List.of(new Symbol("CALL", "c"))), contextOfC.getWord());
+        assertEquals(expectedContextOfR, contextOfR.getCtx());
+        assertEquals(expectedContextOfC, contextOfC.getCtx());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package omegaVPLinc.algorithm;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.fixpoint.period.Periods;
@@ -45,24 +46,22 @@ public class InclusionChecker {
         int prefixIterations = prefixes.iterate();
         int periodIterations = periods.iterate();
         for (State p : a.getStates()) {
-            for (Map<State, Set<State>> x : prefixes.getFromC(a.getInitialState(), p)) {
-                for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromCS(p, p)) {
-                    if (!inctx(x, y1y2.fst(), y1y2.snd())) {
-                        logger.debug("1");
-                        logger.debug("{} -> {}: {}", a.getInitialState(), p, x);
-                        logger.debug("{} -> {}: {}", p, p, y1y2.fst());
-                        logger.debug("{} ->* {}: {}", p, p, y1y2.snd());
+            for (Context x : prefixes.getFromC(a.getInitialState(), p)) {
+                for (Context y1y2 : periods.getFromCS(p, p)) {
+                    if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
+                        logger.debug("C, C_star");
+                        logger.debug("Prefix: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
+                        logger.debug("Period: ({} -> {}) {}", p, p, y1y2.getWord());
                         return false;
                     }
                 }
             }
-            for (Map<State, Set<State>> x : prefixes.getFromU(a.getInitialState(), p)) {
-                for (Pair<Map<State, Set<State>>, Map<State, Set<State>>> y1y2 : periods.getFromRS(p, p)) {
-                    if (!inctx(x, y1y2.fst(), y1y2.snd())) {
-                        logger.debug("2");
-                        logger.debug("{} -> {}: {}", a.getInitialState(), p, x);
-                        logger.debug("{} -> {}: {}", p, p, y1y2.fst());
-                        logger.debug("{} ->* {}: {}", p, p, y1y2.snd());
+            for (Context x : prefixes.getFromU(a.getInitialState(), p)) {
+                for (Context y1y2 : periods.getFromRS(p, p)) {
+                    if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
+                        logger.debug("U, R_star");
+                        logger.debug("Prefix: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
+                        logger.debug("Period: ({} -> {}) {}", p, p, y1y2.getWord());
                         return false;
                     }
                 }

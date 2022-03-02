@@ -1,5 +1,6 @@
 package omegaVPLinc.fixpoint;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
@@ -11,10 +12,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class CVector<T> extends FixpointVector<T> {
-    protected WVector<T> wVector;
+public abstract class CVector extends FixpointVector {
+    protected WVector wVector;
 
-    public CVector(VPA a, VPA b, PartialComparator<T> comparator, WVector<T> wVector) {
+    public CVector(VPA a, VPA b, PartialComparator<Context> comparator, WVector wVector) {
         super(a, b, comparator);
         this.wVector = wVector;
         for (State p : a.getStates()) {

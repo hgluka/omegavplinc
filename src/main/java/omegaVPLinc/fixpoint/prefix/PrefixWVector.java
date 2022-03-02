@@ -1,5 +1,6 @@
 package omegaVPLinc.fixpoint.prefix;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
@@ -11,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class PrefixWVector extends WVector<Map<State, Set<State>>> {
+public class PrefixWVector extends WVector {
 
     public PrefixWVector(VPA a, VPA b) {
         super(a, b, new MapComparator());
@@ -50,11 +51,11 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
                 for (State pPrime : p.getCallSuccessors(c)) {
                     for (Symbol r : q.getReturnPredecessors().keySet()) {
                         for (State qPrime : q.getReturnPredecessors(r, p.getName())) {
-                            if (antichainInsert(pq, State.cErS(c, getOldInnerFrontier(pPrime, qPrime), r))) {
+                            if (antichainInsert(pq, Context.compose(c, getOldInnerFrontier(pPrime, qPrime), r))) {
                                 changed.add(pq);
                             }
                             /*
-                            if (antichainInsert(pq, State.composeS(Set.of(b.context(c)), State.composeS(getOldInnerFrontier(pPrime, qPrime), Set.of(b.context(r))))))
+                            if (antichainInsert(pq, Context.compose(Set.of(b.context(c)), Context.compose(getOldInnerFrontier(pPrime, qPrime), Set.of(b.context(r))))))
                                 changed.add(pq);
                              */
                         }
@@ -64,9 +65,9 @@ public class PrefixWVector extends WVector<Map<State, Set<State>>> {
             // Union of X_{p, q'}X_{q', q} for q' in states of A
             for (State qPrime : a.getStates()) {
                 if (!getOldInnerFrontier(p, qPrime).isEmpty() || !getOldInnerFrontier(qPrime, q).isEmpty()) {
-                    if (antichainInsert(pq, State.composeS(getOldInnerFrontier(p, qPrime), innerVectorCopy.get(Pair.of(qPrime, q)))))
+                    if (antichainInsert(pq, Context.compose(getOldInnerFrontier(p, qPrime), innerVectorCopy.get(Pair.of(qPrime, q)))))
                         changed.add(pq);
-                    if (antichainInsert(pq, State.composeS(innerVectorCopy.get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
+                    if (antichainInsert(pq, Context.compose(innerVectorCopy.get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
                         changed.add(pq);
                 }
             }

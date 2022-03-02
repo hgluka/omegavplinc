@@ -1,5 +1,6 @@
 package omegaVPLinc.fixpoint;
 
+import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
@@ -8,8 +9,8 @@ import omegaVPLinc.utility.Pair;
 
 import java.util.*;
 
-public abstract class WVector<T> extends FixpointVector<T> {
-    public WVector(VPA a, VPA b, PartialComparator<T> comparator) {
+public abstract class WVector extends FixpointVector {
+    public WVector(VPA a, VPA b, PartialComparator<Context> comparator) {
         super(a, b, comparator);
         for (State p : a.getStates()) {
             frontier.add(Pair.of(p, p));

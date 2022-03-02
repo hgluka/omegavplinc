@@ -19,8 +19,7 @@ public class VPA {
     private final Set<State> states;
     private final State initialState;
 
-    private final Map<State, Set<State>> epsilonContext;
-    private final Map<State, Set<State>> finalEpsilonContext;
+    private final Context epsilonContext;
 
     public VPA(Set<Symbol> callAlphabet,
                Set<Symbol> internalAlphabet,
@@ -38,16 +37,17 @@ public class VPA {
         this.states = states;
         this.initialState = initialState;
 
-        this.epsilonContext = new HashMap<>();
+        Map<State, Set<State>> epsilonContextCtx = new HashMap<>();
         for (State p : states) {
-            this.epsilonContext.put(p, new HashSet<>(Set.of(p)));
+            epsilonContextCtx.put(p, new HashSet<>(Set.of(p)));
         }
 
-        this.finalEpsilonContext = new HashMap<>();
+        Map<State, Set<State>> epsilonContextFinalCtx = new HashMap<>();
         for (State p : states) {
             if (p.isFinal())
-                this.finalEpsilonContext.put(p, new HashSet<>(Set.of(p)));
+                epsilonContextFinalCtx.put(p, new HashSet<>(Set.of(p)));
         }
+        this.epsilonContext = new Context(new LinkedList<>(), epsilonContextCtx, epsilonContextFinalCtx);
         this.emptyStackSymbol = "empty";
     }
 
@@ -123,15 +123,11 @@ public class VPA {
         return emptyStackSymbol;
     }
 
-    public Map<State, Set<State>> getEpsilonContext() {
+    public Context getEpsilonContext() {
         return epsilonContext;
     }
 
-    public Map<State, Set<State>> getFinalEpsilonContext() {
-        return finalEpsilonContext;
-    }
-
-    public Map<State, Set<State>> context(Symbol symbol) throws IllegalArgumentException {
+    public Context context(Symbol symbol) throws IllegalArgumentException {
         Map<State, Set<State>> ctx = new HashMap<>();
         switch (symbol.getType()) {
             case CALL -> {
@@ -154,6 +150,7 @@ public class VPA {
                 }
             }
             case RETURN -> {
+                System.out.println(symbol);
                 for (State from : states) {
                     Set<State> ctxFromState = from.getReturnSuccessors()
                             .getOrDefault(symbol, new HashMap<>())
@@ -163,28 +160,26 @@ public class VPA {
             }
             default -> throw new IllegalArgumentException("Symbol type doesn't exist: " + symbol.getType());
         }
-        return ctx;
+        LinkedList<Symbol> word = new LinkedList<>();
+        word.addFirst(symbol);
+        return new Context(word, ctx);
     }
 
-    public Map<State, Set<State>> finalContext(Symbol symbol) {
-        Map<State, Set<State>> ctx = context(symbol);
+    public Context contextPair(Symbol symbol) {
+        Context ctx = context(symbol);
         Map<State, Set<State>> finalCtx = new HashMap<>();
-        for (State p : ctx.keySet()) {
+        for (State p : ctx.getCtx().keySet()) {
             if (p.isFinal()) {
-                finalCtx.put(p, ctx.get(p));
+                finalCtx.put(p, ctx.getCtx().get(p));
             } else {
-                for (State q : ctx.get(p)) {
+                for (State q : ctx.getCtx().get(p)) {
                     if (q.isFinal()) {
                         finalCtx.computeIfAbsent(p, k -> new HashSet<>()).add(q);
                     }
                 }
             }
         }
-        return finalCtx;
-    }
-
-    public Pair<Map<State, Set<State>>, Map<State, Set<State>>> contextPair(Symbol symbol) {
-        return Pair.of(context(symbol), finalContext(symbol));
+        return new Context(ctx.getWord(), ctx.getCtx(), finalCtx);
     }
 
     public Set<Symbol> getCallAlphabet() {
