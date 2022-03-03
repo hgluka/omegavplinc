@@ -29,8 +29,8 @@ public class InclusionChecker {
     }
 
     private boolean inctx(Map<State, Set<State>> x, Map<State, Set<State>> y1, Map<State, Set<State>> y2) {
-        Map<State, Set<State>> y1closure = State.transitiveClosure(y1);
-        Map<State, Set<State>> yComposition = State.composeM(y1closure, State.composeM(y2, y1closure));
+        Map<State, Set<State>> y1closure = Context.transitiveClosure(y1);
+        Map<State, Set<State>> yComposition = Context.composeM(y1closure, Context.composeM(y2, y1closure));
         if (!x.containsKey(b.getInitialState()))
             return false;
         for (State q : x.get(b.getInitialState())) {

@@ -3,18 +3,24 @@ package omegaVPLinc.automaton;
 import java.util.*;
 
 public class Context {
-    private final LinkedList<Symbol> word;
+    private final List<Symbol> word;
     private Map<State, Set<State>> ctx;
     private Map<State, Set<State>> finalCtx;
     private final boolean withFinal;
 
-    public Context(LinkedList<Symbol> word, Map<State, Set<State>> ctx) {
+    public Context() {
+        this.word = null;
+        this.ctx = null;
+        this.withFinal = false;
+    }
+
+    public Context(List<Symbol> word, Map<State, Set<State>> ctx) {
         this.word = word;
         this.ctx = ctx;
         this.withFinal = false;
     }
 
-    public Context(LinkedList<Symbol> word, Map<State, Set<State>> ctx, Map<State, Set<State>> finalCtx) {
+    public Context(List<Symbol> word, Map<State, Set<State>> ctx, Map<State, Set<State>> finalCtx) {
         this.word = word;
         this.ctx = ctx;
         this.finalCtx = finalCtx;
@@ -25,12 +31,10 @@ public class Context {
         if (e.withFinal && d.withFinal) {
             Map<State, Set<State>> ctx = composeM(e.ctx, d.ctx);
             Map<State, Set<State>> finalCtx = union(composeM(e.ctx, d.finalCtx), composeM(e.finalCtx, d.ctx));
-            Context comp = new Context(new LinkedList<>(e.word), ctx, finalCtx);
-            comp.word.addAll(d.word);
+            Context comp = new Context(concatWord(e.word, d.word), ctx, finalCtx);
             return comp;
         } else {
-            Context comp = new Context(new LinkedList<>(e.word), composeM(e.ctx, d.ctx));
-            comp.word.addAll(d.word);
+            Context comp = new Context(concatWord(e.word, d.word), composeM(e.ctx, d.ctx));
             return comp;
         }
     }
@@ -51,14 +55,10 @@ public class Context {
                     }
                 }
             }
-            Context comp = new Context(new LinkedList<>(e.word), ctx, finalCtx);
-            comp.addSymbolLeft(c);
-            comp.addSymbolRight(r);
+            Context comp = new Context(concatWord(c, e.word, r), ctx, finalCtx);
             return comp;
         } else {
-            Context comp = new Context(new LinkedList<>(e.word), cerM(c, e.ctx, r));
-            comp.addSymbolLeft(c);
-            comp.addSymbolRight(r);
+            Context comp = new Context(concatWord(c, e.word, r), cerM(c, e.ctx, r));
             return comp;
         }
     }
@@ -134,6 +134,19 @@ public class Context {
         return added;
     }
 
+    private static List<Symbol> concatWord(List<Symbol> w1, List<Symbol> w2) {
+        LinkedList<Symbol> w = new LinkedList<>(w1);
+        w.addAll(w2);
+        return w;
+    }
+
+    private static List<Symbol> concatWord(Symbol c, List<Symbol> w1, Symbol r) {
+        LinkedList<Symbol> w = new LinkedList<>(w1);
+        w.addFirst(c);
+        w.addLast(r);
+        return w;
+    }
+
     public static Map<State, Set<State>> transitiveClosure(Map<State, Set<State>> m) {
         Map<State, Set<State>> transitiveClosure = new HashMap<>(m);
         boolean added;
@@ -143,15 +156,7 @@ public class Context {
         return transitiveClosure;
     }
 
-    public void addSymbolLeft(Symbol symbol) {
-        word.addFirst(symbol);
-    }
-
-    public void addSymbolRight(Symbol symbol) {
-        word.addLast(symbol);
-    }
-
-    public LinkedList<Symbol> getWord() {
+    public List<Symbol> getWord() {
         return word;
     }
 

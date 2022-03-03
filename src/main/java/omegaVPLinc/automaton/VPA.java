@@ -160,9 +160,7 @@ public class VPA {
             }
             default -> throw new IllegalArgumentException("Symbol type doesn't exist: " + symbol.getType());
         }
-        LinkedList<Symbol> word = new LinkedList<>();
-        word.addFirst(symbol);
-        return new Context(word, ctx);
+        return new Context(new LinkedList<>(List.of(symbol)), ctx);
     }
 
     public Context contextPair(Symbol symbol) {
