@@ -12,6 +12,8 @@ public abstract class FixpointVector {
     protected VPA a;
     protected VPA b;
 
+    protected boolean withFinal;
+
     private Map<Pair<State, State>, Set<Context>> innerVector;
     protected Map<Pair<State, State>, Set<Context>> innerVectorCopy;
     protected Map<Pair<State, State>, Set<Context>> innerFrontier;
@@ -21,11 +23,12 @@ public abstract class FixpointVector {
 
     protected Set<Pair<State, State>> frontier;
 
-    protected PartialComparator<Context> comparator;
+    protected PartialComparator comparator;
 
-    public FixpointVector(VPA a, VPA b, PartialComparator<Context> comparator) {
+    public FixpointVector(VPA a, VPA b, boolean withFinal) {
         this.a = a;
         this.b = b;
+        this.withFinal = withFinal;
         this.innerVector = new HashMap<>();
         this.innerVectorCopy = new HashMap<>();
         this.innerFrontier = new HashMap<>();
@@ -40,7 +43,7 @@ public abstract class FixpointVector {
         }
         this.changed = new HashSet<>();
         this.frontier = new HashSet<>();
-        this.comparator = comparator;
+        this.comparator = new PartialComparator();
     }
 
     public abstract void initial();

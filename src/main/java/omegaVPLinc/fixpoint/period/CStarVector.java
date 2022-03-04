@@ -4,20 +4,19 @@ import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.common.CVector;
 import omegaVPLinc.fixpoint.FixpointVector;
-import omegaVPLinc.fixpoint.compare.PairComparator;
 import omegaVPLinc.utility.Pair;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class CStarVector extends FixpointVector {
     private final WStarVector wStarVector;
-    private final PeriodCVector cVector;
+    private final CVector cVector;
 
-    public CStarVector(VPA a, VPA b, WStarVector wStarVector, PeriodCVector cVector) {
-        super(a, b, new PairComparator());
+    public CStarVector(VPA a, VPA b, WStarVector wStarVector, CVector cVector) {
+        super(a, b, true);
         this.wStarVector = wStarVector;
         this.cVector = cVector;
         for (State p : a.getStates()) {
@@ -38,7 +37,7 @@ public class CStarVector extends FixpointVector {
             // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
             for (Symbol r : p.getReturnSuccessors().keySet()) {
                 if ((p.isFinal() || q.isFinal()) && p.getReturnSuccessors(r, a.getEmptyStackSymbol()).contains(q))
-                    if (antichainInsert(pq, Set.of(b.contextPair(r))))
+                    if (antichainInsert(pq, Set.of(b.context(r, withFinal))))
                         changed.add(pq);
             }
         }

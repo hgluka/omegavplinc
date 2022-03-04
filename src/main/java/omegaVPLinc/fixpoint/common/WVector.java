@@ -1,21 +1,26 @@
-package omegaVPLinc.fixpoint.prefix;
+package omegaVPLinc.fixpoint.common;
 
 import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
-import omegaVPLinc.fixpoint.WVector;
-import omegaVPLinc.fixpoint.compare.MapComparator;
+import omegaVPLinc.fixpoint.FixpointVector;
+import omegaVPLinc.fixpoint.compare.PartialComparator;
 import omegaVPLinc.utility.Pair;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class PrefixWVector extends WVector {
-
-    public PrefixWVector(VPA a, VPA b) {
-        super(a, b, new MapComparator());
+public class WVector extends FixpointVector {
+    public WVector(VPA a, VPA b, boolean withFinal) {
+        super(a, b, withFinal);
+        for (State p : a.getStates()) {
+            frontier.add(Pair.of(p, p));
+            for (Symbol s : p.getInternalSuccessors().keySet()) {
+                for (State q : p.getInternalSuccessors(s)) {
+                    frontier.add(Pair.of(p, q));
+                }
+            }
+        }
     }
 
     @Override
@@ -25,13 +30,13 @@ public class PrefixWVector extends WVector {
             State q = pq.snd();
             // Epsilon context if p == q
             if (p.equals(q)) {
-                if (antichainInsert(pq, Set.of(b.getEpsilonContext())))
+                if (antichainInsert(pq, Set.of(b.getEpsilonContext(withFinal))))
                     changed.add(pq);
             }
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
             for (Symbol s : p.getInternalSuccessors().keySet()) {
                 if (p.getInternalSuccessors(s).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.context(s))))
+                    if (antichainInsert(pq, Set.of(b.context(s, withFinal))))
                         changed.add(pq);
                 }
             }
@@ -69,6 +74,34 @@ public class PrefixWVector extends WVector {
                         changed.add(pq);
                     if (antichainInsert(pq, Context.compose(innerVectorCopy.get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
                         changed.add(pq);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void frontier() {
+        frontier = new HashSet<>();
+        for (Pair<State, State> pq : changed) {
+            State p = pq.fst();
+            State q = pq.snd();
+
+            for (Symbol c : p.getCallPredecessors().keySet()) {
+                for (State pPrime : p.getCallPredecessors(c)) {
+                    for (Symbol r : q.getReturnSuccessors().keySet()) {
+                        for (State qPrime : q.getReturnSuccessors(r, pPrime.getName())) {
+                            frontier.add(Pair.of(pPrime, qPrime));
+                        }
+                    }
+                }
+            }
+
+            for (State pPrime : a.getStates()) {
+                if (!getInnerVector().get(Pair.of(q, pPrime)).isEmpty()) {
+                    frontier.add(Pair.of(p, pPrime));
+                }
+                if (!getInnerVector().get(Pair.of(pPrime, p)).isEmpty()) {
+                    frontier.add(Pair.of(pPrime, q));
                 }
             }
         }

@@ -5,18 +5,17 @@ import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.fixpoint.FixpointVector;
-import omegaVPLinc.fixpoint.compare.PairComparator;
+import omegaVPLinc.fixpoint.common.WVector;
 import omegaVPLinc.utility.Pair;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class WStarVector extends FixpointVector {
-    private final PeriodWVector wVector;
+    private final WVector wVector;
 
-    public WStarVector(VPA a, VPA b, PeriodWVector wVector) {
-        super(a, b, new PairComparator());
+    public WStarVector(VPA a, VPA b, WVector wVector) {
+        super(a, b, true);
         this.wVector = wVector;
         for (State p : a.getStates()) {
             for (Symbol s : p.getInternalSuccessors().keySet()) {
@@ -38,7 +37,7 @@ public class WStarVector extends FixpointVector {
             // if p or p' are final
             for (Symbol s : p.getInternalSuccessors().keySet()) {
                 if ((p.isFinal() || q.isFinal()) && p.getInternalSuccessors(s).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.contextPair(s))))
+                    if (antichainInsert(pq, Set.of(b.context(s, withFinal))))
                         changed.add(pq);
                 }
             }

@@ -2,14 +2,14 @@ package omegaVPLinc.fixpoint.period;
 
 import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
-import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.common.CVector;
+import omegaVPLinc.fixpoint.common.RVector;
+import omegaVPLinc.fixpoint.common.WVector;
 import omegaVPLinc.utility.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class Periods {
@@ -17,21 +17,21 @@ public class Periods {
     private final VPA a;
     private final VPA b;
 
-    private final PeriodWVector W;
+    private final WVector W;
     private final WStarVector WS;
-    private final PeriodCVector C;
+    private final CVector C;
     private final CStarVector CS;
-    private final PeriodRVector R;
+    private final RVector R;
     private final RStarVector RS;
 
     public Periods(VPA a, VPA b) {
         this.a = a;
         this.b = b;
-        this.W = new PeriodWVector(a, b);
+        this.W = new WVector(a, b, true);
         this.WS = new WStarVector(a, b, W);
-        this.C = new PeriodCVector(a, b, W);
+        this.C = new CVector(a, b, true, W);
         this.CS = new CStarVector(a, b, WS, C);
-        this.R = new PeriodRVector(a, b, W);
+        this.R = new RVector(a, b, true, W);
         this.RS = new RStarVector(a, b, WS, R);
     }
 

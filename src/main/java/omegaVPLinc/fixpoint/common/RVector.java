@@ -1,21 +1,28 @@
-package omegaVPLinc.fixpoint.prefix;
+package omegaVPLinc.fixpoint.common;
 
 import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
-import omegaVPLinc.fixpoint.RVector;
-import omegaVPLinc.fixpoint.WVector;
-import omegaVPLinc.fixpoint.compare.MapComparator;
+import omegaVPLinc.fixpoint.FixpointVector;
 import omegaVPLinc.utility.Pair;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-public class PrefixRVector extends RVector {
-    public PrefixRVector(VPA a, VPA b, WVector wVector) {
-        super(a, b, new MapComparator(), wVector);
+public class RVector extends FixpointVector {
+    protected WVector wVector;
+
+    public RVector(VPA a, VPA b, boolean withFinal, WVector wVector) {
+        super(a, b, withFinal);
+        this.wVector = wVector;
+        for (State p : a.getStates()) {
+            for (Symbol c : p.getCallSuccessors().keySet()) {
+                for (State q : p.getCallSuccessors(c)) {
+                    frontier.add(Pair.of(p, q));
+                }
+            }
+        }
     }
 
     @Override
@@ -26,7 +33,7 @@ public class PrefixRVector extends RVector {
             // Union of cZ_{p', q} for (p, r, g, p') in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {
                 if (p.getCallSuccessors(c).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.context(c)))) {
+                    if (antichainInsert(pq, Set.of(b.context(c, withFinal)))) {
                         changed.add(pq);
                     }
                 }
@@ -52,6 +59,43 @@ public class PrefixRVector extends RVector {
                     if (antichainInsert(pq, Context.compose(innerVectorCopy.get(Pair.of(p, qPrime)), getOldInnerFrontier(qPrime, q))))
                         changed.add(pq);
                 }
+            }
+        }
+    }
+
+    @Override
+    public int computeFixpoint() {
+        int i = 0;
+        iterateOnce();
+        updateCopy();
+        updateInnerFrontier();
+        wVector.noChanged();
+        frontier();
+        i++;
+        while (!changed.isEmpty()) {
+            iterateOnce();
+            updateCopy();
+            updateInnerFrontier();
+            frontier();
+            i++;
+        }
+        allChanged();
+        wVector.allChanged();
+        return i;
+    }
+
+    @Override
+    public void frontier() {
+        frontier = new HashSet<>(wVector.getChanged());
+        for (Pair<State, State> pq : changed) {
+            State p = pq.fst();
+            State q = pq.snd();
+
+            for (State pPrime : a.getStates()) {
+                if (!getInnerVector().get(Pair.of(q, pPrime)).isEmpty())
+                    frontier.add(Pair.of(p, pPrime));
+                if (!getInnerVector().get(Pair.of(pPrime, p)).isEmpty())
+                    frontier.add(Pair.of(pPrime, q));
             }
         }
     }

@@ -4,14 +4,12 @@ import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
 import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
-import omegaVPLinc.fixpoint.CVector;
+import omegaVPLinc.fixpoint.common.CVector;
 import omegaVPLinc.fixpoint.FixpointVector;
-import omegaVPLinc.fixpoint.RVector;
-import omegaVPLinc.fixpoint.compare.MapComparator;
+import omegaVPLinc.fixpoint.common.RVector;
 import omegaVPLinc.utility.Pair;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class UVector extends FixpointVector {
@@ -22,7 +20,7 @@ public class UVector extends FixpointVector {
                    VPA b,
                    CVector cVector,
                    RVector rVector) {
-        super(a, b, new MapComparator());
+        super(a, b, false);
         this.cVector = cVector;
         this.rVector = rVector;
         for (State p : a.getStates()) {
@@ -42,7 +40,7 @@ public class UVector extends FixpointVector {
             // ctx(c) for (p, c, q, s) in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {
                 if (p.getCallSuccessors(c).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.context(c))))
+                    if (antichainInsert(pq, Set.of(b.context(c, withFinal))))
                         changed.add(pq);
                 }
             }

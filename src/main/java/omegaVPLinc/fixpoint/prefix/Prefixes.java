@@ -2,14 +2,14 @@ package omegaVPLinc.fixpoint.prefix;
 
 import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
-import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
+import omegaVPLinc.fixpoint.common.CVector;
+import omegaVPLinc.fixpoint.common.RVector;
+import omegaVPLinc.fixpoint.common.WVector;
 import omegaVPLinc.utility.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class Prefixes {
@@ -18,17 +18,17 @@ public class Prefixes {
     private final VPA a;
     private final VPA b;
 
-    private final PrefixWVector W;
-    private final PrefixCVector C;
-    private final PrefixRVector R;
+    private final WVector W;
+    private final CVector C;
+    private final RVector R;
     private final UVector       U;
 
     public Prefixes(VPA a, VPA b) {
         this.a = a;
         this.b = b;
-        this.W = new PrefixWVector(a, b);
-        this.C = new PrefixCVector(a, b, W);
-        this.R = new PrefixRVector(a, b, W);
+        this.W = new WVector(a, b, false);
+        this.C = new CVector(a, b, false, W);
+        this.R = new RVector(a, b, false, W);
         this.U = new UVector(a, b, C, R);
     }
 
@@ -72,7 +72,7 @@ public class Prefixes {
         return U.getInnerVector().get(Pair.of(p, q));
     }
 
-    public PrefixCVector getC() {
+    public CVector getC() {
         return C;
     }
 

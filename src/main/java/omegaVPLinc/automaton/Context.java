@@ -3,24 +3,26 @@ package omegaVPLinc.automaton;
 import java.util.*;
 
 public class Context {
-    private final List<Symbol> word;
-    private Map<State, Set<State>> ctx;
-    private Map<State, Set<State>> finalCtx;
+    private final LinkedList<Symbol> word;
+    private final Map<State, Set<State>> ctx;
+    private final Map<State, Set<State>> finalCtx;
     private final boolean withFinal;
 
     public Context() {
         this.word = null;
         this.ctx = null;
+        this.finalCtx = null;
         this.withFinal = false;
     }
 
-    public Context(List<Symbol> word, Map<State, Set<State>> ctx) {
+    public Context(LinkedList<Symbol> word, Map<State, Set<State>> ctx) {
         this.word = word;
         this.ctx = ctx;
+        this.finalCtx = null;
         this.withFinal = false;
     }
 
-    public Context(List<Symbol> word, Map<State, Set<State>> ctx, Map<State, Set<State>> finalCtx) {
+    public Context(LinkedList<Symbol> word, Map<State, Set<State>> ctx, Map<State, Set<State>> finalCtx) {
         this.word = word;
         this.ctx = ctx;
         this.finalCtx = finalCtx;
@@ -31,11 +33,9 @@ public class Context {
         if (e.withFinal && d.withFinal) {
             Map<State, Set<State>> ctx = composeM(e.ctx, d.ctx);
             Map<State, Set<State>> finalCtx = union(composeM(e.ctx, d.finalCtx), composeM(e.finalCtx, d.ctx));
-            Context comp = new Context(concatWord(e.word, d.word), ctx, finalCtx);
-            return comp;
+            return new Context(concatWord(e.word, d.word), ctx, finalCtx);
         } else {
-            Context comp = new Context(concatWord(e.word, d.word), composeM(e.ctx, d.ctx));
-            return comp;
+            return new Context(concatWord(e.word, d.word), composeM(e.ctx, d.ctx));
         }
     }
 
@@ -55,11 +55,9 @@ public class Context {
                     }
                 }
             }
-            Context comp = new Context(concatWord(c, e.word, r), ctx, finalCtx);
-            return comp;
+            return new Context(concatWord(c, e.word, r), ctx, finalCtx);
         } else {
-            Context comp = new Context(concatWord(c, e.word, r), cerM(c, e.ctx, r));
-            return comp;
+            return new Context(concatWord(c, e.word, r), cerM(c, e.ctx, r));
         }
     }
 
@@ -134,19 +132,6 @@ public class Context {
         return added;
     }
 
-    private static List<Symbol> concatWord(List<Symbol> w1, List<Symbol> w2) {
-        LinkedList<Symbol> w = new LinkedList<>(w1);
-        w.addAll(w2);
-        return w;
-    }
-
-    private static List<Symbol> concatWord(Symbol c, List<Symbol> w1, Symbol r) {
-        LinkedList<Symbol> w = new LinkedList<>(w1);
-        w.addFirst(c);
-        w.addLast(r);
-        return w;
-    }
-
     public static Map<State, Set<State>> transitiveClosure(Map<State, Set<State>> m) {
         Map<State, Set<State>> transitiveClosure = new HashMap<>(m);
         boolean added;
@@ -156,7 +141,20 @@ public class Context {
         return transitiveClosure;
     }
 
-    public List<Symbol> getWord() {
+    private static LinkedList<Symbol> concatWord(LinkedList<Symbol> w1, LinkedList<Symbol> w2) {
+        LinkedList<Symbol> w = new LinkedList<>(w1);
+        w.addAll(w2);
+        return w;
+    }
+
+    private static LinkedList<Symbol> concatWord(Symbol c, LinkedList<Symbol> w1, Symbol r) {
+        LinkedList<Symbol> w = new LinkedList<>(w1);
+        w.addFirst(c);
+        w.addLast(r);
+        return w;
+    }
+
+    public LinkedList<Symbol> getWord() {
         return word;
     }
 
@@ -168,12 +166,8 @@ public class Context {
         return finalCtx;
     }
 
-    public void setCtx(Map<State, Set<State>> ctx) {
-        this.ctx = ctx;
-    }
-
-    public void setFinalCtx(Map<State, Set<State>> finalCtx) {
-        this.finalCtx = finalCtx;
+    public boolean isWithFinal() {
+        return withFinal;
     }
 
     @Override

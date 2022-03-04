@@ -20,6 +20,7 @@ public class VPA {
     private final State initialState;
 
     private final Context epsilonContext;
+    private final Context epsilonContextPair;
 
     public VPA(Set<Symbol> callAlphabet,
                Set<Symbol> internalAlphabet,
@@ -47,7 +48,8 @@ public class VPA {
             if (p.isFinal())
                 epsilonContextFinalCtx.put(p, new HashSet<>(Set.of(p)));
         }
-        this.epsilonContext = new Context(new LinkedList<>(), epsilonContextCtx, epsilonContextFinalCtx);
+        this.epsilonContext = new Context(new LinkedList<>(), epsilonContextCtx);
+        this.epsilonContextPair = new Context(new LinkedList<>(), epsilonContextCtx, epsilonContextFinalCtx);
         this.emptyStackSymbol = "empty";
     }
 
@@ -123,8 +125,11 @@ public class VPA {
         return emptyStackSymbol;
     }
 
-    public Context getEpsilonContext() {
-        return epsilonContext;
+    public Context getEpsilonContext(boolean withFinal) {
+        if (withFinal)
+            return epsilonContextPair;
+        else
+            return epsilonContext;
     }
 
     public Context context(Symbol symbol) throws IllegalArgumentException {
@@ -163,8 +168,10 @@ public class VPA {
         return new Context(new LinkedList<>(List.of(symbol)), ctx);
     }
 
-    public Context contextPair(Symbol symbol) {
+    public Context context(Symbol symbol, boolean withFinal) {
         Context ctx = context(symbol);
+        if (!withFinal)
+            return ctx;
         Map<State, Set<State>> finalCtx = new HashMap<>();
         for (State p : ctx.getCtx().keySet()) {
             if (p.isFinal()) {
