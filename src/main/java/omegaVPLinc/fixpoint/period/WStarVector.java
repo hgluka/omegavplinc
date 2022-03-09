@@ -14,8 +14,8 @@ import java.util.Set;
 public class WStarVector extends FixpointVector {
     private final WVector wVector;
 
-    public WStarVector(VPA a, VPA b, WVector wVector) {
-        super(a, b, true);
+    public WStarVector(VPA a, VPA b, boolean withWords, WVector wVector) {
+        super(a, b, true, withWords);
         this.wVector = wVector;
         for (State p : a.getStates()) {
             for (Symbol s : p.getInternalSuccessors().keySet()) {
@@ -37,7 +37,7 @@ public class WStarVector extends FixpointVector {
             // if p or p' are final
             for (Symbol s : p.getInternalSuccessors().keySet()) {
                 if ((p.isFinal() || q.isFinal()) && p.getInternalSuccessors(s).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.context(s, withFinal))))
+                    if (antichainInsert(pq, Set.of(b.context(s, withFinal, withWords))))
                         changed.add(pq);
                 }
             }

@@ -24,15 +24,15 @@ public class Periods {
     private final RVector R;
     private final RStarVector RS;
 
-    public Periods(VPA a, VPA b) {
+    public Periods(VPA a, VPA b, boolean withWords) {
         this.a = a;
         this.b = b;
-        this.W = new WVector(a, b, true);
-        this.WS = new WStarVector(a, b, W);
-        this.C = new CVector(a, b, true, W);
-        this.CS = new CStarVector(a, b, WS, C);
-        this.R = new RVector(a, b, true, W);
-        this.RS = new RStarVector(a, b, WS, R);
+        this.W = new WVector(a, b, true, withWords);
+        this.WS = new WStarVector(a, b, withWords, W);
+        this.C = new CVector(a, b, true, withWords, W);
+        this.CS = new CStarVector(a, b, withWords, WS, C);
+        this.R = new RVector(a, b, true, withWords, W);
+        this.RS = new RStarVector(a, b, withWords, WS, R);
     }
 
     public int iterate() {

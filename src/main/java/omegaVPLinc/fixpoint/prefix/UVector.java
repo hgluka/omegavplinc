@@ -18,9 +18,10 @@ public class UVector extends FixpointVector {
 
     public UVector(VPA a,
                    VPA b,
+                   boolean withWords,
                    CVector cVector,
                    RVector rVector) {
-        super(a, b, false);
+        super(a, b, false, withWords);
         this.cVector = cVector;
         this.rVector = rVector;
         for (State p : a.getStates()) {
@@ -40,7 +41,7 @@ public class UVector extends FixpointVector {
             // ctx(c) for (p, c, q, s) in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {
                 if (p.getCallSuccessors(c).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.context(c, withFinal))))
+                    if (antichainInsert(pq, Set.of(b.context(c, withFinal, withWords))))
                         changed.add(pq);
                 }
             }

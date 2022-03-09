@@ -11,8 +11,8 @@ import omegaVPLinc.utility.Pair;
 import java.util.*;
 
 public class WVector extends FixpointVector {
-    public WVector(VPA a, VPA b, boolean withFinal) {
-        super(a, b, withFinal);
+    public WVector(VPA a, VPA b, boolean withFinal, boolean withWords) {
+        super(a, b, withFinal, withWords);
         for (State p : a.getStates()) {
             frontier.add(Pair.of(p, p));
             for (Symbol s : p.getInternalSuccessors().keySet()) {
@@ -30,13 +30,13 @@ public class WVector extends FixpointVector {
             State q = pq.snd();
             // Epsilon context if p == q
             if (p.equals(q)) {
-                if (antichainInsert(pq, Set.of(b.getEpsilonContext(withFinal))))
+                if (antichainInsert(pq, Set.of(b.getEpsilonContext(withFinal, withWords))))
                     changed.add(pq);
             }
             // Union of aX_{p', q} for (p, a, p') in internalTransitions
             for (Symbol s : p.getInternalSuccessors().keySet()) {
                 if (p.getInternalSuccessors(s).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.context(s, withFinal))))
+                    if (antichainInsert(pq, Set.of(b.context(s, withFinal, withWords))))
                         changed.add(pq);
                 }
             }
@@ -59,10 +59,6 @@ public class WVector extends FixpointVector {
                             if (antichainInsert(pq, Context.compose(c, getOldInnerFrontier(pPrime, qPrime), r))) {
                                 changed.add(pq);
                             }
-                            /*
-                            if (antichainInsert(pq, Context.compose(Set.of(b.context(c)), Context.compose(getOldInnerFrontier(pPrime, qPrime), Set.of(b.context(r))))))
-                                changed.add(pq);
-                             */
                         }
                     }
                 }

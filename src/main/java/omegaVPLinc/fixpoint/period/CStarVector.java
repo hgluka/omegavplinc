@@ -15,8 +15,8 @@ public class CStarVector extends FixpointVector {
     private final WStarVector wStarVector;
     private final CVector cVector;
 
-    public CStarVector(VPA a, VPA b, WStarVector wStarVector, CVector cVector) {
-        super(a, b, true);
+    public CStarVector(VPA a, VPA b, boolean withWords, WStarVector wStarVector, CVector cVector) {
+        super(a, b, true, withWords);
         this.wStarVector = wStarVector;
         this.cVector = cVector;
         for (State p : a.getStates()) {
@@ -37,7 +37,7 @@ public class CStarVector extends FixpointVector {
             // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
             for (Symbol r : p.getReturnSuccessors().keySet()) {
                 if ((p.isFinal() || q.isFinal()) && p.getReturnSuccessors(r, a.getEmptyStackSymbol()).contains(q))
-                    if (antichainInsert(pq, Set.of(b.context(r, withFinal))))
+                    if (antichainInsert(pq, Set.of(b.context(r, withFinal, withWords))))
                         changed.add(pq);
             }
         }

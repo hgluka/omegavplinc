@@ -13,8 +13,8 @@ import java.util.Set;
 public class CVector extends FixpointVector {
     protected WVector wVector;
 
-    public CVector(VPA a, VPA b, boolean withFinal, WVector wVector) {
-        super(a, b, withFinal);
+    public CVector(VPA a, VPA b, boolean withFinal, boolean withWords, WVector wVector) {
+        super(a, b, withFinal, withWords);
         this.wVector = wVector;
         for (State p : a.getStates()) {
             for (Symbol r : p.getReturnSuccessors().keySet()) {
@@ -33,7 +33,7 @@ public class CVector extends FixpointVector {
             // Union of rY_{p', q} for (p, r, |, p') in returnTransitions
             for (Symbol r : p.getReturnSuccessors().keySet()) {
                 if (p.getReturnSuccessors(r, a.getEmptyStackSymbol()).contains(q))
-                    if (antichainInsert(pq, Set.of(b.context(r, withFinal))))
+                    if (antichainInsert(pq, Set.of(b.context(r, withFinal, withWords))))
                         changed.add(pq);
             }
         }

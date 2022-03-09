@@ -7,16 +7,27 @@ public class Context {
     private final Map<State, Set<State>> ctx;
     private final Map<State, Set<State>> finalCtx;
     private final boolean withFinal;
+    private final boolean withWords;
 
     public Context() {
         this.word = null;
         this.ctx = null;
         this.finalCtx = null;
         this.withFinal = false;
+        this.withWords = false;
     }
 
     public Context(LinkedList<Symbol> word, Map<State, Set<State>> ctx) {
         this.word = word;
+        this.withWords = true;
+        this.ctx = ctx;
+        this.finalCtx = null;
+        this.withFinal = false;
+    }
+
+    public Context(Map<State, Set<State>> ctx) {
+        this.word = null;
+        this.withWords = false;
         this.ctx = ctx;
         this.finalCtx = null;
         this.withFinal = false;
@@ -24,24 +35,39 @@ public class Context {
 
     public Context(LinkedList<Symbol> word, Map<State, Set<State>> ctx, Map<State, Set<State>> finalCtx) {
         this.word = word;
+        this.withWords = true;
+        this.ctx = ctx;
+        this.finalCtx = finalCtx;
+        this.withFinal = true;
+    }
+
+    public Context(Map<State, Set<State>> ctx, Map<State, Set<State>> finalCtx) {
+        this.word = null;
+        this.withWords = false;
         this.ctx = ctx;
         this.finalCtx = finalCtx;
         this.withFinal = true;
     }
 
     public static Context compose(Context e, Context d) {
+        Map<State, Set<State>> ctx = composeM(e.ctx, d.ctx);
         if (e.withFinal && d.withFinal) {
-            Map<State, Set<State>> ctx = composeM(e.ctx, d.ctx);
             Map<State, Set<State>> finalCtx = union(composeM(e.ctx, d.finalCtx), composeM(e.finalCtx, d.ctx));
-            return new Context(concatWord(e.word, d.word), ctx, finalCtx);
+            if (e.withWords && d.withWords)
+                return new Context(concatWord(e.word, d.word), ctx, finalCtx);
+            else
+                return new Context(ctx, finalCtx);
         } else {
-            return new Context(concatWord(e.word, d.word), composeM(e.ctx, d.ctx));
+            if (e.withWords && d.withWords)
+                return new Context(concatWord(e.word, d.word), ctx);
+            else
+                return new Context(ctx);
         }
     }
 
     public static Context compose(Symbol c, Context e, Symbol r) {
+        Map<State, Set<State>> ctx = cerM(c, e.ctx, r);
         if (e.withFinal) {
-            Map<State, Set<State>> ctx = cerM(c, e.ctx, r);
             Map<State, Set<State>> finalCtx = new HashMap<>();
             for (State pPrime : e.ctx.keySet()) {
                 for (State qPrime : e.ctx.get(pPrime)) {
@@ -55,9 +81,15 @@ public class Context {
                     }
                 }
             }
-            return new Context(concatWord(c, e.word, r), ctx, finalCtx);
+            if (e.withWords)
+                return new Context(concatWord(c, e.word, r), ctx, finalCtx);
+            else
+                return new Context(ctx, finalCtx);
         } else {
-            return new Context(concatWord(c, e.word, r), cerM(c, e.ctx, r));
+            if (e.withWords)
+                return new Context(concatWord(c, e.word, r), ctx);
+            else
+                return new Context(ctx);
         }
     }
 

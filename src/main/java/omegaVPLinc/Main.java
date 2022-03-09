@@ -23,13 +23,16 @@ public class Main implements Callable<Integer> {
     @CommandLine.Parameters(index = "1", description = "Second automaton file.")
     private File Bfile;
 
+    @CommandLine.Option(names = {"-w", "--words"}, description = "Keep track of words to find counterexample.")
+    private boolean withWords;
+
     @Override
     public Integer call() throws Exception {
         Parser parserA = new Parser(Afile.getPath());
         Parser parserB = new Parser(Bfile.getPath());
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        InclusionChecker checker = new InclusionChecker(A, B);
+        InclusionChecker checker = new InclusionChecker(A, B, withWords);
         Instant start = Instant.now();
         boolean isIncluded = checker.checkInclusion();
         Instant end = Instant.now();

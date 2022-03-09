@@ -96,7 +96,7 @@ class PeriodVectorsTest {
 
     @Test
     void testPeriods() {
-        Periods periods = new Periods(vpa, vpa);
+        Periods periods = new Periods(vpa, vpa, false);
         int iterations = periods.iterate();
         assertEquals(16, iterations);
     }
@@ -106,7 +106,7 @@ class PeriodVectorsTest {
         Parser parserB = new Parser("src/test/resources/union.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        Periods periods = new Periods(A, B);
+        Periods periods = new Periods(A, B, false);
         Instant start = Instant.now();
         int iterations = periods.iterate();
         Instant end = Instant.now();
@@ -120,7 +120,7 @@ class PeriodVectorsTest {
         Parser parserB = new Parser("src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_Bunion.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        Periods periods = new Periods(A, B);
+        Periods periods = new Periods(A, B, false);
         Instant start = Instant.now();
         int iterations = periods.iterate();
         Instant end = Instant.now();

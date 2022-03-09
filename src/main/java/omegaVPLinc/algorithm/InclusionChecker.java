@@ -21,11 +21,15 @@ public class InclusionChecker {
     private final Prefixes prefixes;
     private final Periods periods;
 
-    public InclusionChecker(VPA a, VPA b) {
+    private boolean withWords;
+
+    public InclusionChecker(VPA a, VPA b, boolean withWords) {
         this.a = a;
         this.b = b;
-        this.prefixes = new Prefixes(a, b);
-        this.periods = new Periods(a, b);
+        this.prefixes = new Prefixes(a, b, withWords);
+        this.periods = new Periods(a, b, withWords);
+        this.withWords = withWords;
+
     }
 
     private boolean inctx(Map<State, Set<State>> x, Map<State, Set<State>> y1, Map<State, Set<State>> y2) {
@@ -50,8 +54,14 @@ public class InclusionChecker {
                 for (Context y1y2 : periods.getFromCS(p, p)) {
                     if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
                         logger.debug("C, C_star");
-                        logger.debug("Prefix: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
-                        logger.debug("Period: ({} -> {}) {}", p, p, y1y2.getWord());
+                        if (withWords) {
+                            logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
+                            logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
+                        } else {
+                            logger.debug("Prefix context: ({} -> {}) {}", a.getInitialState(), p, x.getCtx());
+                            logger.debug("Period context: ({} -> {}) {}", p, p, y1y2.getCtx());
+                            logger.debug("Period final context: ({} -> {}) {}", p, p, y1y2.getFinalCtx());
+                        }
                         return false;
                     }
                 }
@@ -60,8 +70,14 @@ public class InclusionChecker {
                 for (Context y1y2 : periods.getFromRS(p, p)) {
                     if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
                         logger.debug("U, R_star");
-                        logger.debug("Prefix: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
-                        logger.debug("Period: ({} -> {}) {}", p, p, y1y2.getWord());
+                        if (withWords) {
+                            logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
+                            logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
+                        } else {
+                            logger.debug("Prefix context: ({} -> {}) {}", a.getInitialState(), p, x.getCtx());
+                            logger.debug("Period context: ({} -> {}) {}", p, p, y1y2.getCtx());
+                            logger.debug("Period final context: ({} -> {}) {}", p, p, y1y2.getFinalCtx());
+                        }
                         return false;
                     }
                 }

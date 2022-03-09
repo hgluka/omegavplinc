@@ -121,10 +121,10 @@ class InclusionCheckerTest {
 
     @Test
     void checkInclusion() {
-        InclusionChecker inclusionChecker1 = new InclusionChecker(a, b);
-        InclusionChecker inclusionChecker2 = new InclusionChecker(b, a);
-        InclusionChecker inclusionChecker3 = new InclusionChecker(a, a);
-        InclusionChecker inclusionChecker4 = new InclusionChecker(b, b);
+        InclusionChecker inclusionChecker1 = new InclusionChecker(a, b, true);
+        InclusionChecker inclusionChecker2 = new InclusionChecker(b, a, false);
+        InclusionChecker inclusionChecker3 = new InclusionChecker(a, a, false);
+        InclusionChecker inclusionChecker4 = new InclusionChecker(b, b, false);
         assertFalse(inclusionChecker1.checkInclusion());
         assertTrue(inclusionChecker2.checkInclusion());
         assertTrue(inclusionChecker3.checkInclusion());

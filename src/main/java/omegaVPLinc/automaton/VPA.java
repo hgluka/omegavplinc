@@ -125,11 +125,21 @@ public class VPA {
         return emptyStackSymbol;
     }
 
-    public Context getEpsilonContext(boolean withFinal) {
-        if (withFinal)
-            return epsilonContextPair;
-        else
-            return epsilonContext;
+    public Context getEpsilonContext(boolean withFinal, boolean withWords) {
+        if (withFinal) {
+            if (epsilonContextPair.getFinalCtx() == null) {
+                System.out.println("ERROR");
+            }
+            if (withWords)
+                return epsilonContextPair;
+            else
+                return new Context(epsilonContextPair.getCtx(), epsilonContextPair.getFinalCtx());
+        } else {
+            if (withWords)
+                return epsilonContext;
+            else
+                return new Context(epsilonContext.getCtx());
+        }
     }
 
     public Context context(Symbol symbol) throws IllegalArgumentException {
@@ -168,10 +178,14 @@ public class VPA {
         return new Context(new LinkedList<>(List.of(symbol)), ctx);
     }
 
-    public Context context(Symbol symbol, boolean withFinal) {
+    public Context context(Symbol symbol, boolean withFinal, boolean withWords) {
         Context ctx = context(symbol);
-        if (!withFinal)
-            return ctx;
+        if (!withFinal) {
+            if (withWords)
+                return ctx;
+            else
+                return new Context(ctx.getCtx());
+        }
         Map<State, Set<State>> finalCtx = new HashMap<>();
         for (State p : ctx.getCtx().keySet()) {
             if (p.isFinal()) {
@@ -184,7 +198,10 @@ public class VPA {
                 }
             }
         }
-        return new Context(ctx.getWord(), ctx.getCtx(), finalCtx);
+        if (withWords)
+            return new Context(ctx.getWord(), ctx.getCtx(), finalCtx);
+        else
+            return new Context(ctx.getCtx(), finalCtx);
     }
 
     public Set<Symbol> getCallAlphabet() {

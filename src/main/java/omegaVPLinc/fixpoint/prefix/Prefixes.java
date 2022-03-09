@@ -21,15 +21,15 @@ public class Prefixes {
     private final WVector W;
     private final CVector C;
     private final RVector R;
-    private final UVector       U;
+    private final UVector U;
 
-    public Prefixes(VPA a, VPA b) {
+    public Prefixes(VPA a, VPA b, boolean withWords) {
         this.a = a;
         this.b = b;
-        this.W = new WVector(a, b, false);
-        this.C = new CVector(a, b, false, W);
-        this.R = new RVector(a, b, false, W);
-        this.U = new UVector(a, b, C, R);
+        this.W = new WVector(a, b, false, withWords);
+        this.C = new CVector(a, b, false, withWords, W);
+        this.R = new RVector(a, b, false, withWords, W);
+        this.U = new UVector(a, b, withWords, C, R);
     }
 
     public int iterate() {

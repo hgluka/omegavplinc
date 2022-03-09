@@ -22,13 +22,13 @@ public class ParseAndCheckTest {
         Parser parserB = new Parser("src/test/resources/McCarthy91.bpl_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        InclusionChecker checker1 = new InclusionChecker(A, B);
+        InclusionChecker checker1 = new InclusionChecker(A, B, true);
         assertFalse(checker1.checkInclusion());
-        InclusionChecker checker2 = new InclusionChecker(B, A);
+        InclusionChecker checker2 = new InclusionChecker(B, A, false);
         assertTrue(checker2.checkInclusion());
-        InclusionChecker checker3 = new InclusionChecker(A, A);
+        InclusionChecker checker3 = new InclusionChecker(A, A, false);
         assertTrue(checker3.checkInclusion());
-        InclusionChecker checker4 = new InclusionChecker(B, B);
+        InclusionChecker checker4 = new InclusionChecker(B, B, false);
         assertTrue(checker4.checkInclusion());
     }
 
@@ -202,7 +202,7 @@ public class ParseAndCheckTest {
         Parser parserB = new Parser(b);
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        InclusionChecker checker = new InclusionChecker(A, B);
+        InclusionChecker checker = new InclusionChecker(A, B, false);
         Instant start = Instant.now();
         boolean isIncluded = checker.checkInclusion();
         Instant end = Instant.now();
@@ -215,7 +215,7 @@ public class ParseAndCheckTest {
         Parser parserB = new Parser(b);
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        InclusionChecker checker = new InclusionChecker(A, B);
+        InclusionChecker checker = new InclusionChecker(A, B, true);
         Instant start = Instant.now();
         boolean isIncluded = checker.checkInclusion();
         Instant end = Instant.now();

@@ -13,8 +13,8 @@ import java.util.Set;
 public class RVector extends FixpointVector {
     protected WVector wVector;
 
-    public RVector(VPA a, VPA b, boolean withFinal, WVector wVector) {
-        super(a, b, withFinal);
+    public RVector(VPA a, VPA b, boolean withFinal, boolean withWords, WVector wVector) {
+        super(a, b, withFinal, withWords);
         this.wVector = wVector;
         for (State p : a.getStates()) {
             for (Symbol c : p.getCallSuccessors().keySet()) {
@@ -33,7 +33,7 @@ public class RVector extends FixpointVector {
             // Union of cZ_{p', q} for (p, r, g, p') in callTransitions
             for (Symbol c : p.getCallSuccessors().keySet()) {
                 if (p.getCallSuccessors(c).contains(q)) {
-                    if (antichainInsert(pq, Set.of(b.context(c, withFinal)))) {
+                    if (antichainInsert(pq, Set.of(b.context(c, withFinal, withWords)))) {
                         changed.add(pq);
                     }
                 }

@@ -93,7 +93,7 @@ class PrefixVectorsTest {
 
     @Test
     void testPrefixes() {
-        Prefixes prefixes = new Prefixes(vpa, vpa);
+        Prefixes prefixes = new Prefixes(vpa, vpa, false);
         int iterations = prefixes.iterate();
         assertEquals(13, iterations);
     }
@@ -104,7 +104,7 @@ class PrefixVectorsTest {
         Parser parserB = new Parser("src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_Bunion.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        Prefixes prefixes = new Prefixes(A, B);
+        Prefixes prefixes = new Prefixes(A, B, false);
         Instant start = Instant.now();
         int iterations = prefixes.iterate();
         Instant end = Instant.now();
@@ -118,7 +118,7 @@ class PrefixVectorsTest {
         Parser parserB = new Parser("src/test/resources/union.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        Prefixes prefixes = new Prefixes(A, B);
+        Prefixes prefixes = new Prefixes(A, B, false);
         Instant start = Instant.now();
         int iterations = prefixes.iterate();
         Instant end = Instant.now();
@@ -132,7 +132,7 @@ class PrefixVectorsTest {
         Parser parserB = new Parser("src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sup.autfilt.ats");
         VPA A = parserA.parse();
         VPA B = parserB.parse();
-        Prefixes prefixes = new Prefixes(A, B);
+        Prefixes prefixes = new Prefixes(A, B, false);
         Instant start = Instant.now();
         int iterations = prefixes.iterate();
         Instant end = Instant.now();
