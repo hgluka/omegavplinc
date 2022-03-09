@@ -1,15 +1,16 @@
 """run_examples.py
 
 Usage:
-  run_examples.py (-r|-u) [-o CSV_FILE] [-s SKIP_FILE]
+  run_examples.py (-r|-u) [-i INPUT_DIR] [-o CSV_FILE] [-s SKIP_FILE]
   run_examples.py -h | --help
 
 Options:
   -h --help     Show this screen.
   -r            Run the examples.
   -u            Calculate the unions.
+  -i INPUT_DIR  Specify input directory.
   -o CSV_FILE   Specify output csv_file.
-  -s SKIP_FILE Specify file with examples to skip.
+  -s SKIP_FILE  Specify file with examples to skip.
 """
 import glob
 import subprocess
@@ -254,10 +255,13 @@ if __name__=='__main__':
         csv_file = arguments['-o']
     skip_file = arguments['-s']
     if arguments['-r']:
+        input_dir = 'resources/svcomp_examples_notdone'
+        if arguments['-i'] is not None:
+            input_dir = arguments['-i']
         print("Running examples and writing to: " + csv_file +".")
-        examples = load_processed_examples('resources/svcomp_examples_notdone/', skip_file)
+        examples = load_processed_examples(input_dir, skip_file)
         run_processed(examples, csv_file)
-        print("Written to: " + csv_file +".")
+        print("Written to: " + csv_file + ".")
     elif arguments['-u']:
         print("Running union calculations.")
         examples = load_all_examples()
