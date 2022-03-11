@@ -16,10 +16,10 @@ Options:
 """
 import glob
 import subprocess
+import psutil
 from pathlib import Path
 import regex
 import os
-import sys
 import csv
 import string
 import random
@@ -122,7 +122,10 @@ class Example:
                 real_time = -2.0
                 self_reported_time = -2.0
         except subprocess.TimeoutExpired:
-            pass
+            for proc in psutil.process_iter():
+                if "java -Xmx6g -jar build/libs/omegaVPLinc-1.0.jar src/test/" + self.A + " src/test/" + self.B == " ".join(proc.cmdline()):
+                    proc.terminate()
+
         return A_states, B_states, real_time, self_reported_time
 
     def run_fadecider(self, output=False):
