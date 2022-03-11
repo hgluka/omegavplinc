@@ -32,7 +32,7 @@ class Example:
         self.A = A
         self.Bs = Bs
         self.B = B
-        self.timeout = 5 # 3600/2  # 30 seconds
+        self.timeout = 3600/2 # 3600/2  # 30 seconds
 
     def __repr__(self):
         return str(len(self.Bs))
@@ -93,7 +93,6 @@ class Example:
         except subprocess.TimeoutExpired:
             for proc in psutil.process_iter():
                 if "run_example.ats" in proc.cmdline():
-                    print(proc.cmdline())
                     proc.terminate()
         return real_time, self_reported_time
 
