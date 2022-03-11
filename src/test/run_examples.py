@@ -1,14 +1,15 @@
 """run_examples.py
 
 Usage:
-  run_examples.py (-r [-n NUM] [-k]|-u) [-i INPUT_DIR] [-o CSV_FILE] [-s SKIP_FILE]
+  run_examples.py (-r [-n NUM] [--omegaVPLinc|--ultimate]|-u) [-i INPUT_DIR] [-o CSV_FILE] [-s SKIP_FILE]
   run_examples.py -h | --help
 
 Options:
   -h --help     Show this screen.
   -r            Run the examples.
   -n NUM        Specify number of examples to run.
-  -k            Do not run examples with Ultimate.
+  --omegaVPLinc Run examples only with omegaVPLinc.
+  --ultimate    Run examples only with Ultimate.
   -u            Calculate the unions.
   -i INPUT_DIR  Specify input directory.
   -o CSV_FILE   Specify output csv_file.
@@ -31,7 +32,7 @@ class Example:
         self.A = A
         self.Bs = Bs
         self.B = B
-        self.timeout = 3600/2 # 3600/2  # 30 seconds
+        self.timeout = 5 # 3600/2  # 30 seconds
 
     def __repr__(self):
         return str(len(self.Bs))
@@ -90,7 +91,10 @@ class Example:
                 real_time = -2.0
                 self_reported_time = -2.0
         except subprocess.TimeoutExpired:
-            pass
+            for proc in psutil.process_iter():
+                if "run_example.ats" in proc.cmdline():
+                    print(proc.cmdline())
+                    proc.terminate()
         return real_time, self_reported_time
 
     def run_omegaVPLinc(self, output=False):
@@ -115,7 +119,6 @@ class Example:
             elif not rup.returncode and "is not a subset of" in rup.stdout:
                 A_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[0]
                 B_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[1]
-
                 real_time = -float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = -float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
             else:
@@ -234,21 +237,24 @@ def calculate_unions(examples):
                 examples[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
         count += 1
 
-def run_processed(examples, file, num, ultimate):
+def run_processed(examples, file, num, omegavplinc, ultimate):
     with open(file, "w") as results:
         wr = csv.writer(results)
         wr.writerow(["example","A_states", "B_states", "omegaVPLinc", "ultimate"])
         count = 1
         for example in list(examples.keys())[:num]:
-            print(example + ": running in omegaVPLinc.")
-            A_states, B_states, ort, osrt = examples[example].run_omegaVPLinc(output=True)
-            print(example + ": finished in omegaVPLinc in " + str(ort) + " seconds.")
-            print(example + ": running in ultimate.")
+            if (omegavplinc):
+                print(example + ": running in omegaVPLinc.")
+                A_states, B_states, ort, osrt = examples[example].run_omegaVPLinc(output=True)
+                print(example + ": finished in omegaVPLinc in " + str(ort) + " seconds.")
+            else:
+                A_states, B_states, ort, osrt = 0, 0, 0, 0
             if (ultimate):
+                print(example + ": running in ultimate.")
                 urt, usrt = examples[example].run_ultimate(output=True)
+                print(example + ": finished in ultimate in " + str(urt) + " seconds.")
             else:
                 urt, usrt = 0, 0
-            print(example + ": finished in ultimate in " + str(urt) + " seconds.")
             print(str(count) + " -  " + example + ": " + str(A_states) + "(A_states), " + str(B_states) + "(B_states), " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")  # + str(frt) + "(fadecider)")
             wr.writerow([example, A_states, B_states, ort, urt])
             count += 1
@@ -272,9 +278,12 @@ if __name__=='__main__':
         if arguments['-n'] is not None:
             num = int(arguments['-n'])
         ultimate = True
-        if arguments['-k'] is not None:
+        if arguments['--omegaVPLinc'] is not None:
             ultimate = False
-        run_processed(examples, csv_file, num, ultimate)
+        omegavplinc = True
+        if arguments['--ultimate'] is not None:
+            omegavplinc = False
+        run_processed(examples, csv_file, num, omegavplinc, ultimate)
         print("Written to: " + csv_file + ".")
     elif arguments['-u']:
         print("Running union calculations.")
