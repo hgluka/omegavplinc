@@ -5,15 +5,15 @@ Usage:
   run_examples.py -h | --help
 
 Options:
-  -h --help     Show this screen.
-  -r            Run the examples.
-  -n NUM        Specify number of examples to run.
-  --omegaVPLinc Run examples only with omegaVPLinc.
-  --ultimate    Run examples only with Ultimate.
-  -u            Calculate the unions.
-  -i INPUT_DIR  Specify input directory.
-  -o CSV_FILE   Specify output csv_file.
-  -s SKIP_FILE  Specify file with examples to skip.
+  -h --help         Show this screen.
+  -r                Run the examples.
+  -n NUM            Specify number of examples to run.
+  --omegaVPLinc     Run examples only with omegaVPLinc.
+  --ultimate        Run examples only with Ultimate.
+  -u                Calculate the unions.
+  -i INPUT_DIR      Specify input directory.
+  -o CSV_FILE       Specify output csv_file.
+  -s SKIP_FILE      Specify file with examples to skip.
 """
 import glob
 import subprocess
@@ -276,12 +276,8 @@ if __name__=='__main__':
         num = 50
         if arguments['-n'] is not None:
             num = int(arguments['-n'])
-        ultimate = True
-        if arguments['--omegaVPLinc'] is not None:
-            ultimate = False
-        omegavplinc = True
-        if arguments['--ultimate'] is not None:
-            omegavplinc = False
+        ultimate = not arguments['--omegaVPLinc']
+        omegavplinc = not arguments['--ultimate']
         run_processed(examples, csv_file, num, omegavplinc, ultimate)
         print("Written to: " + csv_file + ".")
     elif arguments['-u']:
