@@ -2,6 +2,7 @@ package omegaVPLinc.algorithm;
 
 import omegaVPLinc.automaton.Context;
 import omegaVPLinc.automaton.State;
+import omegaVPLinc.automaton.Symbol;
 import omegaVPLinc.automaton.VPA;
 import omegaVPLinc.fixpoint.period.Periods;
 import omegaVPLinc.fixpoint.prefix.Prefixes;
@@ -9,9 +10,7 @@ import omegaVPLinc.utility.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class InclusionChecker {
     private static final Logger logger = LoggerFactory.getLogger(InclusionChecker.class);
@@ -46,6 +45,34 @@ public class InclusionChecker {
         return false;
     }
 
+    private String getLassoWord(LinkedList<Symbol> stem, LinkedList<Symbol> loop) {
+        return "[" +
+                wordToString(stem) +
+                ", " +
+                wordToString(loop) +
+                "]";
+    }
+
+    private String wordToString(LinkedList<Symbol> loop) {
+        StringBuilder sb = new StringBuilder();
+        for (Symbol s : loop) {
+            switch (s.getType()) {
+                case CALL -> {
+                    sb.append(s);
+                    sb.append("<");
+                }
+                case INTERNAL -> sb.append(s);
+                case RETURN -> {
+                    sb.append(">");
+                    sb.append(s);
+                }
+            }
+            sb.append(" ");
+        }
+        sb.deleteCharAt(sb.lastIndexOf(" "));
+        return sb.toString();
+    }
+
     public boolean checkInclusion() {
         int prefixIterations = prefixes.iterate();
         int periodIterations = periods.iterate();
@@ -55,8 +82,9 @@ public class InclusionChecker {
                     if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
                         logger.debug("C, C_star");
                         if (withWords) {
-                            logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
-                            logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
+                            // logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
+                            // logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
+                            logger.debug("Lasso word: {}", getLassoWord(x.getWord(), y1y2.getWord()));
                         } else {
                             logger.debug("Prefix context: ({} -> {}) {}", a.getInitialState(), p, x.getCtx());
                             logger.debug("Period context: ({} -> {}) {}", p, p, y1y2.getCtx());
@@ -71,8 +99,9 @@ public class InclusionChecker {
                     if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
                         logger.debug("U, R_star");
                         if (withWords) {
-                            logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
-                            logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
+                            // logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
+                            // logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
+                            logger.debug("Lasso word: {}", getLassoWord(x.getWord(), y1y2.getWord()));
                         } else {
                             logger.debug("Prefix context: ({} -> {}) {}", a.getInitialState(), p, x.getCtx());
                             logger.debug("Period context: ({} -> {}) {}", p, p, y1y2.getCtx());

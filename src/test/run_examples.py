@@ -1,19 +1,22 @@
 """run_examples.py
 
 Usage:
-  run_examples.py (-r [-n NUM] [--omegaVPLinc|--ultimate]|-u) [-i INPUT_DIR] [-o CSV_FILE] [-s SKIP_FILE]
+  run_examples.py --run [-n NUM] [--omegaVPLinc|--ultimate] [-i INPUT_DIR] [-o CSV_FILE] [-s SKIP_FILE]
+  run_examples.py --unions [-i INPUT_DIR] [-s SKIP_FILE]
+  run_examples.py --wordcheck CSV_FILE
   run_examples.py -h | --help
 
 Options:
-  -h --help         Show this screen.
-  -r                Run the examples.
-  -n NUM            Specify number of examples to run.
-  --omegaVPLinc     Run examples only with omegaVPLinc.
-  --ultimate        Run examples only with Ultimate.
-  -u                Calculate the unions.
-  -i INPUT_DIR      Specify input directory.
-  -o CSV_FILE       Specify output csv_file.
-  -s SKIP_FILE      Specify file with examples to skip.
+  -h --help                             Show this screen.
+  -r --run                              Run the examples.
+  -n NUM                                Specify number of examples to run. [default: 50]
+  --omegaVPLinc                         Run examples only with omegaVPLinc.
+  --ultimate                            Run examples only with Ultimate.
+  -o CSV_FILE                           Specify output csv_file.
+  -u --unions                           Calculate the unions.
+  -i INPUT_DIR                          Specify input directory. [default: ./resources/svcomp_examples_processed]
+  -s SKIP_FILE                          Specify file with examples to skip.
+  -w CSV_FILE --wordcheck CSV_FILE      Check if word counter-examples
 """
 import glob
 import subprocess
@@ -62,6 +65,48 @@ class Example:
         except subprocess.TimeoutExpired:
             print("Example: {} timed out.".format(self.name))
         return successful
+
+    def run_wordcheck(self, output=False):
+        env_with_java11 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin:' + os.environ['PATH']}
+        env_with_java17 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.17.0-openjdk-amd64/bin:' + os.environ['PATH']}
+        lasso_word_str = ""
+        try:
+            rup = subprocess.run(["/bin/bash", "-c", "java -Xmx6g -jar build/libs/omegaVPLinc-1.0.jar --words src/test/" + self.A + " src/test/" + self.B], env=env_with_java17, timeout=self.timeout, cwd="../../", capture_output=True, universal_newlines=True)
+            if output:
+                with open("experiment_output/"+self.name+"_wordcheck_omegaVPLinc.txt", "w") as o:
+                    o.write("STDOUT:\n")
+                    o.write(rup.stdout)
+                    o.write("\nSTDERR:\n")
+                    o.write(rup.stderr)
+            if not rup.returncode and "is not a subset of" in rup.stdout:
+                lasso_word_str = regex.findall(r"Lasso word: (\[.+\])\n", rup.stdout)[0]
+        except subprocess.TimeoutExpired:
+            for proc in psutil.process_iter():
+                if "java -Xmx6g -jar build/libs/omegaVPLinc-1.0.jar --words src/test/" + self.A + " src/test/" + self.B == " ".join(proc.cmdline()):
+                    proc.terminate()
+        with open("../../Ultimate/run_wordcheck.ats", "w") as rwc:
+            rwc.write("parseAutomata(\"../src/test/" + self.A + "\");\n")
+            rwc.write("parseAutomata(\"../src/test/" + self.B + "\");\n")
+            rwc.write("NestedLassoWord word = " + lasso_word_str + ";\n")
+            rwc.write("assert(buchiAccepts(A, word));\n")
+            rwc.write("assert(!buchiAccepts(B, word));")
+        try:
+            rup = subprocess.run(["/bin/bash", "-c", "./AutomataScriptInterpreter.sh run_wordcheck.ats"], env=env_with_java11, timeout=self.timeout, cwd="../../Ultimate/", stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            if output:
+                with open("experiment_output/"+self.name+"_wordcheck_ultimate.txt", "w") as o:
+                    o.write("STDOUT:\n")
+                    o.write(rup.stdout)
+                    o.write("\nSTDERR:\n")
+                    o.write(rup.stderr)
+            if not rup.returncode and "RESULT: Ultimate proved your program to be correct!" in rup.stdout:
+                return True
+            else:
+                return False
+        except subprocess.TimeoutExpired:
+            for proc in psutil.process_iter():
+                if "run_wordcheck.ats" in proc.cmdline():
+                    proc.terminate()
+            return False
 
     def run_ultimate(self, output=False):
         env_with_java11 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin:' + os.environ['PATH']}
@@ -210,6 +255,20 @@ def load_processed_examples(directory, skip_file = None):
                 examples[prefix].B = atsfile
     return examples
 
+def load_csv_examples(csv_file):
+    processed = load_processed_examples('resources/svcomp_examples_processed')
+    examples = {**processed, **load_processed_examples('resources/svcomp_examples_notdone')}
+    keep = []
+    with open(csv_file, "r") as cf:
+        for line in cf.readlines()[1:]:
+            if line.split(',')[4] not in ["-1.0", "-2.0"] and float(line.split(',')[4]) < 0:
+                keep.append(line.split(',')[0])
+    final = []
+    for example in list(examples.keys()):
+        if example in keep:
+            final.append(examples[example])
+    return final
+
 def calculate_unions(examples):
     finished_unions = 0
     count = 0
@@ -267,7 +326,7 @@ if __name__=='__main__':
     if arguments['-o'] is not None:
         csv_file = arguments['-o']
     skip_file = arguments['-s']
-    if arguments['-r']:
+    if arguments['--run']:
         input_dir = 'resources/svcomp_examples_notdone'
         if arguments['-i'] is not None:
             input_dir = arguments['-i']
@@ -280,8 +339,22 @@ if __name__=='__main__':
         omegavplinc = not arguments['--ultimate']
         run_processed(examples, csv_file, num, omegavplinc, ultimate)
         print("Written to: " + csv_file + ".")
-    elif arguments['-u']:
+    elif arguments['--unions']:
         print("Running union calculations.")
         examples = load_all_examples()
         calculate_unions(examples)
         print("Union calculations done.")
+    elif arguments['--wordcheck']:
+        print("Checking if counterexamples are correct.")
+        examples = load_csv_examples(arguments['--wordcheck'])
+        incorrect = []
+        for example in examples:
+            if not example.run_wordcheck():
+                incorrect.append(example.name)
+        if len(incorrect) == 0:
+            print("All correct.")
+        else:
+            with open('wordcheck_incorrect_' + random_string(3) + ".txt", "w") as fout:
+                for example in incorrect:
+                    fout.write(example + "\n")
+
