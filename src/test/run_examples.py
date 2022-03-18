@@ -348,8 +348,14 @@ if __name__=='__main__':
         print("Checking if counterexamples are correct.")
         examples = load_csv_examples(arguments['--wordcheck'])
         incorrect = []
+        i = 1
         for example in examples:
-            if not example.run_wordcheck():
+            print(str(i) + ": Running " + example.name + ".")
+            wres = example.run_wordcheck()
+            if wres:
+                print(str(i) + ": " + example.name + " is correct.")
+            if not wres:
+                print(str(i) + ": " + example.name + " is incorrect.")
                 incorrect.append(example.name)
         if len(incorrect) == 0:
             print("All correct.")
