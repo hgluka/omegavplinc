@@ -33,58 +33,6 @@ public class ParseAndCheckTest {
     }
 
     @Test
-    void check_sturmianRecurrent() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/All_factors_of_Sturmian_words_are_recurrent_sub.autfilt.ats",
-                "src/test/resources/All_factors_of_Sturmian_words_are_recurrent_sup.autfilt.ats");
-    }
-
-    @Test
-    void check_sturmianPalindromes() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sub.autfilt.ats",
-                "src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sup.autfilt.ats");
-    }
-
-    @Test
-    void check_sturmianPalindromes_reversed() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sup.autfilt.ats",
-                "src/test/resources/Sturmian_words_start_with_arbitarily_long_palindromes_sub.autfilt.ats");
-    }
-
-    @Test
-    void check_ostrowski() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/Addition_of_Ostrowski-a_representations_is_a_function_(ie,_there_is_an_output_for_every_input)_sub.autfilt.ats",
-                "src/test/resources/Addition_of_Ostrowski-a_representations_is_a_function_(ie,_there_is_an_output_for_every_input)_sup.autfilt.ats");
-    }
-
-    @Test
-    void check_naturalNumbers() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/All_natural_numbers_other_than_0_have_a_predecessor_sub.autfilt.ats",
-                "src/test/resources/All_natural_numbers_other_than_0_have_a_predecessor_sup.autfilt.aligned.ats");
-    }
-
-    @Test
-    void check_lazyOstrowski() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/The_lazy_Ostrowski_representation_is_unique_sub.autfilt.ats",
-                "src/test/resources/The_lazy_Ostrowski_representation_is_unique_sup.autfilt.ats");
-    }
-
-    @Test
-    void check_lazyOstrowski_reversed() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/The_lazy_Ostrowski_representation_is_unique_sup.autfilt.ats",
-                "src/test/resources/The_lazy_Ostrowski_representation_is_unique_sub.autfilt.ats");
-    }
-
-    @Test
-    void check_specialFactors_reversed() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/Specal_factors_are_unique_sup.autfilt.aligned.ats", "src/test/resources/Specal_factors_are_unique_sub.autfilt.ats");
-    }
-
-    @Test
-    void check_mccarthy91() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats", "src/test/resources/union.ats");
-    }
-
-    @Test
     void check_png2ico() throws IOException, Parser.ParseError {
         assertInclusion("src/test/resources/png2ico1.ats", "src/test/resources/png2ico2.ats");
     }
@@ -123,78 +71,58 @@ public class ParseAndCheckTest {
     }
 
     @Test
-    void check_2nested() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples/2Nested-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/2Nested-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-    }
-
-    @Test
-    void check_4nestedWith3Variables() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples/4NestedWith3Variables-2.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/4NestedWith3Variables-2.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-    }
-
-    @Test
-    void check_brockschmidtCookFuhs() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/BrockschmidtCookFuhs-CAV2013-Introduction.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-    }
-
-    @Test
-    void check_cairo() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples/Cairo.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/Cairo.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
-    }
-
-    @Test
-    void check_cairoStep2() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples/Cairo_step2-1.c_BuchiCegarLoopAbstraction0.ats", "src/test/resources/svcomp_examples/Cairo_step2-1.c_interpolBuchiNestedWordAutomatonUsedInRefinement1after.ats");
+    void check_mcCarthy91() throws IOException, Parser.ParseError {
+        assertInclusion("src/test/resources/McCarthy91.bpl_BuchiCegarLoopAbstraction0.ats", "src/test/resources/McCarthy91.bpl_union.ats");
     }
 
     @Test
     void check_ddlm2013() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/svcomp_examples_processed/ddlm2013.i_A.ats", "src/test/resources/svcomp_examples_processed/ddlm2013.i_Bunion.ats");
+        assertNoInclusion("src/test/resources/svcomp_examples/ddlm2013.i_A.ats", "src/test/resources/svcomp_examples/ddlm2013.i_Bunion.ats");
     }
 
     @Test
     void check_cstrncatMixedAlloca() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/svcomp_examples_processed/cstrncat_mixed_alloca.i_A.ats", "src/test/resources/svcomp_examples_processed/cstrncat_mixed_alloca.i_Bunion.ats");
+        assertNoInclusion("src/test/resources/svcomp_examples/cstrncat_mixed_alloca.i_A.ats", "src/test/resources/svcomp_examples/cstrncat_mixed_alloca.i_Bunion.ats");
     }
 
     @Test
     void check_recMallocEx2() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/svcomp_examples_processed/rec_malloc_ex2.i_A.ats", "src/test/resources/svcomp_examples_processed/rec_malloc_ex2.i_Bunion.ats");
+        assertNoInclusion("src/test/resources/svcomp_examples/rec_malloc_ex2.i_A.ats", "src/test/resources/svcomp_examples/rec_malloc_ex2.i_Bunion.ats");
     }
 
     @Test
     void check_minepumpSpec3Product01() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples_processed/minepump_spec3_product01.cil.c_A.ats", "src/test/resources/svcomp_examples_processed/minepump_spec3_product01.cil.c_Bunion.ats");
+        assertInclusion("src/test/resources/svcomp_examples/minepump_spec3_product01.cil.c_A.ats", "src/test/resources/svcomp_examples/minepump_spec3_product01.cil.c_Bunion.ats");
     }
 
     @Test
     void check_cllSearch() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/svcomp_examples_processed/cll_search-alloca-1.i_A.ats", "src/test/resources/svcomp_examples_processed/cll_search-alloca-1.i_Bunion.ats");
+        assertNoInclusion("src/test/resources/svcomp_examples/cll_search-alloca-1.i_A.ats", "src/test/resources/svcomp_examples/cll_search-alloca-1.i_Bunion.ats");
     }
 
     @Test
     void check_ex02() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/svcomp_examples_processed/Ex02.c_A.ats", "src/test/resources/svcomp_examples_processed/Ex02.c_Bunion.ats");
+        assertNoInclusion("src/test/resources/svcomp_examples/Ex02.c_A.ats", "src/test/resources/svcomp_examples/Ex02.c_Bunion.ats");
     }
 
     @Test
     void check_fibonacci02() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/svcomp_examples_processed/Fibonacci02.c_A.ats", "src/test/resources/svcomp_examples_processed/Fibonacci02.c_Bunion.ats");
+        assertNoInclusion("src/test/resources/svcomp_examples/Fibonacci02.c_A.ats", "src/test/resources/svcomp_examples/Fibonacci02.c_Bunion.ats");
     }
 
     @Test
     void check_bubbleSort2() throws IOException, Parser.ParseError {
-        assertNoInclusion("src/test/resources/svcomp_examples_notdone/bubble_sort-2.i_A.ats", "src/test/resources/svcomp_examples_notdone/bubble_sort-2.i_Bunion.ats");
+        assertNoInclusion("src/test/resources/svcomp_examples/bubble_sort-2.i_A.ats", "src/test/resources/svcomp_examples/bubble_sort-2.i_Bunion.ats");
     }
 
     @Test
     void check_recMallocEx5() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples_notdone/rec_malloc_ex5.i_A.ats", "src/test/resources/svcomp_examples_notdone/rec_malloc_ex5.i_Bunion.ats");
+        assertInclusion("src/test/resources/svcomp_examples/rec_malloc_ex5.i_A.ats", "src/test/resources/svcomp_examples/rec_malloc_ex5.i_Bunion.ats");
     }
 
     @Test
     void check_diskPerfSimpl1() throws IOException, Parser.ParseError {
-        assertInclusion("src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_A.ats", "src/test/resources/svcomp_examples_notdone/diskperf_simpl1.cil.c_Bunion.ats");
+        assertInclusion("src/test/resources/svcomp_examples/diskperf_simpl1.cil.c_A.ats", "src/test/resources/svcomp_examples/diskperf_simpl1.cil.c_Bunion.ats");
     }
 
     private void assertInclusion(String a, String b) throws IOException, Parser.ParseError {

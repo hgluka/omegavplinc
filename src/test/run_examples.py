@@ -1,9 +1,9 @@
 """run_examples.py
 
 Usage:
-  run_examples.py --run [-n NUM] [--omegaVPLinc|--ultimate] [-i INPUT_DIR] [-o CSV_FILE] [-s SKIP_FILE]
-  run_examples.py --unions [-i INPUT_DIR] [-s SKIP_FILE]
-  run_examples.py --wordcheck CSV_FILE
+  run_examples.py --run [-n NUM] [--omegaVPLinc|--ultimate] [-i INPUT_DIR] [-o OUTPUT_PATH] [-s SKIP_FILE]
+  run_examples.py --unions [-i INPUT_DIR] [-s SKIP_FILE] [-o OUTPUT_PATH]
+  run_examples.py --wordcheck CSV_FILE [-p PREV_FILE]
   run_examples.py -h | --help
 
 Options:
@@ -12,11 +12,12 @@ Options:
   -n NUM                                Specify number of examples to run. [default: 50]
   --omegaVPLinc                         Run examples only with omegaVPLinc.
   --ultimate                            Run examples only with Ultimate.
-  -o CSV_FILE                           Specify output csv_file.
+  -o OUTPUT_PATH                        Specify output directory or csv file.
   -u --unions                           Calculate the unions.
   -i INPUT_DIR                          Specify input directory. [default: ./resources/svcomp_examples_processed]
   -s SKIP_FILE                          Specify file with examples to skip.
   -w CSV_FILE --wordcheck CSV_FILE      Check if word counter-examples
+  -p PREV_FILE                          Specify file from previous run of wordcheck.
 """
 import glob
 import subprocess
@@ -63,6 +64,9 @@ class Example:
             else:
                 print("Union calculation for " + self.name + " wasn't successful.")
         except subprocess.TimeoutExpired:
+            for proc in psutil.process_iter():
+                if "bunion.ats" in proc.cmdline():
+                    proc.terminate()
             print("Example: {} timed out.".format(self.name))
         return successful
 
@@ -201,9 +205,13 @@ class Example:
 
 
 
-def load_all_examples():
+def load_all_examples(directory):
+    if (directory[-1] == '/'):
+        file_pattern = directory + "*.ats"
+    else:
+        file_pattern = directory + "/*.ats"
     examples = {}
-    for atsfile in glob.iglob('resources/svcomp_examples/*.ats'):
+    for atsfile in glob.iglob(file_pattern):
         prefix = atsfile[:atsfile.rfind("_")].split("/")[2]
         suffix = atsfile[atsfile.rfind("_")+1:]
         if prefix not in examples:
@@ -255,32 +263,36 @@ def load_processed_examples(directory, skip_file = None):
                 examples[prefix].B = atsfile
     return examples
 
-def load_csv_examples(csv_file):
-    processed = load_processed_examples('resources/svcomp_examples_processed')
-    examples = {**processed, **load_processed_examples('resources/svcomp_examples_notdone')}
+def load_csv_examples(directory, csv_file, prev_txt=None):
+    examples = load_processed_examples(directory)
     keep = []
-    with open(csv_file, "r") as cf:
-        for line in cf.readlines()[1:]:
-            if line.split(',')[4] not in ["-1.0", "-2.0"] and float(line.split(',')[4]) < 0:
-                keep.append(line.split(',')[0])
+    if prev_txt is not None:
+        with open(prev_txt, "r") as pf:
+            for line in pf.readlines():
+                keep.append(line.strip())
+    else:
+        with open(csv_file, "r") as cf:
+            for line in cf.readlines()[1:]:
+                if line.split(',')[3] not in ["-1.0", "-2.0"] and float(line.split(',')[3]) < 0:
+                    keep.append(line.split(',')[0])
     final = []
     for example in list(examples.keys()):
         if example in keep:
             final.append(examples[example])
     return final
 
-def calculate_unions(examples):
+def calculate_unions(examples, output_dir):
     finished_unions = 0
     count = 0
     for example in list(examples.keys()):
-        if not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_Bunion.npvpa").is_file():
+        if not Path(output_dir + example + "_Bunion.ats").is_file():
             print(str(count) + ": Running union calculation for " + example + ".")
             if examples[example].bunion():
                 finished_unions += 1
-                if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_processed/" + example + "_Bunion.ats").is_file():
+                if not Path(output_dir + example + "_A.ats").is_file():
                     examples[example].acopy()
                 else:
-                    examples[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
+                    examples[example].A = output_dir + example + "_A.ats"
             else:
                 subprocess.run(["mv", examples[example].A[0], "resources/svcomp_examples_timedout/"])
                 for B in examples[example].Bs:
@@ -288,17 +300,17 @@ def calculate_unions(examples):
                 print("Moved to different directory.")
                 del examples[example]
         else:
-            examples[example].B = "resources/svcomp_examples_processed/" + example + "_Bunion.ats"
-            if not Path("resources/svcomp_examples_processed/" + example + "_A.ats").is_file() and not Path("resources/svcomp_examples_notdone/" + example + "_A.ats").is_file():
+            examples[example].B = output_dir + example + "_Bunion.ats"
+            if not Path(output_dir + example + "_A.ats").is_file():
                 examples[example].acopy()
             else:
-                examples[example].A = "resources/svcomp_examples_processed/" + example + "_A.ats"
+                examples[example].A = output_dir + example + "_A.ats"
         count += 1
 
 def run_processed(examples, file, num, omegavplinc, ultimate):
     with open(file, "w") as results:
         wr = csv.writer(results)
-        wr.writerow(["example","A_states", "B_states", "omegaVPLinc", "ultimate"])
+        wr.writerow(["example", "A_states", "B_states", "omegaVPLinc", "ultimate"])
         count = 1
         for example in list(examples.keys())[:num]:
             if (omegavplinc):
@@ -313,7 +325,7 @@ def run_processed(examples, file, num, omegavplinc, ultimate):
                 print(example + ": finished in ultimate in " + str(urt) + " seconds.")
             else:
                 urt, usrt = 0, 0
-            print(str(count) + " -  " + example + ": " + str(A_states) + "(A_states), " + str(B_states) + "(B_states), " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")  # + str(frt) + "(fadecider)")
+            print(str(count) + " -  " + example + ": " + str(A_states) + "(A_states), " + str(B_states) + "(B_states), " + str(ort) + "(omegaVPLinc), " + str(urt) + "(ultimate)")
             wr.writerow([example, A_states, B_states, ort, urt])
             count += 1
 
@@ -322,14 +334,15 @@ if __name__=='__main__':
     def random_string(length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
-    csv_file = "time_omegaVPLinc+ultimate_" + random_string(3) + ".csv"
-    if arguments['-o'] is not None:
-        csv_file = arguments['-o']
+
     skip_file = arguments['-s']
+    input_dir = 'resources/svcomp_examples/'
+    if arguments['-i'] is not None:
+        input_dir = arguments['-i']
     if arguments['--run']:
-        input_dir = 'resources/svcomp_examples_notdone'
-        if arguments['-i'] is not None:
-            input_dir = arguments['-i']
+        csv_file = "time_omegaVPLinc+ultimate_" + random_string(3) + ".csv"
+        if arguments['-o'] is not None:
+            csv_file = arguments['-o']
         print("Running examples and writing to: " + csv_file +".")
         examples = load_processed_examples(input_dir, skip_file)
         num = 50
@@ -340,13 +353,17 @@ if __name__=='__main__':
         run_processed(examples, csv_file, num, omegavplinc, ultimate)
         print("Written to: " + csv_file + ".")
     elif arguments['--unions']:
+        output_dir = "resources/svcomp_examples_processed/"
+        if arguments['-o'] is not None:
+            output_dir = arguments['-o']
         print("Running union calculations.")
-        examples = load_all_examples()
-        calculate_unions(examples)
+        examples = load_all_examples(input_dir)
+        print(len(examples))
+        calculate_unions(examples, output_dir)
         print("Union calculations done.")
     elif arguments['--wordcheck']:
         print("Checking if counterexamples are correct.")
-        examples = load_csv_examples(arguments['--wordcheck'])
+        examples = load_csv_examples(arguments['--wordcheck'], arguments['-p'])
         incorrect = []
         i = 1
         for example in examples:
@@ -357,6 +374,7 @@ if __name__=='__main__':
             if not wres:
                 print(str(i) + ": " + example.name + " is incorrect.")
                 incorrect.append(example.name)
+            i += 1
         if len(incorrect) == 0:
             print("All correct.")
         else:
