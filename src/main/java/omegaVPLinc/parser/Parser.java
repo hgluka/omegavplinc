@@ -64,6 +64,8 @@ public class Parser {
 
     private void parseAutomaton() throws ParseError {
         acceptWord("NestedWordAutomaton");
+        if (peek(Lexer.Token.WORD))
+            vpaBuilder.name(currentWord.getLexeme());
         accept(Lexer.Token.WORD);
         accept(Lexer.Token.EQ);
         accept(Lexer.Token.LPR);

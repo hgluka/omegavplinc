@@ -50,7 +50,8 @@ public class VPATest {
         q1.addReturnSuccessor(alphabet.get("r"), "q0", q0);
         q0.addReturnPredecessor(alphabet.get("r"), "q0", q1);
 
-        this.vpa = vpaBuilder.callAlphabet(ca)
+        this.vpa = vpaBuilder.name("vpa")
+                .callAlphabet(ca)
                 .internalAlphabet(ia)
                 .returnAlphabet(ra)
                 .stackAlphabet(sa)
@@ -86,7 +87,7 @@ public class VPATest {
 
     @Test
     void testWriteAllToNpvpa() throws IOException, Parser.ParseError {
-        File dir = new File("src/test/resources/svcomp_examples_processed/");
+        File dir = new File("src/test/resources/svcomp_examples/");
         File[] directoryListing = dir.listFiles();
         VPA A;
         Parser parser;

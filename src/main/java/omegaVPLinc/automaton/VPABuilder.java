@@ -11,6 +11,7 @@ import java.util.Set;
 public class VPABuilder {
     private static final Logger logger = LoggerFactory.getLogger(VPABuilder.class);
 
+    private String name;
     private Set<Symbol> callAlphabet;
     private final Map<String, Symbol> callAlphabetMap;
     private Set<Symbol> internalAlphabet;
@@ -28,6 +29,11 @@ public class VPABuilder {
         this.internalAlphabetMap = new HashMap<>();
         this.returnAlphabetMap = new HashMap<>();
         this.stateMap = new HashMap<>();
+    }
+
+    public VPABuilder name(String name) {
+        this.name = name;
+        return this;
     }
 
     public VPABuilder callAlphabet(Set<Symbol> callAlphabet) {
@@ -96,28 +102,33 @@ public class VPABuilder {
     }
 
     public VPA build() throws IllegalArgumentException {
-        if (Collections.disjoint(this.callAlphabet, this.internalAlphabet)
-                && Collections.disjoint(this.internalAlphabet, this.returnAlphabet)
-                && Collections.disjoint(this.callAlphabet, this.returnAlphabet)) {
-            if (this.callAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.CALL)
-            && this.internalAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.INTERNAL)
-            && this.returnAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.RETURN)) {
-                if (this.states.contains(initialState)) {
-                    logger.info("Automaton has {} states.", this.states.size());
-                    return new VPA(this.callAlphabet,
-                            this.internalAlphabet,
-                            this.returnAlphabet,
-                            this.stackAlphabet,
-                            this.states,
-                            this.initialState);
+        if (this.name != null) {
+            if (Collections.disjoint(this.callAlphabet, this.internalAlphabet)
+                    && Collections.disjoint(this.internalAlphabet, this.returnAlphabet)
+                    && Collections.disjoint(this.callAlphabet, this.returnAlphabet)) {
+                if (this.callAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.CALL)
+                        && this.internalAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.INTERNAL)
+                        && this.returnAlphabet.stream().noneMatch(s -> s.getType() != Symbol.SymbolType.RETURN)) {
+                    if (this.states.contains(initialState)) {
+                        logger.info("Automaton {} has {} states.", this.name, this.states.size());
+                        return new VPA(this.name,
+                                this.callAlphabet,
+                                this.internalAlphabet,
+                                this.returnAlphabet,
+                                this.stackAlphabet,
+                                this.states,
+                                this.initialState);
+                    } else {
+                        throw new IllegalArgumentException("Initial state must be part of the state set.");
+                    }
                 } else {
-                    throw new IllegalArgumentException("Initial state must be part of the state set.");
+                    throw new IllegalArgumentException("Wrong symbol type in alphabet partition.");
                 }
             } else {
-                throw new IllegalArgumentException("Wrong symbol type in alphabet partition.");
+                throw new IllegalArgumentException("VPA must have disjoint call, internal and return alphabets.");
             }
         } else {
-            throw new IllegalArgumentException("VPA must have disjoint call, internal and return alphabets.");
+            throw new IllegalArgumentException("VPA must have name.");
         }
     }
 }

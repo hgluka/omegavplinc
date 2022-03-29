@@ -9,6 +9,8 @@ import java.util.*;
 
 public class VPA {
 
+    private final String name;
+
     private final Set<Symbol> callAlphabet;
     private final Set<Symbol> internalAlphabet;
     private final Set<Symbol> returnAlphabet;
@@ -22,12 +24,14 @@ public class VPA {
     private final Context epsilonContext;
     private final Context epsilonContextPair;
 
-    public VPA(Set<Symbol> callAlphabet,
+    public VPA(String name,
+               Set<Symbol> callAlphabet,
                Set<Symbol> internalAlphabet,
                Set<Symbol> returnAlphabet,
                Set<String> stackAlphabet,
                Set<State> states,
                State initialState) {
+        this.name = name;
         this.callAlphabet = callAlphabet;
         this.internalAlphabet = internalAlphabet;
         this.returnAlphabet = returnAlphabet;

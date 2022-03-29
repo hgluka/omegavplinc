@@ -82,7 +82,8 @@ class PrefixVectorsTest {
         stateMap.get("s3").addReturnSuccessor(alphabetMap.get("r1"), "s2", stateMap.get("s4"));
         stateMap.get("s4").addReturnPredecessor(alphabetMap.get("r1"), "s2", stateMap.get("s3"));
 
-        this.vpa = vpaBuilder.callAlphabet(ca)
+        this.vpa = vpaBuilder.name("vpa")
+                .callAlphabet(ca)
                 .internalAlphabet(ia)
                 .returnAlphabet(ra)
                 .stackAlphabet(sa)
