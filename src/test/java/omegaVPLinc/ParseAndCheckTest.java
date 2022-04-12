@@ -52,15 +52,15 @@ public class ParseAndCheckTest {
         assertInclusion("src/test/resources/throttle-sep1.ats", "src/test/resources/throttle-sep2.ats");
     }
 
-    @Test
+    // This test takes a long time. To enable, uncomment next line.
+    // @Test
     void check_gzip() throws IOException, Parser.ParseError {
-        // without minimization via ultimate: 4h6m
         assertInclusion("src/test/resources/gzip1.ats", "src/test/resources/gzip2.ats");
     }
 
-    @Test
+    // This test takes a long time. To enable, uncomment next line.
+    // @Test
     void check_gzip_reduced() throws IOException, Parser.ParseError {
-        // with minimization via ultimate: 6172827.7ms (1h43m)
         assertInclusion("src/test/resources/gzip1_reduced.ats", "src/test/resources/gzip2_reduced.ats");
     }
 

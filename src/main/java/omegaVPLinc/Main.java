@@ -18,29 +18,29 @@ public class Main implements Callable<Integer> {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     @CommandLine.Parameters(index = "0", description = "First automaton file.")
-    private File Afile;
+    private File A;
 
     @CommandLine.Parameters(index = "1", description = "Second automaton file.")
-    private File Bfile;
+    private File B;
 
     @CommandLine.Option(names = {"-w", "--words"}, description = "Keep track of words to find counterexample.")
     private boolean withWords;
 
     @Override
     public Integer call() throws Exception {
-        Parser parserA = new Parser(Afile.getPath());
-        Parser parserB = new Parser(Bfile.getPath());
-        VPA A = parserA.parse();
-        VPA B = parserB.parse();
-        InclusionChecker checker = new InclusionChecker(A, B, withWords);
+        Parser parserA = new Parser(A.getPath());
+        Parser parserB = new Parser(B.getPath());
+        VPA vpaA = parserA.parse();
+        VPA vpaB = parserB.parse();
+        InclusionChecker checker = new InclusionChecker(vpaA, vpaB, withWords);
         Instant start = Instant.now();
         boolean isIncluded = checker.checkInclusion();
         Instant end = Instant.now();
-        logger.info("Is " + Afile.getName() + " a subset of " + Bfile.getName() + ": " + isIncluded);
+        logger.info("Is " + A.getName() + " a subset of " + B.getName() + ": " + isIncluded);
         if (isIncluded) {
-            logger.info(Afile.getName() + " is a subset of " + Bfile.getName());
+            logger.info(A.getName() + " is a subset of " + B.getName());
         } else {
-            logger.info(Afile.getName() + " is not a subset of " + Bfile.getName());
+            logger.info(A.getName() + " is not a subset of " + B.getName());
         }
         logger.info("The check took " + Duration.between(start, end).toMillis() + " milliseconds.");
         return 0;
