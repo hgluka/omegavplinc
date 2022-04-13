@@ -1,6 +1,5 @@
 package omegaVPLinc.automaton;
 
-import omegaVPLinc.utility.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

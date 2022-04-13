@@ -9,14 +9,11 @@ import java.util.*;
 
 public class VPA {
 
-    private final String name;
-
     private final Set<Symbol> callAlphabet;
     private final Set<Symbol> internalAlphabet;
     private final Set<Symbol> returnAlphabet;
     private final Set<String> stackAlphabet;
     private final String emptyStackSymbol;
-    private final Set<Symbol> fullAlphabet;
 
     private final Set<State> states;
     private final State initialState;
@@ -31,13 +28,12 @@ public class VPA {
                Set<String> stackAlphabet,
                Set<State> states,
                State initialState) {
-        this.name = name;
         this.callAlphabet = callAlphabet;
         this.internalAlphabet = internalAlphabet;
         this.returnAlphabet = returnAlphabet;
-        this.fullAlphabet = new HashSet<>(this.callAlphabet);
-        this.fullAlphabet.addAll(this.internalAlphabet);
-        this.fullAlphabet.addAll(this.returnAlphabet);
+        Set<Symbol> fullAlphabet = new HashSet<>(this.callAlphabet);
+        fullAlphabet.addAll(this.internalAlphabet);
+        fullAlphabet.addAll(this.returnAlphabet);
         this.stackAlphabet = stackAlphabet;
         this.states = states;
         this.initialState = initialState;

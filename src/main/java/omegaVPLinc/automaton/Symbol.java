@@ -8,7 +8,7 @@ public class Symbol {
     public enum SymbolType {
         CALL,
         INTERNAL,
-        RETURN;
+        RETURN
     }
     private final SymbolType type;
     private final String symbol;
@@ -24,10 +24,6 @@ public class Symbol {
 
     public SymbolType getType() {
         return type;
-    }
-
-    public boolean typeEquals(Symbol s) {
-        return type == s.getType();
     }
 
     public static Set<Symbol> createAlphabet(String typeString, Set<String> symbols) {

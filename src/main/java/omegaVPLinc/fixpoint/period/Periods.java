@@ -43,7 +43,6 @@ public class Periods {
         CS.initial();
         R.initial();
         RS.initial();
-        // logger.info("Iteration number 0 complete");
         W.updateCopy();
         WS.updateCopy();
         C.updateCopy();
@@ -59,21 +58,21 @@ public class Periods {
 
         W.frontier();
         int w_iters = W.computeFixpoint();
+        logger.info("W fixpoint complete after {} iterations.", w_iters);
         WS.frontier();
         int ws_iters = WS.computeFixpoint();
+        logger.info("WS fixpoint complete after {} iterations.", ws_iters);
         C.frontier();
         int c_iters = C.computeFixpoint();
+        logger.info("C fixpoint complete after {} iterations.", c_iters);
         CS.frontier();
         int cs_iters = CS.computeFixpoint();
+        logger.info("CS fixpoint complete after {} iterations.", cs_iters);
         R.frontier();
         int r_iters = R.computeFixpoint();
+        logger.info("R fixpoint complete after {} iterations.", r_iters);
         RS.frontier();
         int rs_iters = RS.computeFixpoint();
-        logger.info("W fixpoint complete after {} iterations.", w_iters);
-        logger.info("WS fixpoint complete after {} iterations.", ws_iters);
-        logger.info("C fixpoint complete after {} iterations.", c_iters);
-        logger.info("CS fixpoint complete after {} iterations.", cs_iters);
-        logger.info("R fixpoint complete after {} iterations.", r_iters);
         logger.info("RS fixpoint complete after {} iterations.", rs_iters);
         return w_iters + ws_iters + c_iters + cs_iters + r_iters + rs_iters;
     }

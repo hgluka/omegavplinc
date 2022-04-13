@@ -126,14 +126,6 @@ public abstract class FixpointVector {
         return i;
     }
 
-    public Map<Pair<State, State>, Set<Context>> deepCopy() {
-        Map<Pair<State, State>, Set<Context>> innerWcopy = new HashMap<>();
-        for (Pair<State, State> pq : innerVector.keySet()) {
-            innerWcopy.put(pq, new HashSet<>(innerVector.get(pq)));
-        }
-        return innerWcopy;
-    }
-
     public void updateCopy() {
         for (Pair<State, State> pq : changed) {
             innerVectorCopy.put(pq, new HashSet<>(innerVector.get(pq)));

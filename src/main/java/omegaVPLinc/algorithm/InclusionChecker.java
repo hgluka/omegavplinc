@@ -20,7 +20,7 @@ public class InclusionChecker {
     private final Prefixes prefixes;
     private final Periods periods;
 
-    private boolean withWords;
+    private final boolean withWords;
 
     public InclusionChecker(VPA a, VPA b, boolean withWords) {
         this.a = a;
@@ -82,8 +82,6 @@ public class InclusionChecker {
                     if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
                         logger.debug("C, C_star");
                         if (withWords) {
-                            // logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
-                            // logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
                             logger.debug("Lasso word: {}", getLassoWord(x.getWord(), y1y2.getWord()));
                         } else {
                             logger.debug("Prefix context: ({} -> {}) {}", a.getInitialState(), p, x.getCtx());
@@ -99,8 +97,6 @@ public class InclusionChecker {
                     if (!inctx(x.getCtx(), y1y2.getCtx(), y1y2.getFinalCtx())) {
                         logger.debug("U, R_star");
                         if (withWords) {
-                            // logger.debug("Prefix word: ({} -> {}) {}", a.getInitialState(), p, x.getWord());
-                            // logger.debug("Period word: ({} -> {}) {}", p, p, y1y2.getWord());
                             logger.debug("Lasso word: {}", getLassoWord(x.getWord(), y1y2.getWord()));
                         } else {
                             logger.debug("Prefix context: ({} -> {}) {}", a.getInitialState(), p, x.getCtx());
