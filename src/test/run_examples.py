@@ -1,23 +1,25 @@
 """run_examples.py
 
 Usage:
-  run_examples.py --run [-n NUM] [--omegaVPLinc|--ultimate] [-i INPUT_DIR] [-o OUTPUT_PATH] [-s SKIP_FILE]
-  run_examples.py --unions [-i INPUT_DIR] [-s SKIP_FILE] [-o OUTPUT_PATH]
-  run_examples.py --wordcheck CSV_FILE [-p PREV_FILE]
+  run_examples.py --run [-n NUM] [--random] [--omegaVPLinc|--ultimate] [-i INPUT_DIR] [-o OUTPUT_PATH] [-s SKIP_FILE] [--timeout TIMEOUT]
+  run_examples.py --unions [-i INPUT_DIR] [-s SKIP_FILE] [-o OUTPUT_PATH] [--timeout TIMEOUT]
+  run_examples.py --wordcheck CSV_FILE [-i INPUT_DIR] [-p PREV_FILE] [--timeout TIMEOUT]
   run_examples.py -h | --help
 
 Options:
   -h --help                             Show this screen.
   -r --run                              Run the examples.
-  -n NUM                                Specify number of examples to run. [default: 50]
+  -n NUM                                Specify number of examples to run. [default: 281]
+  --random                              Shuffle examples before running them.
   --omegaVPLinc                         Run examples only with omegaVPLinc.
   --ultimate                            Run examples only with Ultimate.
   -o OUTPUT_PATH                        Specify output directory or csv file.
   -u --unions                           Calculate the unions.
-  -i INPUT_DIR                          Specify input directory. [default: ./resources/svcomp_examples_processed]
+  -i INPUT_DIR                          Specify input directory. [default: resources/svcomp_examples/]
   -s SKIP_FILE                          Specify file with examples to skip.
-  -w CSV_FILE --wordcheck CSV_FILE      Check if word counter-examples
+  -w CSV_FILE --wordcheck CSV_FILE      Check if words are counter-examples.
   -p PREV_FILE                          Specify file from previous run of wordcheck.
+  --timeout TIMEOUT                     Specify the timeout. [default: 1800]
 """
 import glob
 import subprocess
@@ -31,12 +33,12 @@ import random
 from docopt import docopt
 
 class Example:
-    def __init__(self, name, A, Bs, B):
+    def __init__(self, name, A, Bs, B, timeout):
         self.name = name
         self.A = A
         self.Bs = Bs
         self.B = B
-        self.timeout = 3600/2 # 3600/2  # 30 seconds
+        self.timeout = timeout
 
     def __repr__(self):
         return str(len(self.Bs))
@@ -114,8 +116,8 @@ class Example:
 
     def run_ultimate(self, output=False):
         env_with_java11 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin:' + os.environ['PATH']}
-        real_time = -1.0
-        self_reported_time = -1.0
+        real_time = "TIMEOUT"
+        self_reported_time = "TIMEOUT"
         subprocess.run(["sed", "-i", "s|BuchiCegarLoopAbstraction0 = (|A = (|", self.A])
         subprocess.run(["sed", "-i", "1s|automaton = (|B = (|", self.B])
         with open("../../Ultimate/run_example.ats", "w") as re:
@@ -137,8 +139,8 @@ class Example:
                 real_time = -float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = -sum(float(x)/1000 for x in regex.search("RUNTIME_TOTAL_MS=(\d+)}", rup.stdout).captures(1))
             else:
-                real_time = -2.0
-                self_reported_time = -2.0
+                real_time = "MEMORYOUT"
+                self_reported_time = "MEMORYOUT"
         except subprocess.TimeoutExpired:
             for proc in psutil.process_iter():
                 if "run_example.ats" in proc.cmdline():
@@ -147,8 +149,8 @@ class Example:
 
     def run_omegaVPLinc(self, output=False):
         env_with_java17 = {**os.environ, 'PATH': '/usr/lib/jvm/java-1.17.0-openjdk-amd64/bin:' + os.environ['PATH']}
-        real_time = -1.0
-        self_reported_time = -1.0
+        real_time = "TIMEOUT"
+        self_reported_time = "TIMEOUT"
         A_states = 0
         B_states = 0
         try:
@@ -160,18 +162,18 @@ class Example:
                     o.write("\nSTDERR:\n")
                     o.write(rup.stderr)
             if not rup.returncode and "is a subset of" in rup.stdout:
-                A_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[0]
-                B_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[1]
+                A_states = regex.findall(r"Automaton A has (\d+) states.", rup.stdout)[0]
+                B_states = regex.findall(r"Automaton B has (\d+) states.", rup.stdout)[0]
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
             elif not rup.returncode and "is not a subset of" in rup.stdout:
-                A_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[0]
-                B_states = regex.findall(r"Automaton has (\d+) states.", rup.stdout)[1]
+                A_states = regex.findall(r"Automaton A has (\d+) states.", rup.stdout)[0]
+                B_states = regex.findall(r"Automaton B has (\d+) states.", rup.stdout)[0]
                 real_time = -float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = -float(regex.search(r"The check took (\d+) milliseconds.", rup.stdout).captures(1)[0])/1000
             else:
-                real_time = -2.0
-                self_reported_time = -2.0
+                real_time = "MEMORYOUT"
+                self_reported_time = "MEMORYOUT"
         except subprocess.TimeoutExpired:
             for proc in psutil.process_iter():
                 if "java -Xmx6g -jar build/libs/omegaVPLinc-1.0.jar src/test/" + self.A + " src/test/" + self.B == " ".join(proc.cmdline()):
@@ -180,8 +182,8 @@ class Example:
         return A_states, B_states, real_time, self_reported_time
 
     def run_fadecider(self, output=False):
-        real_time = -1.0
-        self_reported_time = -1.0
+        real_time = "TIMEOUT"
+        self_reported_time = "TIMEOUT"
         with open("fadecider_script.sh", "w") as es:
             es.write("#!/bin/bash\ncat " + self.A.replace("processed", "npvpa").replace(".ats", ".npvpa") + " | ../../fadecider/bin/fadecider -s npvpa -pc -pr -a " + self.B.replace("processed", "npvpa").replace(".ats", ".npvpa"))
         subprocess.run(["chmod", "+x", "fadecider_script.sh"])
@@ -197,15 +199,15 @@ class Example:
                 real_time = float(regex.search(r"real ([^\n]+)\n", rup.stderr).captures(1)[0])
                 self_reported_time = float(regex.search(r"t = (\d+\.\d+) sec", rup.stdout).captures(1)[0])
             else:
-                real_time = -2.0
-                real_time = -2.0
+                real_time = "MEMORYOUT"
+                real_time = "MEMORYOUT"
         except subprocess.TimeoutExpired:
             pass
         return real_time, self_reported_time
 
 
 
-def load_all_examples(directory):
+def load_all_examples(directory, timeout):
     if (directory[-1] == '/'):
         file_pattern = directory + "*.ats"
     else:
@@ -221,7 +223,7 @@ def load_all_examples(directory):
                 A = (atsfile, suffix.split(".")[0])
             else:
                 Bs = [(atsfile, suffix.split(".")[0])]
-            examples[prefix] = Example(prefix, A, Bs, "")
+            examples[prefix] = Example(prefix, A, Bs, "", timeout)
         else:
             if "BuchiCegarLoopAbstraction" in suffix:
                 examples[prefix].A = (atsfile, suffix.split(".")[0])
@@ -229,7 +231,7 @@ def load_all_examples(directory):
                 examples[prefix].Bs.append((atsfile, suffix.split(".")[0]))
     return {key : examples[key] for key in examples if examples[key].A and examples[key].Bs}
 
-def load_processed_examples(directory, skip_file = None):
+def load_processed_examples(directory, timeout, skip_file = None):
     examples = {}
     to_skip = []
     if skip_file is not None:
@@ -255,7 +257,7 @@ def load_processed_examples(directory, skip_file = None):
                 A = atsfile
             elif suffix == "Bunion.ats":
                 B = atsfile
-            examples[prefix] = Example(prefix, A, [], B)
+            examples[prefix] = Example(prefix, A, [], B, timeout)
         else:
             if suffix == "A.ats":
                 examples[prefix].A = atsfile
@@ -263,8 +265,8 @@ def load_processed_examples(directory, skip_file = None):
                 examples[prefix].B = atsfile
     return examples
 
-def load_csv_examples(directory, csv_file, prev_txt=None):
-    examples = load_processed_examples(directory)
+def load_csv_examples(directory, csv_file, timeout, prev_txt=None):
+    examples = load_processed_examples(directory, timeout)
     keep = []
     if prev_txt is not None:
         with open(prev_txt, "r") as pf:
@@ -273,7 +275,7 @@ def load_csv_examples(directory, csv_file, prev_txt=None):
     else:
         with open(csv_file, "r") as cf:
             for line in cf.readlines()[1:]:
-                if line.split(',')[3] not in ["-1.0", "-2.0"] and float(line.split(',')[3]) < 0:
+                if line.split(',')[3] not in ["TIMEOUT", "MEMORYOUT"] and float(line.split(',')[3]) < 0:
                     keep.append(line.split(',')[0])
     final = []
     for example in list(examples.keys()):
@@ -307,21 +309,24 @@ def calculate_unions(examples, output_dir):
                 examples[example].A = output_dir + example + "_A.ats"
         count += 1
 
-def run_processed(examples, file, num, omegavplinc, ultimate):
+def run_processed(examples, file, num, randomize, omegavplinc, ultimate):
+    list_of_keys = list(examples.keys())[:num]
+    if randomize:
+        random.shuffle(list_of_keys)
     with open(file, "w") as results:
         wr = csv.writer(results)
         wr.writerow(["example", "A_states", "B_states", "omegaVPLinc", "ultimate"])
         count = 1
-        for example in list(examples.keys())[:num]:
+        for example in list_of_keys:
             if (omegavplinc):
                 print(example + ": running in omegaVPLinc.")
-                A_states, B_states, ort, osrt = examples[example].run_omegaVPLinc(output=True)
+                A_states, B_states, ort, osrt = examples[example].run_omegaVPLinc(output=False)
                 print(example + ": finished in omegaVPLinc in " + str(ort) + " seconds.")
             else:
                 A_states, B_states, ort, osrt = 0, 0, 0, 0
             if (ultimate):
                 print(example + ": running in ultimate.")
-                urt, usrt = examples[example].run_ultimate(output=True)
+                urt, usrt = examples[example].run_ultimate(output=False)
                 print(example + ": finished in ultimate in " + str(urt) + " seconds.")
             else:
                 urt, usrt = 0, 0
@@ -339,31 +344,35 @@ if __name__=='__main__':
     input_dir = 'resources/svcomp_examples/'
     if arguments['-i'] is not None:
         input_dir = arguments['-i']
+    timeout = 1800
+    if arguments['--timeout'] is not None:
+        timeout = int(arguments['--timeout'])
+    print("Timeout is set to " + str(timeout) + " seconds.")
     if arguments['--run']:
         csv_file = "time_omegaVPLinc+ultimate_" + random_string(3) + ".csv"
         if arguments['-o'] is not None:
             csv_file = arguments['-o']
-        print("Running examples and writing to: " + csv_file +".")
-        examples = load_processed_examples(input_dir, skip_file)
-        num = 50
+        examples = load_processed_examples(input_dir, timeout, skip_file)
+        num = 281
         if arguments['-n'] is not None:
             num = int(arguments['-n'])
+        print("Running " + str(num) + " examples and writing to: " + csv_file +".")
         ultimate = not arguments['--omegaVPLinc']
         omegavplinc = not arguments['--ultimate']
-        run_processed(examples, csv_file, num, omegavplinc, ultimate)
+        run_processed(examples, csv_file, num, arguments['--random'], omegavplinc, ultimate)
         print("Written to: " + csv_file + ".")
     elif arguments['--unions']:
         output_dir = "resources/svcomp_examples_processed/"
         if arguments['-o'] is not None:
             output_dir = arguments['-o']
         print("Running union calculations.")
-        examples = load_all_examples(input_dir)
+        examples = load_all_examples(input_dir, timeout)
         print(len(examples))
         calculate_unions(examples, output_dir)
         print("Union calculations done.")
     elif arguments['--wordcheck']:
         print("Checking if counterexamples are correct.")
-        examples = load_csv_examples(arguments['--wordcheck'], arguments['-p'])
+        examples = load_csv_examples(input_dir, arguments['--wordcheck'], timeout, arguments['-p'])
         incorrect = []
         i = 1
         for example in examples:

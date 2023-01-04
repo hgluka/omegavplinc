@@ -23,14 +23,14 @@ Checks for inclusion between 2 omega-VPL automata.
       <B>         Second automaton file.
   -h, --help      Show this help message and exit.
   -V, --version   Print version information and exit.
-  -w, --words     Keep track of words to find counterexample.
+  -w, --words     Keep track of words to find counterexamples.
 ```
 
 The two automata `A` and `B` should be given in the `.ats` (Automata Script) format
 defined for the [Ultimate Automata Library](https://monteverdi.informatik.uni-freiburg.de/tomcat/Website/?ui=tool&tool=automata_library)
 
-Running with `--words` is slower, and is unnecessary in cases where the inclusion holds. 
-When inclusion doesn't hold, you can rerun the program with `--words` to find the counterexample:
+Running with `--words` is slower, and is unnecessary in cases where the inclusion holds.
+When inclusion doesn't hold, you can rerun the program with `--words` to find a counterexample:
 ```
 java -jar build/libs/omegaVPLinc-1.0.jar --words A.ats B.ats
 ```
