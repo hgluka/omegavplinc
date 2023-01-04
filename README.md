@@ -50,7 +50,7 @@ unzip Ultimate.zip
 cd src/test/resources
 unzip svcomp_examples.zip
 cd ..
-python3 run_examples.py --run -i resources/svcomp_examples/
+python3 run_examples.py --run
 ```
 This will run omegaVPLinc and Ultimate on the whole benchmark suite and output a csv file with run times.
 If you want to do something else with the benchmark, check `python3 run_examples.py --help` for more info.
